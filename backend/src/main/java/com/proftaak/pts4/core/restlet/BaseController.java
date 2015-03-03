@@ -1,6 +1,8 @@
-package com.proftaak.pts4.core;
+package com.proftaak.pts4.core.restlet;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.proftaak.pts4.core.gson.AnnotationExclusionStrategy;
 import org.restlet.Response;
 import org.restlet.data.MediaType;
 import org.restlet.data.Status;
@@ -16,7 +18,11 @@ import java.util.Map;
  * Created by Michon on 2-3-2015.
  */
 public class BaseController extends ServerResource {
-    protected Gson GSON = new Gson();
+    protected Gson GSON = null;
+
+    public BaseController() {
+        GSON = new GsonBuilder().setExclusionStrategies(new AnnotationExclusionStrategy()).create();
+    }
 
     /**
      * Set all applicable cross-origin headers.

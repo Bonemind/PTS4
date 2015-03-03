@@ -1,4 +1,4 @@
-package com.proftaak.pts4.core;
+package com.proftaak.pts4.core.restlet;
 
 import org.restlet.data.Status;
 

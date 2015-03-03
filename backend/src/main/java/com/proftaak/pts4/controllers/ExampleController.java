@@ -1,6 +1,6 @@
 package com.proftaak.pts4.controllers;
 
-import com.proftaak.pts4.core.BaseController;
+import com.proftaak.pts4.core.restlet.BaseController;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.util.Map;

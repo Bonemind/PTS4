@@ -1,7 +1,7 @@
 package com.proftaak.pts4;
 
-import com.proftaak.pts4.controllers.auth.LoginController;
-import com.proftaak.pts4.core.BaseController;
+import com.proftaak.pts4.core.database.DBUtils;
+import com.proftaak.pts4.core.restlet.BaseController;
 import org.reflections.Reflections;
 import org.restlet.Component;
 import org.restlet.data.Protocol;
@@ -19,6 +19,10 @@ public class Main extends ServerResource {
     private static final String CONTROLLER_PACKAGE = "com.proftaak.pts4.controllers";
 
     public static void main(String[] args) throws Exception {
+        // Prepare the database.
+        DBUtils.recreateAllTables();
+        DBUtils.createTestData();
+
         // Prepare the component.
         Component component = new Component();
         component.getServers().add(Protocol.HTTP, 8182);

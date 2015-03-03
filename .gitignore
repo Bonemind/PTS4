@@ -141,5 +141,14 @@ Session.vim
 .netrwhist
 *~
 
-#Javascript
+###
+# Javascript
+###
+
 bower_components/
+
+###
+# Project
+###
+
+user.properties
