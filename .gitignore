@@ -128,3 +128,6 @@ nb-configuration.xml
 Session.vim
 .netrwhist
 *~
+
+#Javascript
+bower_components/
