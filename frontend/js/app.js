@@ -1,6 +1,7 @@
 var PTSApp = angular.module("PTSApp", [
 	"ngRoute",
 	"PTSAppControllers",
+	"angular-loading-bar",
 	"MessageCenterModule"
 	]).run(["$rootScope", "$injector", function($rootScope, $injector) {
 		$injector.get("$http").defaults.transformRequest = function(data, headersGetter) {

@@ -146,6 +146,7 @@ Session.vim
 ###
 
 bower_components/
+node_modules/
 
 ###
 # Project
