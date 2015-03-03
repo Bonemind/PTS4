@@ -1,9 +1,9 @@
 package com.proftaak.pts4.controllers.auth;
 
 import com.proftaak.pts4.core.BaseController;
+import com.proftaak.pts4.core.HTTPException;
 import org.restlet.data.Status;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,15 +15,13 @@ public class LoginController extends BaseController {
     private static final String EMAIL = "test";
     private static final String PASSWORD = "test";
 
-    public Object postHandler(Object data) throws IOException {
+    public Map<String, Object> postHandler(Map<String, Object> data) throws HTTPException {
         // Check the login details.
-        Map<String, String> loginData = (Map<String, String>) data;
-        if (!loginData.get("email").equals(EMAIL) || !loginData.get("password").equals(PASSWORD)) {
-            setStatus(Status.CLIENT_ERROR_UNAUTHORIZED);
-            return "Invalid login details";
+        if (!data.get("email").equals(EMAIL) || !data.get("password").equals(PASSWORD)) {
+            throw new HTTPException("Invalid login details", Status.CLIENT_ERROR_UNAUTHORIZED);
         }
 
-        Map<String, String> output = new HashMap<>();
+        Map<String, Object> output = new HashMap<>();
         output.put("token", TOKEN);
         return output;
     }
