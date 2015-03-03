@@ -9,7 +9,7 @@ PTSAppControllers.controller("loginController", ["$rootScope", "$scope", "$http"
 					messageCenterService.add("warning", "Fill in all fields", {timeout: 8000});
 					return;
 				} 
-				$http.post("http://192.168.1.202:8182/auth/login", {"email": user.email, "password": user.password}).
+				$http.post("http://localhost:8182/auth/login", {"email": user.email, "password": user.password}).
 					success(function(data, status, headers, config) {
 						messageCenterService.add("success", "Logged in", {timeout: 8000, status: messageCenterService.status.next});
 						$rootScope.token = data.token;
