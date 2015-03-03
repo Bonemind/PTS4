@@ -27,11 +27,15 @@ public class Main extends ServerResource {
         Reflections reflections = new Reflections(CONTROLLER_PACKAGE);
         Set<Class<? extends BaseController>> controllers = reflections.getSubTypesOf(BaseController.class);
         for (Class<? extends BaseController> controller : controllers) {
-            String path = "/";
-            path += controller.getPackage().getName().substring(CONTROLLER_PACKAGE.length() + 1).replace('.', '/');
+            // Determine the path of this controller.
+            String path = "";
+            path += controller.getPackage().getName().substring(CONTROLLER_PACKAGE.length()).replace('.', '/');
             path += "/";
             path += controller.getSimpleName().replace("Controller", "").toLowerCase();
+
+            // Add the controller to the routing.
             component.getDefaultHost().attach(path, controller);
+            component.getDefaultHost().attach(path + "/{id}", controller);
         }
 
         // Start the server.

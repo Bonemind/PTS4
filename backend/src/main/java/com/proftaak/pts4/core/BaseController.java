@@ -2,21 +2,15 @@ package com.proftaak.pts4.core;
 
 import com.google.gson.Gson;
 import org.restlet.Response;
-import org.restlet.data.Form;
 import org.restlet.data.MediaType;
 import org.restlet.data.Status;
-import org.restlet.engine.adapter.HttpResponse;
 import org.restlet.engine.header.Header;
-import org.restlet.representation.Representation;
 import org.restlet.resource.*;
 import org.restlet.util.Series;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * Created by Michon on 2-3-2015.
@@ -31,7 +25,7 @@ public class BaseController extends ServerResource {
         Response response = this.getResponse();
         Series<Header> responseHeaders = (Series<Header>) response.getAttributes().get("org.restlet.http.headers");
         if (responseHeaders == null) {
-            responseHeaders = new Series(Header.class);
+            responseHeaders = new Series<Header>(Header.class);
             response.getAttributes().put("org.restlet.http.headers", responseHeaders);
         }
         responseHeaders.add("Access-Control-Allow-Origin", "*");
@@ -43,7 +37,7 @@ public class BaseController extends ServerResource {
      * Send a response back to the client.
      * @param response The data to send back.
      */
-    private void processResponse(Object response) {
+    private void processResponse(Map<String, Object> response) {
         // Set the headers.
         setCORS();
 
@@ -56,19 +50,33 @@ public class BaseController extends ServerResource {
      * @param exc The exception.
      */
     private void processError(Exception exc) {
-        //} catch (SecurityException e) {
-        //} catch (NoSuchMethodException e) {
-        //} catch (InvocationTargetException e) {
-        //} catch (IllegalAccessException e) {
-
         // Set the headers.
         setCORS();
 
+        // Convert the exception, if needed.
+        HTTPException userException;
+        if (!(exc instanceof HTTPException)) {
+            // Print the stacktrace, if useful.
+            if (!(exc instanceof NotImplementedException)) {
+                exc.printStackTrace();
+            }
+
+            // Build an HTTPException.
+            userException = new HTTPException(
+                "The server encountered an internal error when trying to process your request.",
+                Status.SERVER_ERROR_INTERNAL
+            );
+        } else {
+            userException = (HTTPException) exc;
+        }
+
         // Something went wrong, so set the appropriate status code.
-        this.setStatus(Status.SERVER_ERROR_INTERNAL);
+        this.setStatus(userException.getStatus());
 
         // Set the body.
-        setResponseBody(exc.getMessage());
+        Map<String, Object> response = new HashMap<>();
+        response.put("error", userException.getMessage());
+        setResponseBody(response);
     }
 
     /**
@@ -85,25 +93,40 @@ public class BaseController extends ServerResource {
     @Get
     public void getWrapper() {
         try {
-            processResponse(getHandler());
+            Object urlParam = getRequestAttributes().get("id");
+            if (urlParam == null) {
+                processResponse(getHandler());
+            } else {
+                processResponse(getHandler(urlParam.toString()));
+            }
         } catch (Exception e) {
             processError(e);
         }
     }
     @Post("json")
-    public void postWrapper(Representation rep) {
+    public void postWrapper(String json) {
         try {
-            Object data = GSON.fromJson(rep.getText(), Object.class);
-            processResponse(postHandler(data));
+            Map<String, Object> data = GSON.fromJson(json, Map.class);
+            Object urlParam = getRequestAttributes().get("id");
+            if (urlParam == null) {
+                processResponse(postHandler(data));
+            } else {
+                processResponse(postHandler(data, urlParam.toString()));
+            }
         } catch (Exception e) {
             processError(e);
         }
     }
     @Put("json")
-    public void putWrapper(Representation rep) {
+    public void putWrapper(String json) {
         try {
-            Object data = GSON.fromJson(rep.getText(), Object.class);
-            processResponse(putHandler(data));
+            Map<String, Object> data = GSON.fromJson(json, Map.class);
+            Object urlParam = getRequestAttributes().get("id");
+            if (urlParam == null) {
+                processResponse(putHandler(data));
+            } else {
+                processResponse(putHandler(data, urlParam.toString()));
+            }
         } catch (Exception e) {
             processError(e);
         }
@@ -111,7 +134,8 @@ public class BaseController extends ServerResource {
     @Delete
     public void deleteWrapper() {
         try {
-            processResponse(deleteHandler());
+            Object urlParam = getRequestAttributes().get("id");
+            processResponse(deleteHandler(urlParam.toString()));
         } catch (Exception e) {
             processError(e);
         }
@@ -128,16 +152,25 @@ public class BaseController extends ServerResource {
     /**
      * The methods that can be implemented by the controllers in order to respond to requests.
      */
-    public Object getHandler() throws Exception {
+    public Map<String, Object> getHandler() throws Exception {
         throw new NotImplementedException();
     }
-    public Object postHandler(Object data) throws Exception {
+    public Map<String, Object> getHandler(String urlParam) throws Exception {
         throw new NotImplementedException();
     }
-    public Object putHandler(Object data) throws Exception {
+    public Map<String, Object> postHandler(Map<String, Object> data) throws Exception {
         throw new NotImplementedException();
     }
-    public Object deleteHandler() throws Exception {
+    public Map<String, Object> postHandler(Map<String, Object> data, String urlParam) throws Exception {
+        throw new NotImplementedException();
+    }
+    public Map<String, Object> putHandler(Map<String, Object> data) throws Exception {
+        throw new NotImplementedException();
+    }
+    public Map<String, Object> putHandler(Map<String, Object> data, String urlParam) throws Exception {
+        throw new NotImplementedException();
+    }
+    public Map<String, Object> deleteHandler(String urlParam) throws Exception {
         throw new NotImplementedException();
     }
 }
