@@ -131,3 +131,4 @@ Session.vim
 
 #Javascript
 bower_components/
+node_modules/
