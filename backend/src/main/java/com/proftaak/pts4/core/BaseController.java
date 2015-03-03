@@ -107,12 +107,7 @@ public class BaseController extends ServerResource {
     public void postWrapper(String json) {
         try {
             Map<String, Object> data = GSON.fromJson(json, Map.class);
-            Object urlParam = getRequestAttributes().get("id");
-            if (urlParam == null) {
-                processResponse(postHandler(data));
-            } else {
-                processResponse(postHandler(data, urlParam.toString()));
-            }
+            processResponse(postHandler(data));
         } catch (Exception e) {
             processError(e);
         }
@@ -122,11 +117,7 @@ public class BaseController extends ServerResource {
         try {
             Map<String, Object> data = GSON.fromJson(json, Map.class);
             Object urlParam = getRequestAttributes().get("id");
-            if (urlParam == null) {
-                processResponse(putHandler(data));
-            } else {
-                processResponse(putHandler(data, urlParam.toString()));
-            }
+            processResponse(putHandler(data, urlParam.toString()));
         } catch (Exception e) {
             processError(e);
         }
@@ -159,12 +150,6 @@ public class BaseController extends ServerResource {
         throw new NotImplementedException();
     }
     public Map<String, Object> postHandler(Map<String, Object> data) throws Exception {
-        throw new NotImplementedException();
-    }
-    public Map<String, Object> postHandler(Map<String, Object> data, String urlParam) throws Exception {
-        throw new NotImplementedException();
-    }
-    public Map<String, Object> putHandler(Map<String, Object> data) throws Exception {
         throw new NotImplementedException();
     }
     public Map<String, Object> putHandler(Map<String, Object> data, String urlParam) throws Exception {

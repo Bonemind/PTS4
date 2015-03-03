@@ -31,20 +31,6 @@ public class ExampleController extends BaseController {
     }
 
     /**
-     * POST /example/1
-     */
-    public Map<String, Object> postHandler(Map<String, Object> data, String urlParam) throws Exception {
-        throw new NotImplementedException();
-    }
-
-    /**
-     * PUT /example
-     */
-    public Map<String, Object> putHandler(Map<String, Object> data) throws Exception {
-        throw new NotImplementedException();
-    }
-
-    /**
      * PUT /example/1
      */
     public Map<String, Object> putHandler(Map<String, Object> data, String urlParam) throws Exception {
