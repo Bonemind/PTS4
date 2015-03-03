@@ -20,6 +20,8 @@ PTSAppControllers.controller("loginController", ["$rootScope", "$scope", "$http"
 							messageCenterService.add("danger", "The server seems to be having trouble, please try again later", {timeout: 8000});
 						} else if (status == 401) {
 							messageCenterService.add("danger", "Invalid username or password", {timeout: 8000});
+						} else {
+							messageCenterService.add("danger", "Something went wrong, try again later", {timeout: 8000});
 						}
 						console.log(status);
 					});
