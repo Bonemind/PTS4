@@ -1,5 +1,6 @@
 package com.proftaak.pts4.controllers.auth;
 
+import com.proftaak.pts4.core.database.DBUtils;
 import com.proftaak.pts4.core.restlet.BaseController;
 import com.proftaak.pts4.core.restlet.HTTPException;
 import com.proftaak.pts4.database.User;
@@ -20,7 +21,7 @@ public class LoginController extends BaseController {
         // Check the login details.
         Map<String, Object> queryMap = new HashMap<String, Object>();
         queryMap.put("email", data.get("email"));
-        User user = User.getDao().queryForFieldValues(queryMap).get(0);
+        User user = DBUtils.getDao(User.class).queryForFieldValues(queryMap).get(0);
         if (user == null || !user.checkPassword(data.get("password").toString())) {
             throw new HTTPException("Invalid login details", Status.CLIENT_ERROR_UNAUTHORIZED);
         }

@@ -90,13 +90,4 @@ public class User {
 	public boolean checkPassword(String pass) {
         return BCrypt.checkpw(pass, this.password);
 	}
-
-	/**
-	 * Creates a DAO handle for this class
-	 * @return The DAO
-	 * @throws java.sql.SQLException Thrown if something goes wrong during dao creation
-	 */
-	public static Dao<User, Integer> getDao() throws SQLException, FileNotFoundException {
-		return DaoManager.createDao(DBUtils.getConnectionSource(), User.class);
-	}
 }

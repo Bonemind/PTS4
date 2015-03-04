@@ -1,6 +1,7 @@
 package com.proftaak.pts4.core.database;
 
 import com.j256.ormlite.dao.Dao;
+import com.j256.ormlite.dao.DaoManager;
 import com.j256.ormlite.jdbc.JdbcPooledConnectionSource;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.DatabaseTable;
@@ -61,9 +62,18 @@ public class DBUtils {
 	 * @throws java.sql.SQLException
 	 */
 	public static void createTestData() throws SQLException, FileNotFoundException {
-		Dao<User, Integer> userDao = User.getDao();
+		Dao<User, Integer> userDao = DBUtils.getDao(User.class);
 
 		User u = new User("test", "test");
 		userDao.create(u);
 	}
+
+    /**
+     * Get the DAO for a table class.
+     * @param cls The class for which we want a DAO.
+     * @return The DAO for this class.
+     */
+    public static <T> Dao<T, Integer> getDao(Class<T> cls) throws FileNotFoundException, SQLException {
+        return DaoManager.createDao(DBUtils.getConnectionSource(), cls);
+    }
 }
