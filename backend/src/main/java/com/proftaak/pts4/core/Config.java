@@ -54,8 +54,6 @@ public class Config {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-            } else {
-                throw new FileNotFoundException("property file '" + USER_PROPERTIES_FILE + "' not found in the classpath");
             }
         }
         return Config.properties;
