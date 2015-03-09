@@ -37,3 +37,50 @@ PTSAppControllers.controller("indexContoller", ["$rootScope", "$scope",
 			}
 			console.log($rootScope.token);
 }]);
+
+//CRUD controller
+PTSAppControllers.controller("CRUDController", ["$scope", "Restangular", "messageCenterService", "close", "model", "meta",
+	function($scope, Restangular, messageCenterService, close, model, meta) {
+		$scope.model = model;
+		$scope.meta = meta;
+		$scope.close = function(result) {
+			close(result, 500);
+		}
+		$scope.save = function(result) {
+			result.save().then(function() {
+				messageCenterService.add("success", "Changes saved", {timeout: 7000});
+			}, function() {
+				messageCenterService.add("danger", "Something went wrong, please try again", {timeout: 7000});
+			});
+			close(result, 500);
+		}
+
+		$scope.remove = function(result) {
+			result.remove().then(function() {
+				messageCenterService.add("success", "Changes saved", {timeout: 7000});
+			}, function() {
+				messageCenterService.add("danger", "Something went wrong, please try again", {timeout: 7000});
+			});
+			close(result, 500);
+		}
+
+	}
+]);
+
+
+PTSAppControllers.controller("TestController", ["$scope", "ModalService",
+		function($scope, ModalService) {
+			ModalService.showModal({
+				templateUrl: "templates/testModal.html",
+				controller: "CRUDController",
+				inputs: {
+					model: {},
+					meta: {}
+				}
+
+			}).then(function(modal) {
+				modal.element.modal();
+				//modal.close();
+			});
+		}
+	]);

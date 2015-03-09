@@ -2,6 +2,8 @@ var PTSApp = angular.module("PTSApp", [
 	"ngRoute",
 	"PTSAppControllers",
 	"angular-loading-bar",
+	"restangular",
+	"angularModalService",
 	"MessageCenterModule"
 	]).run(["$rootScope", "$injector", function($rootScope, $injector) {
 		$injector.get("$http").defaults.transformRequest = function(data, headersGetter) {
@@ -15,6 +17,13 @@ var PTSApp = angular.module("PTSApp", [
 		}
 	}]);
 
+//Configure restangular
+PTSApp.config(["RestangularProvider", function(RestangularProvider) {
+	RestangularProvider.setBaseUrl("http://localhost:8128/api/");
+	RestangularProvider.setRequestSuffix('/');
+}]);
+
+//Define routes
 PTSApp.config(["$routeProvider",
 	function($routeProvider) {
 		$routeProvider.when("/login", {
@@ -23,6 +32,9 @@ PTSApp.config(["$routeProvider",
 		}).when("/", {
 			templateUrl: "templates/index.html",
 			controller: "indexContoller"
+		}).when("/test", {
+			templateUrl: "templates/test.html",
+			controller: "TestController"
 		});
 	}]);
 
