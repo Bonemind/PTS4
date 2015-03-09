@@ -6,7 +6,7 @@ import com.j256.ormlite.jdbc.JdbcPooledConnectionSource;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.DatabaseTable;
 import com.j256.ormlite.table.TableUtils;
-import com.proftaak.pts4.core.Config;
+import com.proftaak.pts4.core.PropertiesUtils;
 import com.proftaak.pts4.database.User;
 import org.reflections.Reflections;
 
@@ -34,7 +34,7 @@ public class DBUtils {
 	 */
 	public static ConnectionSource getConnectionSource() throws SQLException, FileNotFoundException {
 		if (connSource == null || !connSource.isOpen()) {
-            Properties p = Config.getProperties();
+            Properties p = PropertiesUtils.getProperties();
 			connSource = new JdbcPooledConnectionSource(p.getProperty("mysql.url"), p.getProperty("mysql.username"), p.getProperty("mysql.password"));
 		}
 		return connSource;
@@ -62,18 +62,9 @@ public class DBUtils {
 	 * @throws java.sql.SQLException
 	 */
 	public static void createTestData() throws SQLException, FileNotFoundException {
-		Dao<User, Integer> userDao = DBUtils.getDao(User.class);
+		Dao<User, Integer> userDao = User.getDao();
 
 		User u = new User("test", "test");
 		userDao.create(u);
 	}
-
-    /**
-     * Get the DAO for a table class.
-     * @param cls The class for which we want a DAO.
-     * @return The DAO for this class.
-     */
-    public static <T> Dao<T, Integer> getDao(Class<T> cls) throws FileNotFoundException, SQLException {
-        return DaoManager.createDao(DBUtils.getConnectionSource(), cls);
-    }
 }
