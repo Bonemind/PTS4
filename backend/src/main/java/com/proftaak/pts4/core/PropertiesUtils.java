@@ -8,7 +8,7 @@ import java.util.Properties;
 /**
  * @author Michon
  */
-public class Config {
+public class PropertiesUtils {
     /**
      * The properties file name.
      */
@@ -31,14 +31,14 @@ public class Config {
      * @throws FileNotFoundException If the properties file
      */
     public static Properties getProperties() throws FileNotFoundException {
-        if (Config.properties == null) {
-            Config.properties = new Properties();
+        if (PropertiesUtils.properties == null) {
+            PropertiesUtils.properties = new Properties();
 
             // Read the default properties file.
-            InputStream inputStream = Config.class.getClassLoader().getResourceAsStream(PROPERTIES_FILE);
+            InputStream inputStream = PropertiesUtils.class.getClassLoader().getResourceAsStream(PROPERTIES_FILE);
             if (inputStream != null) {
                 try {
-                    Config.properties.load(inputStream);
+                    PropertiesUtils.properties.load(inputStream);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -47,15 +47,15 @@ public class Config {
             }
 
             // Read user overrides.
-            inputStream = Config.class.getClassLoader().getResourceAsStream(USER_PROPERTIES_FILE);
+            inputStream = PropertiesUtils.class.getClassLoader().getResourceAsStream(USER_PROPERTIES_FILE);
             if (inputStream != null) {
                 try {
-                    Config.properties.load(inputStream);
+                    PropertiesUtils.properties.load(inputStream);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
         }
-        return Config.properties;
+        return PropertiesUtils.properties;
     }
 }
