@@ -14,6 +14,7 @@ public class HTTPException extends Exception {
     public HTTPException(String message) {
         super(message);
     }
+
     public HTTPException(String message, Status status) {
         this(message);
         setStatus(status);

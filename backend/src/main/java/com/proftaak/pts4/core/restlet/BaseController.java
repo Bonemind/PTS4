@@ -4,9 +4,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.proftaak.pts4.core.annotations.RequireAuth;
 import com.proftaak.pts4.core.gson.AnnotationExclusionStrategy;
-import com.proftaak.pts4.database.Token;
-import com.proftaak.pts4.database.User;
-import org.reflections.Reflections;
+import com.proftaak.pts4.database.tables.Token;
+import com.proftaak.pts4.database.tables.User;
 import org.restlet.Response;
 import org.restlet.data.MediaType;
 import org.restlet.data.Status;
@@ -53,24 +52,28 @@ public class BaseController extends ServerResource {
             response.getAttributes().put(RESTLET_HEADER_KEY, responseHeaders);
         }
         responseHeaders.add("Access-Control-Allow-Origin", "*");
-        responseHeaders.add("Access-Control-Allow-Methods", "*");
+        responseHeaders.add("Access-Control-Allow-Methods", "POST, PUT, GET, OPTIONS, DELETE");
         responseHeaders.add("Access-Control-Allow-Headers", "Content-Type,X-TOKEN");
     }
 
     /**
      * Send a response back to the client.
+     *
      * @param response The data to send back.
      */
-    private void processResponse(Map<String, Object> response) {
+    private void processResponse(Object response) {
         // Set the headers.
         setCORS();
 
         // Set the body.
-        setResponseBody(response);
+        if (response != null) {
+            setResponseBody(response);
+        }
     }
 
     /**
      * Relay an exception back to the client.
+     *
      * @param exc The exception.
      */
     private void processError(Exception exc) {
@@ -87,8 +90,8 @@ public class BaseController extends ServerResource {
 
             // Build an HTTPException.
             userException = new HTTPException(
-                "The server encountered an internal error when trying to process your request.",
-                Status.SERVER_ERROR_INTERNAL
+                    "The server encountered an internal error when trying to process your request.",
+                    Status.SERVER_ERROR_INTERNAL
             );
         } else {
             userException = (HTTPException) exc;
@@ -132,6 +135,7 @@ public class BaseController extends ServerResource {
 
     /**
      * Set the body of the response.
+     *
      * @param body The body of the response.
      */
     private void setResponseBody(Object body) {
@@ -144,45 +148,44 @@ public class BaseController extends ServerResource {
     @Get
     public void getWrapper() {
         try {
-            Object urlParam = getRequestAttributes().get("id");
-            if (urlParam == null) {
-                processAnnotations(this.getClass().getMethod("getHandler"));
-                processResponse(getHandler());
-            } else {
-                processAnnotations(this.getClass().getMethod("getHandler", String.class));
-                processResponse(getHandler(urlParam.toString()));
-            }
+            Map<String, Object> urlParams = getRequestAttributes();
+            processAnnotations(this.getClass().getMethod("getHandler", Map.class));
+            processResponse(getHandler(urlParams));
         } catch (Exception e) {
             processError(e);
         }
     }
+
     @Post("json")
     public void postWrapper(String json) {
         try {
             Map<String, Object> data = GSON.fromJson(json, Map.class);
-            processAnnotations(this.getClass().getMethod("postHandler"));
-            processResponse(postHandler(data));
+            Map<String, Object> urlParams = getRequestAttributes();
+            processAnnotations(this.getClass().getMethod("postHandler", Map.class, Map.class));
+            processResponse(postHandler(data, urlParams));
         } catch (Exception e) {
             processError(e);
         }
     }
+
     @Put("json")
     public void putWrapper(String json) {
         try {
             Map<String, Object> data = GSON.fromJson(json, Map.class);
-            Object urlParam = getRequestAttributes().get("id");
-            processAnnotations(this.getClass().getMethod("putHandler", String.class));
-            processResponse(putHandler(data, urlParam.toString()));
+            Map<String, Object> urlParams = getRequestAttributes();
+            processAnnotations(this.getClass().getMethod("putHandler", Map.class, Map.class));
+            processResponse(putHandler(data, urlParams));
         } catch (Exception e) {
             processError(e);
         }
     }
+
     @Delete
     public void deleteWrapper() {
         try {
-            Object urlParam = getRequestAttributes().get("id");
-            processAnnotations(this.getClass().getMethod("deleteHandler", String.class));
-            processResponse(deleteHandler(urlParam.toString()));
+            Map<String, Object> urlParams = getRequestAttributes();
+            processAnnotations(this.getClass().getMethod("deleteHandler", Map.class));
+            processResponse(deleteHandler(urlParams));
         } catch (Exception e) {
             processError(e);
         }
@@ -199,19 +202,19 @@ public class BaseController extends ServerResource {
     /**
      * The methods that can be implemented by the controllers in order to respond to requests.
      */
-    public Map<String, Object> getHandler() throws Exception {
+    public Object getHandler(Map<String, Object> urlParams) throws Exception {
         throw new NotImplementedException();
     }
-    public Map<String, Object> getHandler(String urlParam) throws Exception {
+
+    public Object postHandler(Map<String, Object> data, Map<String, Object> urlParams) throws Exception {
         throw new NotImplementedException();
     }
-    public Map<String, Object> postHandler(Map<String, Object> data) throws Exception {
+
+    public Object putHandler(Map<String, Object> data, Map<String, Object> urlParams) throws Exception {
         throw new NotImplementedException();
     }
-    public Map<String, Object> putHandler(Map<String, Object> data, String urlParam) throws Exception {
-        throw new NotImplementedException();
-    }
-    public Map<String, Object> deleteHandler(String urlParam) throws Exception {
+
+    public Object deleteHandler(Map<String, Object> urlParams) throws Exception {
         throw new NotImplementedException();
     }
 
