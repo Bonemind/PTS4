@@ -1,0 +1,24 @@
+<div class="row">
+	<button class="btn btn-primary" ng-click="showModal(undefined)">
+		New story
+	</button>
+</div>
+<div class="row">
+	<table class="table table-striped">
+		<thead>
+			<th>story</th>
+			<th>Status</th>
+			<th>Actions</th>
+		</thead>
+		<tbody>
+			<tr ng-repeat="story in stories">
+				<td>{{ story.name }}</td>
+				<td><pts-status status="story.status"></pts-status></td>
+				<td>
+					<a class="glyphicon glyphicon-list-alt" href="#/story/{{ story.id }}/tasks"></a>
+					<a class="glyphicon glyphicon-pencil" ng-click="showModal(story)"></a>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+</div>

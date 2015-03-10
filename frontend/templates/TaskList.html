@@ -1,0 +1,25 @@
+<div class="row">
+	<h3><strong> Story:</strong> {{ story.name }}</h3>
+	<p> Desciption: {{ story.description || "-" }}</p>
+</div>
+<div class="row">
+	<button class="btn btn-primary" ng-click="showModal(undefined)">
+		New task
+	</button>
+</div>
+<div class="row">
+	<table class="table table-striped">
+		<thead>
+			<th>task</th>
+			<th>Status</th>
+			<th>Actions</th>
+		</thead>
+		<tbody>
+			<tr ng-repeat="task in tasks">
+				<td>{{ task.name }}</td>
+				<td><pts-status status="task.status"></pts-status></td>
+				<td><a class="glyphicon glyphicon-pencil" ng-click="showModal(task)"></a></td>
+			</tr>
+		</tbody>
+	</table>
+</div>
