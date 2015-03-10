@@ -1,13 +1,14 @@
-package com.proftaak.pts4.core.database;
+package com.proftaak.pts4.database;
 
 import com.j256.ormlite.dao.Dao;
-import com.j256.ormlite.dao.DaoManager;
 import com.j256.ormlite.jdbc.JdbcPooledConnectionSource;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.DatabaseTable;
 import com.j256.ormlite.table.TableUtils;
 import com.proftaak.pts4.core.PropertiesUtils;
-import com.proftaak.pts4.database.User;
+import com.proftaak.pts4.database.tables.Story;
+import com.proftaak.pts4.database.tables.Token;
+import com.proftaak.pts4.database.tables.User;
 import org.reflections.Reflections;
 
 import java.io.FileNotFoundException;
@@ -19,7 +20,7 @@ public class DBUtils {
     /**
      * The name of the package holding the tables.
      */
-    private static final String TABLES_PACKAGE = "com.proftaak.pts4.database";
+    private static final String TABLES_PACKAGE = "com.proftaak.pts4.database.tables";
 
     /**
      * The connection source.
@@ -63,8 +64,18 @@ public class DBUtils {
 	 */
 	public static void createTestData() throws SQLException, FileNotFoundException {
 		Dao<User, Integer> userDao = User.getDao();
+        Dao<Token, String> tokenDao = Token.getDao();
+        Dao<Story, Integer> userStoryDao = Story.getDao();
 
 		User u = new User("test", "test");
 		userDao.create(u);
+
+        Token t = new Token(u, "test");
+        tokenDao.create(t);
+
+        Story us1 = new Story("Foo");
+        userStoryDao.create(us1);
+        Story us2 = new Story("Lorem", "Lorem Ipsum Dolor Sit Amet");
+        userStoryDao.create(us2);
 	}
 }

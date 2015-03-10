@@ -1,10 +1,10 @@
-package com.proftaak.pts4.database;
+package com.proftaak.pts4.database.tables;
 
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
-import com.proftaak.pts4.core.database.DBUtils;
+import com.proftaak.pts4.database.DBUtils;
 import com.proftaak.pts4.core.gson.GsonExclude;
 import org.mindrot.jbcrypt.BCrypt;
 
@@ -49,26 +49,14 @@ public class User {
         this.setPassword(password);
     }
 
-    /**
-     * Gets the database id of this user
-     * @return The database id
-     */
     public int getId() {
         return this.id;
     }
 
-    /**
-     * Returns this user's email
-     * @return The email address
-     */
     public String getEmail() {
         return email;
     }
 
-    /**
-     * Sets this user's email
-     * @param email The email to set
-     */
     public void setEmail(String email) {
         this.email = email;
     }

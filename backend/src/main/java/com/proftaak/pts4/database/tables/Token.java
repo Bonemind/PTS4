@@ -1,11 +1,11 @@
-package com.proftaak.pts4.database;
+package com.proftaak.pts4.database.tables;
 
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
 import com.j256.ormlite.field.DataType;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
-import com.proftaak.pts4.core.database.DBUtils;
+import com.proftaak.pts4.database.DBUtils;
 
 import java.io.FileNotFoundException;
 import java.sql.SQLException;
@@ -47,10 +47,18 @@ public class Token {
 	public Token() {
 	}
 
+    /**
+     * Create a new token.
+     * @param user The user to whom the token belongs
+     */
     public Token(User user) {
         this.token = UUID.randomUUID().toString();
         this.user = user;
         this.creationDate = new Date();
+    }
+    public Token(User user, String token) {
+        this(user);
+        this.token = token;
     }
 
     public String getToken() {

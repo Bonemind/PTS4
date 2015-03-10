@@ -1,6 +1,7 @@
 package com.proftaak.pts4;
 
-import com.proftaak.pts4.core.database.DBUtils;
+import com.proftaak.pts4.core.annotations.Route;
+import com.proftaak.pts4.database.DBUtils;
 import com.proftaak.pts4.core.restlet.BaseController;
 import org.reflections.Reflections;
 import org.restlet.Component;
@@ -33,9 +34,15 @@ public class Main extends ServerResource {
         for (Class<? extends BaseController> controller : controllers) {
             // Determine the path of this controller.
             String path = "";
-            path += controller.getPackage().getName().substring(CONTROLLER_PACKAGE.length()).replace('.', '/');
-            path += "/";
-            path += controller.getSimpleName().replace("Controller", "").toLowerCase();
+            Route route = controller.getAnnotation(Route.class);
+            if (route == null) {
+                path += controller.getPackage().getName().substring(CONTROLLER_PACKAGE.length()).replace('.', '/');
+                path += "/";
+                path += controller.getSimpleName().replace("Controller", "").toLowerCase();
+            }
+            else {
+                path = route.value();
+            }
 
             // Add the controller to the routing.
             component.getDefaultHost().attach(path, controller);
