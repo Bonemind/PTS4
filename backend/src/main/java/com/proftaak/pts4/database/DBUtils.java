@@ -6,9 +6,9 @@ import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.DatabaseTable;
 import com.j256.ormlite.table.TableUtils;
 import com.proftaak.pts4.core.PropertiesUtils;
+import com.proftaak.pts4.database.tables.Story;
 import com.proftaak.pts4.database.tables.Token;
 import com.proftaak.pts4.database.tables.User;
-import com.proftaak.pts4.database.tables.UserStory;
 import org.reflections.Reflections;
 
 import java.io.FileNotFoundException;
@@ -65,7 +65,7 @@ public class DBUtils {
 	public static void createTestData() throws SQLException, FileNotFoundException {
 		Dao<User, Integer> userDao = User.getDao();
         Dao<Token, String> tokenDao = Token.getDao();
-        Dao<UserStory, Integer> userStoryDao = UserStory.getDao();
+        Dao<Story, Integer> userStoryDao = Story.getDao();
 
 		User u = new User("test", "test");
 		userDao.create(u);
@@ -73,9 +73,9 @@ public class DBUtils {
         Token t = new Token(u, "test");
         tokenDao.create(t);
 
-        UserStory us1 = new UserStory("Foo");
+        Story us1 = new Story("Foo");
         userStoryDao.create(us1);
-        UserStory us2 = new UserStory("Lorem", "Lorem Ipsum Dolor Sit Amet");
+        Story us2 = new Story("Lorem", "Lorem Ipsum Dolor Sit Amet");
         userStoryDao.create(us2);
 	}
 }

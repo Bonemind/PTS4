@@ -15,7 +15,7 @@ import java.sql.SQLException;
  * @author Michon
  */
 @DatabaseTable(tableName = "userstories")
-public class UserStory {
+public class Story {
 	/**
 	 * The database id of this userstory
 	 */
@@ -43,16 +43,16 @@ public class UserStory {
 	/**
 	 * ORM-Lite no-arg constructor
 	 */
-	public UserStory() {
+	public Story() {
 	}
 
-    public UserStory(String name) {
+    public Story(String name) {
         this(name, null);
     }
-    public UserStory(String name, String description) {
+    public Story(String name, String description) {
         this(name, description, SprintStatus.DEFINED);
     }
-    public UserStory(String name, String description, SprintStatus sprintStatus) {
+    public Story(String name, String description, SprintStatus sprintStatus) {
         this.setName(name);
         this.setDescription(description);
         this.setStatus(sprintStatus);
@@ -90,7 +90,7 @@ public class UserStory {
      * Get the DAO for this table
      * @return The DAO for this table
      */
-    public static Dao<UserStory, Integer> getDao() throws FileNotFoundException, SQLException {
-        return DaoManager.createDao(DBUtils.getConnectionSource(), UserStory.class);
+    public static Dao<Story, Integer> getDao() throws FileNotFoundException, SQLException {
+        return DaoManager.createDao(DBUtils.getConnectionSource(), Story.class);
     }
 }

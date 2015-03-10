@@ -4,9 +4,8 @@ import com.proftaak.pts4.core.annotations.RequireAuth;
 import com.proftaak.pts4.core.restlet.BaseController;
 import com.proftaak.pts4.core.restlet.HTTPException;
 import com.proftaak.pts4.database.SprintStatus;
-import com.proftaak.pts4.database.tables.UserStory;
+import com.proftaak.pts4.database.tables.Story;
 import org.restlet.data.Status;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.io.FileNotFoundException;
 import java.sql.SQLException;
@@ -17,10 +16,10 @@ import java.util.Map;
 /**
  * @author Michon
  */
-public class UserStoryController extends BaseController {
-    private UserStory getUserStory(String id) throws HTTPException, FileNotFoundException, SQLException {
+public class StoryController extends BaseController {
+    private Story getUserStory(String id) throws HTTPException, FileNotFoundException, SQLException {
         int storyId = Integer.parseInt(id);
-        UserStory story = UserStory.getDao().queryForId(storyId);
+        Story story = Story.getDao().queryForId(storyId);
         if (story == null) {
             throw new HTTPException("That story does not exist", Status.CLIENT_ERROR_NOT_FOUND);
         }
@@ -35,7 +34,7 @@ public class UserStoryController extends BaseController {
     public Map<String, Object> getHandler() throws Exception {
         // Get the list of user stories.
         Map<String, Object> output = new HashMap<>();
-        List<UserStory> stories = UserStory.getDao().queryForAll();
+        List<Story> stories = Story.getDao().queryForAll();
         output.put("stories", stories);
         return output;
     }
@@ -45,10 +44,10 @@ public class UserStoryController extends BaseController {
      */
     @Override
     @RequireAuth
-    public Map<String, Object> getHandler(String urlParam) throws Exception {
+    public Map<String, Object> getHandler(Map<String, Object> urlParams) throws Exception {
         // Build the output.
         Map<String, Object> output = new HashMap<>();
-        output.put("story", this.getUserStory(urlParam));
+        output.put("story", this.getUserStory(urlParams.get("id").toString()));
         return output;
     }
 
@@ -59,14 +58,14 @@ public class UserStoryController extends BaseController {
     @RequireAuth
     public Map<String, Object> postHandler(Map<String, Object> data) throws Exception {
         // Create the new user story.
-        UserStory story;
+        Story story;
         try {
-            story = new UserStory(
+            story = new Story(
                     (String) data.get("name"),
                     (String) data.get("description"),
                     SprintStatus.valueOf(data.getOrDefault("status", SprintStatus.DEFINED.toString()).toString())
             );
-            UserStory.getDao().create(story);
+            Story.getDao().create(story);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -74,7 +73,9 @@ public class UserStoryController extends BaseController {
         }
 
         // Return the created user story.
-        return getHandler(String.valueOf(story.getId()));
+        Map<String, Object> fakeParams = new HashMap<>();
+        fakeParams.put("id", String.valueOf(story.getId()));
+        return getHandler(fakeParams);
     }
 
     /**
@@ -82,9 +83,9 @@ public class UserStoryController extends BaseController {
      */
     @Override
     @RequireAuth
-    public Map<String, Object> putHandler(Map<String, Object> data, String urlParam) throws Exception {
+    public Map<String, Object> putHandler(Map<String, Object> data, Map<String, Object> urlParams) throws Exception {
         // Try to get the user story.
-        UserStory story = this.getUserStory(urlParam);
+        Story story = this.getUserStory(urlParams.get("id").toString());
 
         // Change the story.
         if (data.containsKey("name")) {
@@ -98,10 +99,12 @@ public class UserStoryController extends BaseController {
         }
 
         // Save the changes.
-        UserStory.getDao().update(story);
+        Story.getDao().update(story);
 
         // Return the changed user story.
-        return getHandler(String.valueOf(story.getId()));
+        Map<String, Object> fakeParams = new HashMap<>();
+        fakeParams.put("id", String.valueOf(story.getId()));
+        return getHandler(fakeParams);
     }
 
     /**
@@ -109,12 +112,12 @@ public class UserStoryController extends BaseController {
      */
     @Override
     @RequireAuth
-    public Map<String, Object> deleteHandler(String urlParam) throws Exception {
+    public Map<String, Object> deleteHandler(Map<String, Object> urlParams) throws Exception {
         // Try to get the user story.
-        UserStory story = this.getUserStory(urlParam);
+        Story story = this.getUserStory(urlParams.get("id").toString());
 
         // Delete the user story.
-        UserStory.getDao().delete(story);
+        Story.getDao().delete(story);
 
         // Return nothing.
         return null;

@@ -145,13 +145,13 @@ public class BaseController extends ServerResource {
     @Get
     public void getWrapper() {
         try {
-            Object urlParam = getRequestAttributes().get("id");
-            if (urlParam == null) {
+            Map<String, Object> urlParams = getRequestAttributes();
+            if (urlParams == null) {
                 processAnnotations(this.getClass().getMethod("getHandler"));
                 processResponse(getHandler());
             } else {
-                processAnnotations(this.getClass().getMethod("getHandler", String.class));
-                processResponse(getHandler(urlParam.toString()));
+                processAnnotations(this.getClass().getMethod("getHandler", Map.class));
+                processResponse(getHandler(urlParams));
             }
         } catch (Exception e) {
             processError(e);
@@ -171,9 +171,9 @@ public class BaseController extends ServerResource {
     public void putWrapper(String json) {
         try {
             Map<String, Object> data = GSON.fromJson(json, Map.class);
-            Object urlParam = getRequestAttributes().get("id");
-            processAnnotations(this.getClass().getMethod("putHandler", Map.class, String.class));
-            processResponse(putHandler(data, urlParam.toString()));
+            Map<String, Object> urlParams = getRequestAttributes();
+            processAnnotations(this.getClass().getMethod("putHandler", Map.class, Map.class));
+            processResponse(putHandler(data, urlParams));
         } catch (Exception e) {
             processError(e);
         }
@@ -181,9 +181,9 @@ public class BaseController extends ServerResource {
     @Delete
     public void deleteWrapper() {
         try {
-            Object urlParam = getRequestAttributes().get("id");
-            processAnnotations(this.getClass().getMethod("deleteHandler", String.class));
-            processResponse(deleteHandler(urlParam.toString()));
+            Map<String, Object> urlParams = getRequestAttributes();
+            processAnnotations(this.getClass().getMethod("deleteHandler", Map.class));
+            processResponse(deleteHandler(urlParams));
         } catch (Exception e) {
             processError(e);
         }
@@ -203,16 +203,16 @@ public class BaseController extends ServerResource {
     public Map<String, Object> getHandler() throws Exception {
         throw new NotImplementedException();
     }
-    public Map<String, Object> getHandler(String urlParam) throws Exception {
+    public Map<String, Object> getHandler(Map<String, Object> urlParams) throws Exception {
         throw new NotImplementedException();
     }
     public Map<String, Object> postHandler(Map<String, Object> data) throws Exception {
         throw new NotImplementedException();
     }
-    public Map<String, Object> putHandler(Map<String, Object> data, String urlParam) throws Exception {
+    public Map<String, Object> putHandler(Map<String, Object> data, Map<String, Object> urlParams) throws Exception {
         throw new NotImplementedException();
     }
-    public Map<String, Object> deleteHandler(String urlParam) throws Exception {
+    public Map<String, Object> deleteHandler(Map<String, Object> urlParams) throws Exception {
         throw new NotImplementedException();
     }
 
