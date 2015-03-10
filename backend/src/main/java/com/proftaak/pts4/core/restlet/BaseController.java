@@ -60,7 +60,7 @@ public class BaseController extends ServerResource {
      * Send a response back to the client.
      * @param response The data to send back.
      */
-    private void processResponse(Map<String, Object> response) {
+    private void processResponse(Object response) {
         // Set the headers.
         setCORS();
 
@@ -146,13 +146,8 @@ public class BaseController extends ServerResource {
     public void getWrapper() {
         try {
             Map<String, Object> urlParams = getRequestAttributes();
-            if (urlParams == null) {
-                processAnnotations(this.getClass().getMethod("getHandler"));
-                processResponse(getHandler());
-            } else {
-                processAnnotations(this.getClass().getMethod("getHandler", Map.class));
-                processResponse(getHandler(urlParams));
-            }
+            processAnnotations(this.getClass().getMethod("getHandler", Map.class));
+            processResponse(getHandler(urlParams));
         } catch (Exception e) {
             processError(e);
         }
@@ -200,19 +195,16 @@ public class BaseController extends ServerResource {
     /**
      * The methods that can be implemented by the controllers in order to respond to requests.
      */
-    public Map<String, Object> getHandler() throws Exception {
+    public Object getHandler(Map<String, Object> urlParams) throws Exception {
         throw new NotImplementedException();
     }
-    public Map<String, Object> getHandler(Map<String, Object> urlParams) throws Exception {
+    public Object postHandler(Map<String, Object> data) throws Exception {
         throw new NotImplementedException();
     }
-    public Map<String, Object> postHandler(Map<String, Object> data) throws Exception {
+    public Object putHandler(Map<String, Object> data, Map<String, Object> urlParams) throws Exception {
         throw new NotImplementedException();
     }
-    public Map<String, Object> putHandler(Map<String, Object> data, Map<String, Object> urlParams) throws Exception {
-        throw new NotImplementedException();
-    }
-    public Map<String, Object> deleteHandler(Map<String, Object> urlParams) throws Exception {
+    public Object deleteHandler(Map<String, Object> urlParams) throws Exception {
         throw new NotImplementedException();
     }
 

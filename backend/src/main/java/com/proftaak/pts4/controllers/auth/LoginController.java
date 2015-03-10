@@ -15,7 +15,7 @@ import java.util.Map;
  * Created by Michon on 2-3-2015.
  */
 public class LoginController extends BaseController {
-    public Map<String, Object> postHandler(Map<String, Object> data) throws HTTPException, FileNotFoundException, SQLException {
+    public Object postHandler(Map<String, Object> data) throws HTTPException, FileNotFoundException, SQLException {
         // Check the login details.
         Map<String, Object> queryMap = new HashMap<String, Object>();
         queryMap.put("email", data.get("email"));

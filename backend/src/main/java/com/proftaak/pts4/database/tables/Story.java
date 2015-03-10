@@ -14,7 +14,7 @@ import java.sql.SQLException;
 /**
  * @author Michon
  */
-@DatabaseTable(tableName = "userstories")
+@DatabaseTable(tableName = "stories")
 public class Story {
 	/**
 	 * The database id of this userstory

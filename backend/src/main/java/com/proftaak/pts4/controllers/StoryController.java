@@ -1,6 +1,7 @@
 package com.proftaak.pts4.controllers;
 
 import com.proftaak.pts4.core.annotations.RequireAuth;
+import com.proftaak.pts4.core.annotations.Route;
 import com.proftaak.pts4.core.restlet.BaseController;
 import com.proftaak.pts4.core.restlet.HTTPException;
 import com.proftaak.pts4.database.SprintStatus;
@@ -27,28 +28,18 @@ public class StoryController extends BaseController {
     }
 
     /**
-     * GET /userstory
+     * GET /userstory or /userstory/1
      */
     @Override
     @RequireAuth
-    public Map<String, Object> getHandler() throws Exception {
-        // Get the list of user stories.
-        Map<String, Object> output = new HashMap<>();
-        List<Story> stories = Story.getDao().queryForAll();
-        output.put("stories", stories);
-        return output;
-    }
-
-    /**
-     * GET /userstory/1
-     */
-    @Override
-    @RequireAuth
-    public Map<String, Object> getHandler(Map<String, Object> urlParams) throws Exception {
-        // Build the output.
-        Map<String, Object> output = new HashMap<>();
-        output.put("story", this.getUserStory(urlParams.get("id").toString()));
-        return output;
+    public Object getHandler(Map<String, Object> urlParams) throws Exception {
+        if (urlParams.get("id") == null) {
+            List<Story> stories = Story.getDao().queryForAll();
+            return stories;
+        }
+        else {
+            return this.getUserStory(urlParams.get("id").toString());
+        }
     }
 
     /**
@@ -56,7 +47,7 @@ public class StoryController extends BaseController {
      */
     @Override
     @RequireAuth
-    public Map<String, Object> postHandler(Map<String, Object> data) throws Exception {
+    public Object postHandler(Map<String, Object> data) throws Exception {
         // Create the new user story.
         Story story;
         try {
@@ -83,7 +74,7 @@ public class StoryController extends BaseController {
      */
     @Override
     @RequireAuth
-    public Map<String, Object> putHandler(Map<String, Object> data, Map<String, Object> urlParams) throws Exception {
+    public Object putHandler(Map<String, Object> data, Map<String, Object> urlParams) throws Exception {
         // Try to get the user story.
         Story story = this.getUserStory(urlParams.get("id").toString());
 
@@ -112,7 +103,7 @@ public class StoryController extends BaseController {
      */
     @Override
     @RequireAuth
-    public Map<String, Object> deleteHandler(Map<String, Object> urlParams) throws Exception {
+    public Object deleteHandler(Map<String, Object> urlParams) throws Exception {
         // Try to get the user story.
         Story story = this.getUserStory(urlParams.get("id").toString());
 
