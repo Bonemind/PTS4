@@ -23,9 +23,9 @@ public class Token {
     public static final String FIELD_DATE_CREATED = "dateCreated";
 
     /**
-     * The time a token stays valid, in seconds.
+     * The time a token stays valid, in milliseconds.
      */
-    public static final int TIME_TO_LIVE = 60 * 60 * 24;
+    public static final int TIME_TO_LIVE = 1000 * 60 * 60 * 24;
 
     /**
      * The token
