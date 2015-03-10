@@ -4,9 +4,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.proftaak.pts4.core.annotations.RequireAuth;
 import com.proftaak.pts4.core.gson.AnnotationExclusionStrategy;
-import com.proftaak.pts4.database.Token;
-import com.proftaak.pts4.database.User;
-import org.reflections.Reflections;
+import com.proftaak.pts4.database.tables.Token;
+import com.proftaak.pts4.database.tables.User;
 import org.restlet.Response;
 import org.restlet.data.MediaType;
 import org.restlet.data.Status;
@@ -66,7 +65,9 @@ public class BaseController extends ServerResource {
         setCORS();
 
         // Set the body.
-        setResponseBody(response);
+        if (response != null) {
+            setResponseBody(response);
+        }
     }
 
     /**
@@ -160,7 +161,7 @@ public class BaseController extends ServerResource {
     public void postWrapper(String json) {
         try {
             Map<String, Object> data = GSON.fromJson(json, Map.class);
-            processAnnotations(this.getClass().getMethod("postHandler"));
+            processAnnotations(this.getClass().getMethod("postHandler", Map.class));
             processResponse(postHandler(data));
         } catch (Exception e) {
             processError(e);
@@ -171,7 +172,7 @@ public class BaseController extends ServerResource {
         try {
             Map<String, Object> data = GSON.fromJson(json, Map.class);
             Object urlParam = getRequestAttributes().get("id");
-            processAnnotations(this.getClass().getMethod("putHandler", String.class));
+            processAnnotations(this.getClass().getMethod("putHandler", Map.class, String.class));
             processResponse(putHandler(data, urlParam.toString()));
         } catch (Exception e) {
             processError(e);

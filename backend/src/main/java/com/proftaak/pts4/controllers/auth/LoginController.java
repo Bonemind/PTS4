@@ -1,10 +1,9 @@
 package com.proftaak.pts4.controllers.auth;
 
-import com.proftaak.pts4.core.database.DBUtils;
 import com.proftaak.pts4.core.restlet.BaseController;
 import com.proftaak.pts4.core.restlet.HTTPException;
-import com.proftaak.pts4.database.Token;
-import com.proftaak.pts4.database.User;
+import com.proftaak.pts4.database.tables.Token;
+import com.proftaak.pts4.database.tables.User;
 import org.restlet.data.Status;
 
 import java.io.FileNotFoundException;

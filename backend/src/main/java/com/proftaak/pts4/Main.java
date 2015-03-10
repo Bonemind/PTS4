@@ -1,6 +1,6 @@
 package com.proftaak.pts4;
 
-import com.proftaak.pts4.core.database.DBUtils;
+import com.proftaak.pts4.database.DBUtils;
 import com.proftaak.pts4.core.restlet.BaseController;
 import org.reflections.Reflections;
 import org.restlet.Component;
