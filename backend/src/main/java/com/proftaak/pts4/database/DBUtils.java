@@ -15,7 +15,6 @@ import org.reflections.Reflections;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.IntSummaryStatistics;
 import java.util.Properties;
 
 public class DBUtils {
@@ -27,51 +26,52 @@ public class DBUtils {
     /**
      * The connection source.
      */
-	private static JdbcPooledConnectionSource connSource;
-	
-	/**
-	 * Creates an open pooled JDBC connection source
-     *
-	 * @return a pooled connection source
-	 * @throws java.sql.SQLException Thrown if anything went wrong while connecting to the database
-	 */
-	public static ConnectionSource getConnectionSource() throws SQLException, FileNotFoundException {
-		if (connSource == null || !connSource.isOpen()) {
-            Properties p = PropertiesUtils.getProperties();
-			connSource = new JdbcPooledConnectionSource(p.getProperty("mysql.url"), p.getProperty("mysql.username"), p.getProperty("mysql.password"));
-		}
-		return connSource;
-	}
+    private static JdbcPooledConnectionSource connSource;
 
-	/**
-	 * Recreates all tables, dropping any existing ones in the process
+    /**
+     * Creates an open pooled JDBC connection source
      *
-	 * @throws java.sql.SQLException  Thrown when connecting to the database fails
-	 * @throws ClassNotFoundException  Thrown when we try to load a class that somehow doesn't exist
-	 * @throws java.io.IOException
-	 */
-	@SuppressWarnings("unchecked")
-	public static void recreateAllTables() throws SQLException, ClassNotFoundException, IOException {
-		ConnectionSource connSource = DBUtils.getConnectionSource();
+     * @return a pooled connection source
+     * @throws java.sql.SQLException Thrown if anything went wrong while connecting to the database
+     */
+    public static ConnectionSource getConnectionSource() throws SQLException, FileNotFoundException {
+        if (connSource == null || !connSource.isOpen()) {
+            Properties p = PropertiesUtils.getProperties();
+            connSource = new JdbcPooledConnectionSource(p.getProperty("mysql.url"), p.getProperty("mysql.username"), p.getProperty("mysql.password"));
+        }
+        return connSource;
+    }
+
+    /**
+     * Recreates all tables, dropping any existing ones in the process
+     *
+     * @throws java.sql.SQLException  Thrown when connecting to the database fails
+     * @throws ClassNotFoundException Thrown when we try to load a class that somehow doesn't exist
+     * @throws java.io.IOException
+     */
+    @SuppressWarnings("unchecked")
+    public static void recreateAllTables() throws SQLException, ClassNotFoundException, IOException {
+        ConnectionSource connSource = DBUtils.getConnectionSource();
         Reflections r = new Reflections(TABLES_PACKAGE);
         for (Class<?> tableClass : r.getTypesAnnotatedWith(DatabaseTable.class)) {
-			TableUtils.dropTable(connSource, tableClass, true);
-			TableUtils.createTable(connSource, tableClass);
-		}
-	}
+            TableUtils.dropTable(connSource, tableClass, true);
+            TableUtils.createTable(connSource, tableClass);
+        }
+    }
 
-	/**
-	 * Writes some test data to the database
-	 * @throws java.sql.SQLException
-	 */
-	public static void createTestData() throws SQLException, FileNotFoundException {
-		Dao<User, Integer> userDao = User.getDao();
+    /**
+     * Writes some test data to the database
+     *
+     * @throws java.sql.SQLException
+     */
+    public static void createTestData() throws SQLException, FileNotFoundException {
+        Dao<User, Integer> userDao = User.getDao();
         Dao<Token, String> tokenDao = Token.getDao();
         Dao<Story, Integer> storyDao = Story.getDao();
         Dao<Task, Integer> taskDao = Task.getDao();
 
-		User u = new User("test", "test");
-		userDao.create(u);
+        User u = new User("test", "test");
+        userDao.create(u);
 
         Token t = new Token(u, "test");
         tokenDao.create(t);
@@ -89,5 +89,5 @@ public class DBUtils {
         taskDao.create(t21);
         Task t22 = new Task(us2, "Backend", null, SprintStatus.ACCEPTED);
         taskDao.create(t22);
-	}
+    }
 }

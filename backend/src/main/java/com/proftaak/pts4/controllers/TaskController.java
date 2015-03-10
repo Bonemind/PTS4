@@ -12,7 +12,6 @@ import org.restlet.data.Status;
 import java.io.FileNotFoundException;
 import java.sql.SQLException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -38,8 +37,7 @@ public class TaskController extends BaseController {
         Story story = StoryController.getStory(urlParams.get("storyId").toString());
         if (urlParams.get("id") == null) {
             return Task.getDao().queryBuilder().where().eq(Task.FIELD_STORY, story).query();
-        }
-        else {
+        } else {
             return this.getTask(urlParams.get("storyId").toString(), urlParams.get("id").toString());
         }
     }
@@ -63,8 +61,7 @@ public class TaskController extends BaseController {
                     SprintStatus.valueOf(data.getOrDefault("status", SprintStatus.DEFINED.toString()).toString())
             );
             Task.getDao().create(task);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             throw new HTTPException("Invalid request", Status.CLIENT_ERROR_BAD_REQUEST);
         }

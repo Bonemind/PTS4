@@ -33,26 +33,27 @@ public class Token {
     @DatabaseField(id = true, columnName = FIELD_TOKEN)
     private String token;
 
-	/**
-	 * The user
-	 */
-	@DatabaseField(foreign = true, foreignAutoRefresh = true, columnName = FIELD_USER)
-	private User user;
+    /**
+     * The user
+     */
+    @DatabaseField(foreign = true, foreignAutoRefresh = true, columnName = FIELD_USER)
+    private User user;
 
-	/**
-	 * Date of creation of the token, used for TTL
-	 */
-	@DatabaseField(dataType = DataType.DATE, columnName = FIELD_DATE_CREATED)
-	private Date creationDate;
+    /**
+     * Date of creation of the token, used for TTL
+     */
+    @DatabaseField(dataType = DataType.DATE, columnName = FIELD_DATE_CREATED)
+    private Date creationDate;
 
-	/**
-	 * ORM-Lite no-arg constructor
-	 */
-	public Token() {
-	}
+    /**
+     * ORM-Lite no-arg constructor
+     */
+    public Token() {
+    }
 
     /**
      * Create a new token.
+     *
      * @param user The user to whom the token belongs
      */
     public Token(User user) {
@@ -60,6 +61,7 @@ public class Token {
         this.user = user;
         this.creationDate = new Date();
     }
+
     public Token(User user, String token) {
         this(user);
         this.token = token;
@@ -75,6 +77,7 @@ public class Token {
 
     /**
      * Check whether the token is still valid
+     *
      * @return True if the token is still valid, False otherwise
      */
     public boolean isValid() {
@@ -85,6 +88,7 @@ public class Token {
 
     /**
      * Get the DAO for this table
+     *
      * @return The DAO for this table
      */
     public static Dao<Token, String> getDao() throws FileNotFoundException, SQLException {

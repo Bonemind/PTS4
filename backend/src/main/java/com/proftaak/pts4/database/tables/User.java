@@ -4,8 +4,8 @@ import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
-import com.proftaak.pts4.database.DBUtils;
 import com.proftaak.pts4.core.gson.GsonExclude;
+import com.proftaak.pts4.database.DBUtils;
 import org.mindrot.jbcrypt.BCrypt;
 
 import java.io.FileNotFoundException;
@@ -21,11 +21,11 @@ public class User {
     public static final String FIELD_EMAIL = "email";
     public static final String FIELD_PASSWORD = "password";
 
-	/**
-	 * The database id of this user
-	 */
-	@DatabaseField(generatedId = true, columnName = FIELD_ID)
-	private int id;
+    /**
+     * The database id of this user
+     */
+    @DatabaseField(generatedId = true, columnName = FIELD_ID)
+    private int id;
 
     /**
      * The email address of this user
@@ -33,18 +33,18 @@ public class User {
     @DatabaseField(canBeNull = false, unique = true, columnName = FIELD_EMAIL)
     private String email;
 
-	/**
-	 * The password of this user
-	 */
-	@GsonExclude
-	@DatabaseField(canBeNull = false, columnName = FIELD_PASSWORD)
-	private String password;
+    /**
+     * The password of this user
+     */
+    @GsonExclude
+    @DatabaseField(canBeNull = false, columnName = FIELD_PASSWORD)
+    private String password;
 
-	/**
-	 * ORM-Lite no-arg constructor
-	 */
-	public User() {
-	}
+    /**
+     * ORM-Lite no-arg constructor
+     */
+    public User() {
+    }
 
     /**
      * Create a new user.
@@ -66,26 +66,29 @@ public class User {
         this.email = email;
     }
 
-	/**
-	 * Sets a new password for the user. Hashed and salts it in the process
-	 * @param newPassword The new password
-	 */
-	public void setPassword(String newPassword) {
-		String salt = BCrypt.gensalt();
-		this.password = BCrypt.hashpw(newPassword, salt);
-	}
+    /**
+     * Sets a new password for the user. Hashed and salts it in the process
+     *
+     * @param newPassword The new password
+     */
+    public void setPassword(String newPassword) {
+        String salt = BCrypt.gensalt();
+        this.password = BCrypt.hashpw(newPassword, salt);
+    }
 
-	/**
-	 * Compares the plaintext password passed to it with the hashed stored version
-	 * @param pass The plaintext password
-	 * @return True if they are the same, false otherwise
-	 */
-	public boolean checkPassword(String pass) {
+    /**
+     * Compares the plaintext password passed to it with the hashed stored version
+     *
+     * @param pass The plaintext password
+     * @return True if they are the same, false otherwise
+     */
+    public boolean checkPassword(String pass) {
         return BCrypt.checkpw(pass, this.password);
-	}
+    }
 
     /**
      * Get the DAO for this table
+     *
      * @return The DAO for this table
      */
     public static Dao<User, Integer> getDao() throws FileNotFoundException, SQLException {

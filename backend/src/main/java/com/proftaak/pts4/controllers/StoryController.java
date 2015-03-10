@@ -1,7 +1,6 @@
 package com.proftaak.pts4.controllers;
 
 import com.proftaak.pts4.core.annotations.RequireAuth;
-import com.proftaak.pts4.core.annotations.Route;
 import com.proftaak.pts4.core.restlet.BaseController;
 import com.proftaak.pts4.core.restlet.HTTPException;
 import com.proftaak.pts4.database.SprintStatus;
@@ -11,7 +10,6 @@ import org.restlet.data.Status;
 import java.io.FileNotFoundException;
 import java.sql.SQLException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -35,8 +33,7 @@ public class StoryController extends BaseController {
     public Object getHandler(Map<String, Object> urlParams) throws Exception {
         if (urlParams.get("id") == null) {
             return Story.getDao().queryForAll();
-        }
-        else {
+        } else {
             return this.getStory(urlParams.get("id").toString());
         }
     }
@@ -56,8 +53,7 @@ public class StoryController extends BaseController {
                     SprintStatus.valueOf(data.getOrDefault("status", SprintStatus.DEFINED.toString()).toString())
             );
             Story.getDao().create(story);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             throw new HTTPException("Invalid request", Status.CLIENT_ERROR_BAD_REQUEST);
         }

@@ -53,18 +53,20 @@ public class Task {
     @DatabaseField(foreign = true, foreignAutoRefresh = true, columnName = FIELD_STORY)
     private Story story;
 
-	/**
-	 * ORM-Lite no-arg constructor
-	 */
-	public Task() {
-	}
+    /**
+     * ORM-Lite no-arg constructor
+     */
+    public Task() {
+    }
 
     public Task(Story story, String name) {
         this(story, name, null);
     }
+
     public Task(Story story, String name, String description) {
         this(story, name, description, SprintStatus.DEFINED);
     }
+
     public Task(Story story, String name, String description, SprintStatus sprintStatus) {
         this.story = story;
         this.setName(name);
@@ -106,6 +108,7 @@ public class Task {
 
     /**
      * Get the DAO for this table
+     *
      * @return The DAO for this table
      */
     public static Dao<Task, Integer> getDao() throws FileNotFoundException, SQLException {

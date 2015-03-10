@@ -22,11 +22,11 @@ public class Story {
     public static final String FIELD_DESCRIPTION = "description";
     public static final String FIELD_STATUS = "status";
 
-	/**
-	 * The database id of this userstory
-	 */
-	@DatabaseField(generatedId = true, columnName = FIELD_ID)
-	private int id;
+    /**
+     * The database id of this userstory
+     */
+    @DatabaseField(generatedId = true, columnName = FIELD_ID)
+    private int id;
 
     /**
      * The name of this userstory
@@ -34,11 +34,11 @@ public class Story {
     @DatabaseField(canBeNull = false, columnName = FIELD_NAME)
     private String name;
 
-	/**
-	 * The description of this userstory
-	 */
-	@DatabaseField(columnName = FIELD_DESCRIPTION)
-	private String description;
+    /**
+     * The description of this userstory
+     */
+    @DatabaseField(columnName = FIELD_DESCRIPTION)
+    private String description;
 
     /**
      * The status of this userstory
@@ -46,18 +46,20 @@ public class Story {
     @DatabaseField(canBeNull = false, dataType = DataType.ENUM_STRING, columnName = FIELD_STATUS)
     private SprintStatus status;
 
-	/**
-	 * ORM-Lite no-arg constructor
-	 */
-	public Story() {
-	}
+    /**
+     * ORM-Lite no-arg constructor
+     */
+    public Story() {
+    }
 
     public Story(String name) {
         this(name, null);
     }
+
     public Story(String name, String description) {
         this(name, description, SprintStatus.DEFINED);
     }
+
     public Story(String name, String description, SprintStatus sprintStatus) {
         this.setName(name);
         this.setDescription(description);
@@ -94,6 +96,7 @@ public class Story {
 
     /**
      * Get the DAO for this table
+     *
      * @return The DAO for this table
      */
     public static Dao<Story, Integer> getDao() throws FileNotFoundException, SQLException {

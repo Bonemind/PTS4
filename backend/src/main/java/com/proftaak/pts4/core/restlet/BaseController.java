@@ -58,6 +58,7 @@ public class BaseController extends ServerResource {
 
     /**
      * Send a response back to the client.
+     *
      * @param response The data to send back.
      */
     private void processResponse(Object response) {
@@ -72,6 +73,7 @@ public class BaseController extends ServerResource {
 
     /**
      * Relay an exception back to the client.
+     *
      * @param exc The exception.
      */
     private void processError(Exception exc) {
@@ -88,8 +90,8 @@ public class BaseController extends ServerResource {
 
             // Build an HTTPException.
             userException = new HTTPException(
-                "The server encountered an internal error when trying to process your request.",
-                Status.SERVER_ERROR_INTERNAL
+                    "The server encountered an internal error when trying to process your request.",
+                    Status.SERVER_ERROR_INTERNAL
             );
         } else {
             userException = (HTTPException) exc;
@@ -133,6 +135,7 @@ public class BaseController extends ServerResource {
 
     /**
      * Set the body of the response.
+     *
      * @param body The body of the response.
      */
     private void setResponseBody(Object body) {
@@ -152,6 +155,7 @@ public class BaseController extends ServerResource {
             processError(e);
         }
     }
+
     @Post("json")
     public void postWrapper(String json) {
         try {
@@ -163,6 +167,7 @@ public class BaseController extends ServerResource {
             processError(e);
         }
     }
+
     @Put("json")
     public void putWrapper(String json) {
         try {
@@ -174,6 +179,7 @@ public class BaseController extends ServerResource {
             processError(e);
         }
     }
+
     @Delete
     public void deleteWrapper() {
         try {
@@ -199,12 +205,15 @@ public class BaseController extends ServerResource {
     public Object getHandler(Map<String, Object> urlParams) throws Exception {
         throw new NotImplementedException();
     }
+
     public Object postHandler(Map<String, Object> data, Map<String, Object> urlParams) throws Exception {
         throw new NotImplementedException();
     }
+
     public Object putHandler(Map<String, Object> data, Map<String, Object> urlParams) throws Exception {
         throw new NotImplementedException();
     }
+
     public Object deleteHandler(Map<String, Object> urlParams) throws Exception {
         throw new NotImplementedException();
     }

@@ -1,8 +1,8 @@
 package com.proftaak.pts4;
 
 import com.proftaak.pts4.core.annotations.Route;
-import com.proftaak.pts4.database.DBUtils;
 import com.proftaak.pts4.core.restlet.BaseController;
+import com.proftaak.pts4.database.DBUtils;
 import org.reflections.Reflections;
 import org.restlet.Component;
 import org.restlet.data.Protocol;
@@ -39,8 +39,7 @@ public class Main extends ServerResource {
                 path += controller.getPackage().getName().substring(CONTROLLER_PACKAGE.length()).replace('.', '/');
                 path += "/";
                 path += controller.getSimpleName().replace("Controller", "").toLowerCase();
-            }
-            else {
+            } else {
                 path = route.value();
             }
 
