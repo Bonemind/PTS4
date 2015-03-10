@@ -52,7 +52,7 @@ public class BaseController extends ServerResource {
             response.getAttributes().put(RESTLET_HEADER_KEY, responseHeaders);
         }
         responseHeaders.add("Access-Control-Allow-Origin", "*");
-        responseHeaders.add("Access-Control-Allow-Methods", "*");
+        responseHeaders.add("Access-Control-Allow-Methods", "POST, PUT, GET, OPTIONS, DELETE");
         responseHeaders.add("Access-Control-Allow-Headers", "Content-Type,X-TOKEN");
     }
 
