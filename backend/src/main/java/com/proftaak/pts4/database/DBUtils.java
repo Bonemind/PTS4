@@ -7,6 +7,7 @@ import com.j256.ormlite.table.DatabaseTable;
 import com.j256.ormlite.table.TableUtils;
 import com.proftaak.pts4.core.PropertiesUtils;
 import com.proftaak.pts4.database.tables.Story;
+import com.proftaak.pts4.database.tables.Task;
 import com.proftaak.pts4.database.tables.Token;
 import com.proftaak.pts4.database.tables.User;
 import org.reflections.Reflections;
@@ -14,6 +15,7 @@ import org.reflections.Reflections;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.IntSummaryStatistics;
 import java.util.Properties;
 
 public class DBUtils {
@@ -65,7 +67,8 @@ public class DBUtils {
 	public static void createTestData() throws SQLException, FileNotFoundException {
 		Dao<User, Integer> userDao = User.getDao();
         Dao<Token, String> tokenDao = Token.getDao();
-        Dao<Story, Integer> userStoryDao = Story.getDao();
+        Dao<Story, Integer> storyDao = Story.getDao();
+        Dao<Task, Integer> taskDao = Task.getDao();
 
 		User u = new User("test", "test");
 		userDao.create(u);
@@ -74,8 +77,17 @@ public class DBUtils {
         tokenDao.create(t);
 
         Story us1 = new Story("Foo");
-        userStoryDao.create(us1);
-        Story us2 = new Story("Lorem", "Lorem Ipsum Dolor Sit Amet");
-        userStoryDao.create(us2);
+        storyDao.create(us1);
+        Story us2 = new Story("Lorem", "Lorem Ipsum Dolor Sit Amet", SprintStatus.IN_PROGRESS);
+        storyDao.create(us2);
+
+        Task t11 = new Task(us1, "Frontend");
+        taskDao.create(t11);
+        Task t12 = new Task(us1, "Backend", "Do backend stuff");
+        taskDao.create(t12);
+        Task t21 = new Task(us2, "Frontend");
+        taskDao.create(t21);
+        Task t22 = new Task(us2, "Backend", null, SprintStatus.ACCEPTED);
+        taskDao.create(t22);
 	}
 }

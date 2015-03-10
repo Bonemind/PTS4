@@ -15,11 +15,9 @@ import java.util.Map;
  * Created by Michon on 2-3-2015.
  */
 public class LoginController extends BaseController {
-    public Object postHandler(Map<String, Object> data) throws HTTPException, FileNotFoundException, SQLException {
+    public Object postHandler(Map<String, Object> data, Map<String, Object> urlParams) throws HTTPException, FileNotFoundException, SQLException {
         // Check the login details.
-        Map<String, Object> queryMap = new HashMap<String, Object>();
-        queryMap.put("email", data.get("email"));
-        User user = User.getDao().queryForFieldValues(queryMap).get(0);
+        User user = User.getDao().queryBuilder().where().eq(User.FIELD_EMAIL, data.get("email")).queryForFirst();
         if (user == null || !user.checkPassword(data.get("password").toString())) {
             throw new HTTPException("Invalid login details", Status.CLIENT_ERROR_UNAUTHORIZED);
         }

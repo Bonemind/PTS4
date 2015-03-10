@@ -16,23 +16,28 @@ import java.sql.SQLException;
  */
 @DatabaseTable(tableName = "users")
 public class User {
+
+    public static final String FIELD_ID = "id";
+    public static final String FIELD_EMAIL = "email";
+    public static final String FIELD_PASSWORD = "password";
+
 	/**
 	 * The database id of this user
 	 */
-	@DatabaseField(generatedId = true)
+	@DatabaseField(generatedId = true, columnName = FIELD_ID)
 	private int id;
 
     /**
      * The email address of this user
      */
-    @DatabaseField(canBeNull = false, unique = true)
+    @DatabaseField(canBeNull = false, unique = true, columnName = FIELD_EMAIL)
     private String email;
 
 	/**
 	 * The password of this user
 	 */
 	@GsonExclude
-	@DatabaseField(canBeNull = false)
+	@DatabaseField(canBeNull = false, columnName = FIELD_PASSWORD)
 	private String password;
 
 	/**

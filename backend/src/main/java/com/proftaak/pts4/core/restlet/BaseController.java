@@ -156,8 +156,9 @@ public class BaseController extends ServerResource {
     public void postWrapper(String json) {
         try {
             Map<String, Object> data = GSON.fromJson(json, Map.class);
-            processAnnotations(this.getClass().getMethod("postHandler", Map.class));
-            processResponse(postHandler(data));
+            Map<String, Object> urlParams = getRequestAttributes();
+            processAnnotations(this.getClass().getMethod("postHandler", Map.class, Map.class));
+            processResponse(postHandler(data, urlParams));
         } catch (Exception e) {
             processError(e);
         }
@@ -198,7 +199,7 @@ public class BaseController extends ServerResource {
     public Object getHandler(Map<String, Object> urlParams) throws Exception {
         throw new NotImplementedException();
     }
-    public Object postHandler(Map<String, Object> data) throws Exception {
+    public Object postHandler(Map<String, Object> data, Map<String, Object> urlParams) throws Exception {
         throw new NotImplementedException();
     }
     public Object putHandler(Map<String, Object> data, Map<String, Object> urlParams) throws Exception {

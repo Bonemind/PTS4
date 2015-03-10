@@ -18,6 +18,10 @@ import java.util.UUID;
 @DatabaseTable(tableName = "tokens")
 public class Token {
 
+    public static final String FIELD_TOKEN = "token";
+    public static final String FIELD_USER = "user";
+    public static final String FIELD_DATE_CREATED = "dateCreated";
+
     /**
      * The time a token stays valid, in seconds.
      */
@@ -26,19 +30,19 @@ public class Token {
     /**
      * The token
      */
-    @DatabaseField(id = true)
+    @DatabaseField(id = true, columnName = FIELD_TOKEN)
     private String token;
 
 	/**
 	 * The user
 	 */
-	@DatabaseField(foreign = true, foreignAutoRefresh = true)
+	@DatabaseField(foreign = true, foreignAutoRefresh = true, columnName = FIELD_USER)
 	private User user;
 
 	/**
 	 * Date of creation of the token, used for TTL
 	 */
-	@DatabaseField(dataType = DataType.DATE)
+	@DatabaseField(dataType = DataType.DATE, columnName = FIELD_DATE_CREATED)
 	private Date creationDate;
 
 	/**
