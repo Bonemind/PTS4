@@ -70,7 +70,7 @@ public class DBUtils {
         Dao<Story, Integer> storyDao = Story.getDao();
         Dao<Task, Integer> taskDao = Task.getDao();
 
-        User u = new User("test", "test");
+        User u = new User("test", "test", User.UserRole.PRODUCT_OWNER);
         userDao.create(u);
 
         Token t = new Token(u, "test");

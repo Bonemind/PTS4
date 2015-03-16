@@ -1,4 +1,6 @@
-package com.proftaak.pts4.core.annotations;
+package com.proftaak.pts4.core.restlet.annotations;
+
+import com.proftaak.pts4.database.tables.User;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -11,7 +13,10 @@ import java.lang.annotation.Target;
  * @author Michon
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
-public @interface Route {
-    String value();
+@Target(ElementType.METHOD)
+public @interface RequireAuth {
+    /**
+     * The allowed role(s)
+     */
+    User.UserRole[] roles() default {};
 }

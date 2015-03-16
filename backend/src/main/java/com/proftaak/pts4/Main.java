@@ -1,14 +1,17 @@
 package com.proftaak.pts4;
 
-import com.proftaak.pts4.core.annotations.Route;
 import com.proftaak.pts4.core.restlet.BaseController;
+import com.proftaak.pts4.core.restlet.annotations.CRUDController;
 import com.proftaak.pts4.database.DBUtils;
 import org.reflections.Reflections;
 import org.restlet.Component;
 import org.restlet.data.Protocol;
 import org.restlet.resource.ServerResource;
 
-import java.util.Set;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * Created by Michon on 2-3-2015.
@@ -30,17 +33,46 @@ public class Main extends ServerResource {
 
         // Perform routing.
         Reflections reflections = new Reflections(CONTROLLER_PACKAGE);
-        Set<Class<? extends BaseController>> controllers = reflections.getSubTypesOf(BaseController.class);
+        Collection<Class<? extends BaseController>> controllers = reflections.getSubTypesOf(BaseController.class);
         for (Class<? extends BaseController> controller : controllers) {
-            // Determine the path of this controller.
+            // Inialize the controller.
+            Method init = controller.getMethod("init");
+            if (init != null) {
+                init.invoke(null);
+            }
+
+            // Do the routing.
             String path = "";
-            Route route = controller.getAnnotation(Route.class);
-            if (route == null) {
+            CRUDController crudController = controller.getAnnotation(CRUDController.class);
+            if (crudController != null) {
+                List<CRUDController> controllerList = new ArrayList<>();
+                controllerList.add(crudController);
+                while (crudController != null) {
+                    if (crudController.parent() != null && crudController.parent().getAnnotation(CRUDController.class) != null) {
+                        crudController = crudController.parent().getAnnotation(CRUDController.class);
+                        controllerList.add(crudController);
+                    } else {
+                        break;
+                    }
+                }
+                path += "/";
+                while (controllerList.size() > 1) {
+                    crudController = controllerList.remove(controllerList.size() - 1);
+                    path += crudController.table().getSimpleName().toLowerCase();
+                    path += "/";
+                    path += "{" + crudController.table().getSimpleName().toLowerCase() + "Id}";
+                    path += "/";
+                }
+                path += controllerList.get(0).table().getSimpleName().toLowerCase();
+
+                component.getDefaultHost().attach(path, controller);
+                component.getDefaultHost().attach(path + "/{" + controllerList.get(0).table().getSimpleName().toLowerCase() + "Id}", controller);
+            } else {
                 path += controller.getPackage().getName().substring(CONTROLLER_PACKAGE.length()).replace('.', '/');
                 path += "/";
                 path += controller.getSimpleName().replace("Controller", "").toLowerCase();
-            } else {
-                path = route.value();
+                component.getDefaultHost().attach(path, controller);
+                component.getDefaultHost().attach(path + "/{id}", controller);
             }
 
             // Add the controller to the routing.

@@ -2,14 +2,18 @@ package com.proftaak.pts4.database.tables;
 
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
+import com.j256.ormlite.field.DataType;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 import com.proftaak.pts4.core.gson.GsonExclude;
+import com.proftaak.pts4.core.restlet.HTTPException;
 import com.proftaak.pts4.database.DBUtils;
 import org.mindrot.jbcrypt.BCrypt;
+import org.restlet.data.Status;
 
 import java.io.FileNotFoundException;
 import java.sql.SQLException;
+import java.util.Arrays;
 
 /**
  * @author Michon
@@ -20,6 +24,18 @@ public class User {
     public static final String FIELD_ID = "id";
     public static final String FIELD_EMAIL = "email";
     public static final String FIELD_PASSWORD = "password";
+    public static final String FIELD_ROLE = "role";
+
+    public static enum UserRole {
+        DEVELOPER,
+        PRODUCT_OWNER;
+
+        public void require(UserRole... roles) throws HTTPException {
+            if (!Arrays.asList(roles).contains(this)) {
+                throw new HTTPException("You do not have permission to do that", Status.CLIENT_ERROR_FORBIDDEN);
+            }
+        }
+    }
 
     /**
      * The database id of this user
@@ -41,6 +57,12 @@ public class User {
     private String password;
 
     /**
+     * The role of this user
+     */
+    @DatabaseField(canBeNull = false, dataType = DataType.ENUM_STRING, columnName = FIELD_ROLE)
+    private UserRole role;
+
+    /**
      * ORM-Lite no-arg constructor
      */
     public User() {
@@ -49,9 +71,10 @@ public class User {
     /**
      * Create a new user.
      */
-    public User(String email, String password) {
+    public User(String email, String password, UserRole role) {
         this.setEmail(email);
         this.setPassword(password);
+        this.setRole(role);
     }
 
     public int getId() {
@@ -84,6 +107,14 @@ public class User {
      */
     public boolean checkPassword(String pass) {
         return BCrypt.checkpw(pass, this.password);
+    }
+
+    public UserRole getRole() {
+        return role;
+    }
+
+    public void setRole(UserRole role) {
+        this.role = role;
     }
 
     /**
