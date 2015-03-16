@@ -33,18 +33,24 @@
                 <a class="navbar-brand" href="#">Start Bootstrap</a>
             </div>
             <!-- Collect the nav links, forms, and other content for toggling -->
-            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <div class="collapse navbar-collapse" id="navbar">
                 <ul class="nav navbar-nav">
                     <li>
                         <a href="#/">Home</a>
                     </li>
                     <li>
-                        <a href="#/login">Login</a>
-                    </li>
-                    <li>
                         <a href="#/stories">Stories</a>
                     </li>
                 </ul>
+		<ul class="nav navbar-nav navbar-right" ng-controller="LoginMenuController">
+			<li ng-hide="loggedIn"><a href="#/login">Login</a></li>
+			<li ng-show="loggedIn" class="dropdown">
+				<a href="#" class="dropdown toggle" data-toggle="dropdown" role="button" aria-expanded="false">{{ $root.user.email }} <span class="caret"></span></a>
+				<ul class="dropdown-menu" role="menu">
+					<li><a href="#/login" ng-click="logout()" href="#">Logout</a></li>
+				</ul>
+			</li>
+		</ul>
             </div>
             <!-- /.navbar-collapse -->
         </div>

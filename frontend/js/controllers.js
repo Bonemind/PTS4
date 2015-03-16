@@ -11,7 +11,8 @@ PTSAppControllers.controller("loginController", ["$rootScope", "$scope", "$http"
 					success(function(data, status, headers, config) {
 						messageCenterService.add("success", "Logged in", {timeout: 8000, status: messageCenterService.status.next});
 						$rootScope.token = data.token;
-						$location.path("/index");
+						$rootScope.user = data.user;
+						$location.path("/");
 					}).
 					error(function(data, status, headers, config) {
 						if (status >= 500 && status < 600) {
@@ -100,13 +101,15 @@ PTSAppControllers.controller("UserStoryListController", ["$rootScope", "$scope",
 				} else {
 					model = Restangular.copy(model);
 				}
+				
+				var copiedStatus = cleanupStatusList($rootScope.user, $rootScope.StatusList);
 				ModalService.showModal({
 					templateUrl: "templates/userStoryModal.html",
 					controller: "CRUDController",
 					inputs: {
 						model: model,
 						meta: {
-							StatusList: $rootScope.StatusList
+							StatusList: copiedStatus
 						}
 					}
 
@@ -145,7 +148,7 @@ PTSAppControllers.controller("TaskListController", ["$rootScope", "$scope", "Res
 					inputs: {
 						model: model,
 						meta: {
-							StatusList: $rootScope.StatusList
+							StatusList: cleanupStatusList($rootScope.user, $rootScope.StatusList)
 						}
 					}
 
@@ -157,4 +160,16 @@ PTSAppControllers.controller("TaskListController", ["$rootScope", "$scope", "Res
 				});
 			}
 			$scope.update();
+		}]);
+
+PTSAppControllers.controller("LoginMenuController", ["$rootScope", "$scope",
+		function($rootScope, $scope) {
+			$scope.loggedIn = false;
+			$rootScope.$watch("user", function(newval, oldval) {
+				$scope.loggedIn = newval !== undefined;
+			});
+			$scope.logout = function() {
+				$rootScope.user = undefined;
+				$rootScope.token = undefined;
+			}
 		}]);

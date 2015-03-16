@@ -70,6 +70,30 @@ angular.module('PTSApp').directive('ngReallyClick', [function() {
     }
 }]);
 
+//Setup a basic auth interceptor
+//If we're unauthenticated a login dialog is shown
+PTSApp.factory("authInterceptor", ["$rootScope", "$q", "$location", "messageCenterService",
+	function($rootScope, $q, $location, messageCenterService) {
+		return {
+			"responseError": function(response) {
+				if (response && response.status === 401) {
+					var deferred = $q.defer();
+					if ($location.url().indexOf("login") <= -1) {
+						messageCenterService.add("danger", "Please login first", {timeout: 7000, status: messageCenterService.status.next});
+					}
+					$location.path("/login");
+					return $q.reject(response);
+				}
+				return $q.reject(response);
+			}
+		}
+	}
+]);
+
+PTSApp.config(["$httpProvider", function ($httpProvider) {
+		$httpProvider.interceptors.push("authInterceptor");
+}]);
+
 /**
  * Resolves a system status to the human readable variant
  * usage: <pts-status status="somestatus"></pts-status>
@@ -95,3 +119,22 @@ angular.module("PTSApp").directive('ptsStatus', ["$rootScope",
 				}
 			}
 		}]);
+
+function cleanupStatusList(user, statusList) {
+	if (user.role === "PRODUCT_OWNER") {
+		return statusList;
+	}
+	var acceptedIndex = -1;
+	for (var i = 0; i < statusList.length; i++){
+		if (statusList[i].status === "ACCEPTED") {
+			acceptedIndex = i;
+			break;
+		}
+	}
+
+	var copiedStatus = angular.copy(statusList);
+	if (acceptedIndex >= 0) {
+		copiedStatus.splice(acceptedIndex, 1);
+	}
+	return copiedStatus;
+}
