@@ -1,56 +1,49 @@
 package com.proftaak.pts4.controllers;
 
-import com.proftaak.pts4.core.annotations.RequireAuth;
 import com.proftaak.pts4.core.restlet.BaseController;
 import com.proftaak.pts4.core.restlet.HTTPException;
+import com.proftaak.pts4.core.restlet.annotations.CRUDController;
+import com.proftaak.pts4.core.restlet.annotations.RequireAuth;
 import com.proftaak.pts4.database.SprintStatus;
 import com.proftaak.pts4.database.tables.Story;
+import com.proftaak.pts4.database.tables.User;
 import org.restlet.data.Status;
 
-import java.io.FileNotFoundException;
-import java.sql.SQLException;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
  * @author Michon
  */
+@CRUDController(table = Story.class)
 public class StoryController extends BaseController {
-    protected static Story getStory(String id) throws HTTPException, FileNotFoundException, SQLException {
-        int storyId = Integer.parseInt(id);
-        Story story = Story.getDao().queryForId(storyId);
-        if (story == null) {
-            throw new HTTPException("That story does not exist", Status.CLIENT_ERROR_NOT_FOUND);
-        }
-        return story;
-    }
-
     /**
      * GET /story or /story/1
      */
-    @Override
     @RequireAuth
-    public Object getHandler(Map<String, Object> urlParams) throws Exception {
-        if (urlParams.get("id") == null) {
+    public Object getHandler(RequestData requestData) throws Exception {
+        if (requestData.getUrlParams().get("storyId") == null) {
             return Story.getDao().queryForAll();
         } else {
-            return this.getStory(urlParams.get("id").toString());
+            return requestData.getScopeObject(Story.class);
         }
     }
 
     /**
      * POST /story
      */
-    @Override
     @RequireAuth
-    public Object postHandler(Map<String, Object> data, Map<String, Object> urlParams) throws Exception {
+    public Object postHandler(RequestData requestData) throws Exception {
         // Create the new user story.
         Story story;
         try {
+            SprintStatus status = SprintStatus.valueOf(requestData.getPayload().getOrDefault("status", SprintStatus.DEFINED.toString()).toString());
+            if (status == SprintStatus.ACCEPTED) {
+                requestData.getUser().getRole().require(User.UserRole.PRODUCT_OWNER);
+            }
             story = new Story(
-                    (String) data.get("name"),
-                    (String) data.get("description"),
-                    SprintStatus.valueOf(data.getOrDefault("status", SprintStatus.DEFINED.toString()).toString())
+                (String) requestData.getPayload().get("name"),
+                (String) requestData.getPayload().get("description"),
+                status
             );
             Story.getDao().create(story);
         } catch (Exception e) {
@@ -59,48 +52,47 @@ public class StoryController extends BaseController {
         }
 
         // Return the created user story.
-        Map<String, Object> fakeParams = new HashMap<>();
-        fakeParams.put("id", story.getId());
-        return getHandler(fakeParams);
+        return story;
     }
 
     /**
      * PUT /story/1
      */
-    @Override
     @RequireAuth
-    public Object putHandler(Map<String, Object> data, Map<String, Object> urlParams) throws Exception {
+    public Object putHandler(RequestData requestData) throws Exception {
         // Try to get the user story.
-        Story story = this.getStory(urlParams.get("id").toString());
+        Story story = requestData.getScopeObject(Story.class);
+        Map<String, Object> payload = requestData.getPayload();
 
         // Change the story.
-        if (data.containsKey("name")) {
-            story.setName((String) data.get("name"));
+        if (payload.containsKey("name")) {
+            story.setName((String) payload.get("name"));
         }
-        if (data.containsKey("description")) {
-            story.setDescription((String) data.get("description"));
+        if (payload.containsKey("description")) {
+            story.setDescription((String) payload.get("description"));
         }
-        if (data.containsKey("status")) {
-            story.setStatus(SprintStatus.valueOf(data.getOrDefault("status", SprintStatus.DEFINED.toString()).toString()));
+        if (payload.containsKey("status")) {
+            SprintStatus status = SprintStatus.valueOf(payload.getOrDefault("status", SprintStatus.DEFINED.toString()).toString());
+            if (story.getStatus() != SprintStatus.ACCEPTED && status == SprintStatus.ACCEPTED) {
+                requestData.getUser().getRole().require(User.UserRole.PRODUCT_OWNER);
+            }
+            story.setStatus(status);
         }
 
         // Save the changes.
         Story.getDao().update(story);
 
         // Return the changed user story.
-        Map<String, Object> fakeParams = new HashMap<>();
-        fakeParams.put("id", story.getId());
-        return getHandler(fakeParams);
+        return story;
     }
 
     /**
      * DELETE /story/1
      */
-    @Override
     @RequireAuth
-    public Object deleteHandler(Map<String, Object> urlParams) throws Exception {
+    public Object deleteHandler(RequestData requestData) throws Exception {
         // Try to get the user story.
-        Story story = this.getStory(urlParams.get("id").toString());
+        Story story = requestData.getScopeObject(Story.class);
 
         // Delete the user story.
         Story.getDao().delete(story);
