@@ -45,7 +45,7 @@
 		<ul class="nav navbar-nav navbar-right" ng-controller="LoginMenuController">
 			<li ng-hide="loggedIn"><a href="#/login">Login</a></li>
 			<li ng-show="loggedIn" class="dropdown">
-				<a href="#" class="dropdown toggle" data-toggle="dropdown" role="button" aria-expanded="false">{{ $root.user.email }} <span class="caret"></span></a>
+				<a class="dropdown toggle" data-toggle="dropdown" role="button" aria-expanded="false">{{ $root.user.email }} <span class="caret"></span></a>
 				<ul class="dropdown-menu" role="menu">
 					<li><a href="#/login" ng-click="logout()" href="#">Logout</a></li>
 				</ul>
