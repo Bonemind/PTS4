@@ -142,13 +142,17 @@ PTSAppControllers.controller("TaskListController", ["$rootScope", "$scope", "Res
 				} else {
 					model = Restangular.copy(model);
 				}
+				var copiedStatus = angular.copy($rootScope.StatusList);
+				copiedStatus = _.filter(copiedStatus, function(status) {
+					return status.status !== "ACCEPTED";
+				});
 				ModalService.showModal({
 					templateUrl: "templates/userStoryModal.html",
 					controller: "CRUDController",
 					inputs: {
 						model: model,
 						meta: {
-							StatusList: cleanupStatusList($rootScope.user, $rootScope.StatusList)
+							StatusList: copiedStatus
 						}
 					}
 
