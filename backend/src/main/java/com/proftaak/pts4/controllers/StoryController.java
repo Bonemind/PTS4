@@ -4,7 +4,6 @@ import com.proftaak.pts4.core.restlet.BaseController;
 import com.proftaak.pts4.core.restlet.HTTPException;
 import com.proftaak.pts4.core.restlet.annotations.CRUDController;
 import com.proftaak.pts4.core.restlet.annotations.RequireAuth;
-import com.proftaak.pts4.database.SprintStatus;
 import com.proftaak.pts4.database.tables.Story;
 import com.proftaak.pts4.database.tables.User;
 import org.restlet.data.Status;
@@ -36,14 +35,14 @@ public class StoryController extends BaseController {
         // Create the new user story.
         Story story;
         try {
-            SprintStatus status = SprintStatus.valueOf(requestData.getPayload().getOrDefault("status", SprintStatus.DEFINED.toString()).toString());
-            if (status == SprintStatus.ACCEPTED) {
+            Story.Status status = Story.Status.valueOf(requestData.getPayload().getOrDefault("status", Story.Status.DEFINED.toString()).toString());
+            if (status == Story.Status.ACCEPTED) {
                 requestData.getUser().getRole().require(User.UserRole.PRODUCT_OWNER);
             }
             story = new Story(
-                (String) requestData.getPayload().get("name"),
-                (String) requestData.getPayload().get("description"),
-                status
+                    (String) requestData.getPayload().get("name"),
+                    (String) requestData.getPayload().get("description"),
+                    status
             );
             Story.getDao().create(story);
         } catch (Exception e) {
@@ -72,8 +71,8 @@ public class StoryController extends BaseController {
             story.setDescription((String) payload.get("description"));
         }
         if (payload.containsKey("status")) {
-            SprintStatus status = SprintStatus.valueOf(payload.getOrDefault("status", SprintStatus.DEFINED.toString()).toString());
-            if (story.getStatus() != SprintStatus.ACCEPTED && status == SprintStatus.ACCEPTED) {
+            Story.Status status = Story.Status.valueOf(payload.getOrDefault("status", Story.Status.DEFINED.toString()).toString());
+            if (story.getStatus() != Story.Status.ACCEPTED && status == Story.Status.ACCEPTED) {
                 requestData.getUser().getRole().require(User.UserRole.PRODUCT_OWNER);
             }
             story.setStatus(status);

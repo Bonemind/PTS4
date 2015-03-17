@@ -5,8 +5,8 @@ import com.j256.ormlite.dao.DaoManager;
 import com.j256.ormlite.field.DataType;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
+import com.proftaak.pts4.core.gson.GsonExclude;
 import com.proftaak.pts4.database.DBUtils;
-import com.proftaak.pts4.database.SprintStatus;
 
 import java.io.FileNotFoundException;
 import java.sql.SQLException;
@@ -22,6 +22,23 @@ public class Task {
     public static final String FIELD_DESCRIPTION = "description";
     public static final String FIELD_STATUS = "status";
     public static final String FIELD_STORY = "story";
+
+    public enum Status {
+        /**
+         * Task is defined
+         */
+        DEFINED,
+
+        /**
+         * Task has been started
+         */
+        IN_PROGRESS,
+
+        /**
+         * Task has been completed, is now waiting for verification
+         */
+        DONE
+    }
 
     /**
      * The database id of this task
@@ -45,11 +62,12 @@ public class Task {
      * The status of this task
      */
     @DatabaseField(canBeNull = false, dataType = DataType.ENUM_STRING, columnName = FIELD_STATUS)
-    private SprintStatus status;
+    private Status status;
 
     /**
      * The user story of this task.
      */
+    @GsonExclude
     @DatabaseField(foreign = true, foreignAutoRefresh = true, columnName = FIELD_STORY)
     private Story story;
 
@@ -64,14 +82,14 @@ public class Task {
     }
 
     public Task(Story story, String name, String description) {
-        this(story, name, description, SprintStatus.DEFINED);
+        this(story, name, description, Status.DEFINED);
     }
 
-    public Task(Story story, String name, String description, SprintStatus sprintStatus) {
+    public Task(Story story, String name, String description, Status status) {
         this.story = story;
         this.setName(name);
         this.setDescription(description);
-        this.setStatus(sprintStatus);
+        this.setStatus(status);
     }
 
     public int getId() {
@@ -94,12 +112,12 @@ public class Task {
         this.description = description;
     }
 
-    public SprintStatus getStatus() {
+    public Status getStatus() {
         return status;
     }
 
-    public void setStatus(SprintStatus sprintStatus) {
-        this.status = sprintStatus;
+    public void setStatus(Status status) {
+        this.status = status;
     }
 
     public Story getStory() {

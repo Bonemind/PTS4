@@ -6,7 +6,6 @@ import com.j256.ormlite.field.DataType;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 import com.proftaak.pts4.database.DBUtils;
-import com.proftaak.pts4.database.SprintStatus;
 
 import java.io.FileNotFoundException;
 import java.sql.SQLException;
@@ -21,6 +20,28 @@ public class Story {
     public static final String FIELD_NAME = "name";
     public static final String FIELD_DESCRIPTION = "description";
     public static final String FIELD_STATUS = "status";
+
+    public enum Status {
+        /**
+         * Story is defined
+         */
+        DEFINED,
+
+        /**
+         * Story has been started
+         */
+        IN_PROGRESS,
+
+        /**
+         * Story has been completed, is now waiting for verification
+         */
+        DONE,
+
+        /**
+         * Story has been accepted
+         */
+        ACCEPTED
+    }
 
     /**
      * The database id of this userstory
@@ -44,7 +65,7 @@ public class Story {
      * The status of this userstory
      */
     @DatabaseField(canBeNull = false, dataType = DataType.ENUM_STRING, columnName = FIELD_STATUS)
-    private SprintStatus status;
+    private Status status;
 
     /**
      * ORM-Lite no-arg constructor
@@ -57,13 +78,13 @@ public class Story {
     }
 
     public Story(String name, String description) {
-        this(name, description, SprintStatus.DEFINED);
+        this(name, description, Status.DEFINED);
     }
 
-    public Story(String name, String description, SprintStatus sprintStatus) {
+    public Story(String name, String description, Status status) {
         this.setName(name);
         this.setDescription(description);
-        this.setStatus(sprintStatus);
+        this.setStatus(status);
     }
 
     public int getId() {
@@ -86,12 +107,12 @@ public class Story {
         this.description = description;
     }
 
-    public SprintStatus getStatus() {
+    public Status getStatus() {
         return status;
     }
 
-    public void setStatus(SprintStatus sprintStatus) {
-        this.status = sprintStatus;
+    public void setStatus(Status status) {
+        this.status = status;
     }
 
     /**
