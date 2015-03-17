@@ -73,6 +73,13 @@ public class DBUtils {
         User u = new User("test", "test", User.UserRole.PRODUCT_OWNER);
         userDao.create(u);
 
+        User u2 = new User("dev", "dev", User.UserRole.DEVELOPER);
+        userDao.create(u2);
+
+
+        User u3 = new User("productowner", "productowner", User.UserRole.PRODUCT_OWNER);
+        userDao.create(u3);
+
         Token t = new Token(u, "test");
         tokenDao.create(t);
 
