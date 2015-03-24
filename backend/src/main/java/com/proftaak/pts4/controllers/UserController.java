@@ -29,7 +29,6 @@ public class UserController extends BaseController {
     /**
      * POST /user
      */
-    @RequireAuth
     public Object postHandler(RequestData requestData) throws Exception {
         // Create the new user.
         User user;
