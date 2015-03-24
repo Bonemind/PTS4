@@ -5,6 +5,7 @@ import com.j256.ormlite.dao.DaoManager;
 import com.j256.ormlite.field.DataType;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
+import com.proftaak.pts4.database.DBTable;
 import com.proftaak.pts4.database.DBUtils;
 
 import java.io.FileNotFoundException;
@@ -14,7 +15,7 @@ import java.sql.SQLException;
  * @author Michon
  */
 @DatabaseTable(tableName = "stories")
-public class Story {
+public class Story extends DBTable {
 
     public static final String FIELD_ID = "id";
     public static final String FIELD_NAME = "name";
@@ -113,6 +114,11 @@ public class Story {
 
     public void setStatus(Status status) {
         this.status = status;
+    }
+
+    @Override
+    public int hashCode() {
+        return Integer.hashCode(this.getId());
     }
 
     /**

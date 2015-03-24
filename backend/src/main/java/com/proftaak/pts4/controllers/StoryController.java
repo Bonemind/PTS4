@@ -47,7 +47,7 @@ public class StoryController extends BaseController {
             Story.getDao().create(story);
         } catch (Exception e) {
             e.printStackTrace();
-            throw new HTTPException("Invalid request", Status.CLIENT_ERROR_BAD_REQUEST);
+            throw HTTPException.ERROR_BAD_REQUEST;
         }
 
         // Return the created user story.

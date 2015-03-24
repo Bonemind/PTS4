@@ -5,6 +5,7 @@ import com.j256.ormlite.dao.DaoManager;
 import com.j256.ormlite.field.DataType;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
+import com.proftaak.pts4.database.DBTable;
 import com.proftaak.pts4.database.DBUtils;
 
 import java.io.FileNotFoundException;
@@ -16,7 +17,7 @@ import java.util.UUID;
  * @author Michon
  */
 @DatabaseTable(tableName = "tokens")
-public class Token {
+public class Token extends DBTable {
 
     public static final String FIELD_TOKEN = "token";
     public static final String FIELD_USER = "user";
@@ -84,6 +85,11 @@ public class Token {
         long tokenEndTimestamp = this.creationDate.getTime() + Token.TIME_TO_LIVE;
         long currentTimestamp = new Date().getTime();
         return currentTimestamp < tokenEndTimestamp;
+    }
+
+    @Override
+    public int hashCode() {
+        return this.getToken().hashCode();
     }
 
     /**

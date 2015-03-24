@@ -6,6 +6,7 @@ import com.j256.ormlite.field.DataType;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 import com.proftaak.pts4.core.gson.GsonExclude;
+import com.proftaak.pts4.database.DBTable;
 import com.proftaak.pts4.database.DBUtils;
 
 import java.io.FileNotFoundException;
@@ -15,7 +16,7 @@ import java.sql.SQLException;
  * @author Michon
  */
 @DatabaseTable(tableName = "tasks")
-public class Task {
+public class Task extends DBTable {
 
     public static final String FIELD_ID = "id";
     public static final String FIELD_NAME = "name";
@@ -122,6 +123,11 @@ public class Task {
 
     public Story getStory() {
         return story;
+    }
+
+    @Override
+    public int hashCode() {
+        return Integer.hashCode(this.getId());
     }
 
     /**

@@ -20,7 +20,7 @@ public class TaskController extends BaseController {
      * Validate a scope object.
      */
     @ValidateScopeObject(Task.class)
-    public static boolean processScopeObject(RequestData requestData, Task task) throws Exception {
+    public static boolean validateTaskInStory(RequestData requestData, Task task) throws Exception {
         Story story = requestData.getScopeObject(Story.class);
         return story.getId() == task.getStory().getId();
     }
@@ -58,7 +58,7 @@ public class TaskController extends BaseController {
             Task.getDao().create(task);
         } catch (Exception e) {
             e.printStackTrace();
-            throw new HTTPException("Invalid request", Status.CLIENT_ERROR_BAD_REQUEST);
+            throw HTTPException.ERROR_BAD_REQUEST;
         }
 
         // Return the created task.
