@@ -7,6 +7,16 @@ import org.restlet.data.Status;
  */
 public class HTTPException extends Exception {
     /**
+     * The user does not have permission to do what he wants to do.
+     */
+    public static final HTTPException ERROR_FORBIDDEN = new HTTPException("You do not have permission to do that", Status.CLIENT_ERROR_FORBIDDEN);
+
+    /**
+     * The request is somehow invalid.
+     */
+    public static final HTTPException ERROR_BAD_REQUEST = new HTTPException("Invalid request", Status.CLIENT_ERROR_BAD_REQUEST);
+
+    /**
      * The status that goes with this error.
      */
     private Status status = Status.SERVER_ERROR_INTERNAL;

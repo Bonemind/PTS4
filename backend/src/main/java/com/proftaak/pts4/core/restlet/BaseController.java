@@ -80,7 +80,7 @@ abstract public class BaseController extends ServerResource {
 
         /**
          * Get the object of the given type from the current request.
-         * <p/>
+         * <p>
          * This object has to be available in the URL, and the type must be either the type of this controller, or of one of the parent controllers.
          *
          * @param cls The type of object to get.
@@ -152,9 +152,9 @@ abstract public class BaseController extends ServerResource {
 
         public String toString() {
             return "User: " + user + "\n" +
-                "Token: " + token + "\n" +
-                "Data: " + GSON.toJson(getPayload()) + "\n" +
-                "Params: " + GSON.toJson(getUrlParams());
+                    "Token: " + token + "\n" +
+                    "Data: " + GSON.toJson(getPayload()) + "\n" +
+                    "Params: " + GSON.toJson(getUrlParams());
         }
 
         protected RequestData() {
@@ -243,8 +243,8 @@ abstract public class BaseController extends ServerResource {
 
             // Build an HTTPException.
             userException = new HTTPException(
-                "The server encountered an internal error when trying to process your request.",
-                Status.SERVER_ERROR_INTERNAL
+                    "The server encountered an internal error when trying to process your request.",
+                    Status.SERVER_ERROR_INTERNAL
             );
         } else {
             userException = (HTTPException) exc;
@@ -303,7 +303,6 @@ abstract public class BaseController extends ServerResource {
     public void getWrapper() {
         try {
             RequestData requestData = this.buildRequest(null);
-            System.out.println(requestData);
             processAnnotations(this.getClass().getMethod("getHandler", RequestData.class), requestData);
             processResponse(getHandler(requestData));
         } catch (Exception e) {

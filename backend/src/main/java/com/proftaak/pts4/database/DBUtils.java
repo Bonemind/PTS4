@@ -85,7 +85,7 @@ public class DBUtils {
 
         Story us1 = new Story("Foo");
         storyDao.create(us1);
-        Story us2 = new Story("Lorem", "Lorem Ipsum Dolor Sit Amet", SprintStatus.IN_PROGRESS);
+        Story us2 = new Story("Lorem", "Lorem Ipsum Dolor Sit Amet", Story.Status.IN_PROGRESS);
         storyDao.create(us2);
 
         Task t11 = new Task(us1, "Frontend");
@@ -94,7 +94,7 @@ public class DBUtils {
         taskDao.create(t12);
         Task t21 = new Task(us2, "Frontend");
         taskDao.create(t21);
-        Task t22 = new Task(us2, "Backend", null, SprintStatus.ACCEPTED);
+        Task t22 = new Task(us2, "Backend", null, Task.Status.DONE);
         taskDao.create(t22);
     }
 }

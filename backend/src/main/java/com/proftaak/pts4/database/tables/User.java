@@ -2,14 +2,16 @@ package com.proftaak.pts4.database.tables;
 
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
+import com.j256.ormlite.dao.ForeignCollection;
 import com.j256.ormlite.field.DataType;
 import com.j256.ormlite.field.DatabaseField;
+import com.j256.ormlite.field.ForeignCollectionField;
 import com.j256.ormlite.table.DatabaseTable;
 import com.proftaak.pts4.core.gson.GsonExclude;
 import com.proftaak.pts4.core.restlet.HTTPException;
+import com.proftaak.pts4.database.DBTable;
 import com.proftaak.pts4.database.DBUtils;
 import org.mindrot.jbcrypt.BCrypt;
-import org.restlet.data.Status;
 
 import java.io.FileNotFoundException;
 import java.sql.SQLException;
@@ -19,7 +21,7 @@ import java.util.Arrays;
  * @author Michon
  */
 @DatabaseTable(tableName = "users")
-public class User {
+public class User extends DBTable {
 
     public static final String FIELD_ID = "id";
     public static final String FIELD_EMAIL = "email";
@@ -32,7 +34,7 @@ public class User {
 
         public void require(UserRole... roles) throws HTTPException {
             if (!Arrays.asList(roles).contains(this)) {
-                throw new HTTPException("You do not have permission to do that", Status.CLIENT_ERROR_FORBIDDEN);
+                throw HTTPException.ERROR_FORBIDDEN;
             }
         }
     }
@@ -61,6 +63,13 @@ public class User {
      */
     @DatabaseField(canBeNull = false, dataType = DataType.ENUM_STRING, columnName = FIELD_ROLE)
     private UserRole role;
+
+    /**
+     * The tokens this user has
+     */
+    @GsonExclude
+    @ForeignCollectionField(eager = false)
+    private ForeignCollection<Token> tokens;
 
     /**
      * ORM-Lite no-arg constructor
@@ -115,6 +124,11 @@ public class User {
 
     public void setRole(UserRole role) {
         this.role = role;
+    }
+
+    @Override
+    public int hashCode() {
+        return Integer.hashCode(this.getId());
     }
 
     /**
