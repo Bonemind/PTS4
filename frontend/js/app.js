@@ -1,9 +1,11 @@
+//Main angular module
 var PTSApp = angular.module("PTSApp", [
 	"ngRoute",
 	"PTSAppControllers",
 	"angular-loading-bar",
 	"restangular",
 	"angularModalService",
+	"ui.bootstrap.showErrors",
 	"MessageCenterModule"
 	]).run(["$rootScope", "$injector", function($rootScope, $injector) {
 
@@ -17,7 +19,6 @@ var PTSApp = angular.module("PTSApp", [
 			console.log($rootScope.token);
 			if ($rootScope.token !== undefined) {
 				headersGetter()["X-Token"] = $rootScope.token;
-				headersGetter()["X-Token"] = "test";
 			}
 			if (data) {
 				return angular.toJson(data);
@@ -39,6 +40,9 @@ PTSApp.config(["$routeProvider",
 		}).when("/", {
 			templateUrl: "templates/index.html",
 			controller: "indexContoller"
+		}).when("/register", {
+			templateUrl: "templates/register.html",
+			controller: "RegistrationController"
 		}).when("/test", {
 			templateUrl: "templates/test.html",
 			controller: "TestController"
@@ -90,6 +94,7 @@ PTSApp.factory("authInterceptor", ["$rootScope", "$q", "$location", "messageCent
 	}
 ]);
 
+//Inject the auth provider
 PTSApp.config(["$httpProvider", function ($httpProvider) {
 		$httpProvider.interceptors.push("authInterceptor");
 }]);
@@ -120,21 +125,20 @@ angular.module("PTSApp").directive('ptsStatus', ["$rootScope",
 			}
 		}]);
 
+/**
+ * Used to hide statusses depending on the role of a user
+ * user is the current logged in user
+ * statusList is the list of statusses
+ */
 function cleanupStatusList(user, statusList) {
 	if (user.role === "PRODUCT_OWNER") {
 		return statusList;
 	}
 	var acceptedIndex = -1;
-	for (var i = 0; i < statusList.length; i++){
-		if (statusList[i].status === "ACCEPTED") {
-			acceptedIndex = i;
-			break;
-		}
-	}
 
 	var copiedStatus = angular.copy(statusList);
-	if (acceptedIndex >= 0) {
-		copiedStatus.splice(acceptedIndex, 1);
-	}
+	copiedStatus = _.filter(copiedStatus, function(status) {
+	 return status.status !== "ACCEPTED";
+	});
 	return copiedStatus;
 }
