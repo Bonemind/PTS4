@@ -21,6 +21,11 @@ public @interface CRUDController {
     Class table();
 
     /**
+     * The name of the objects. Used for routing. Default is the name of the table class
+     */
+    String name() default "";
+
+    /**
      * The parent controller
      */
     Class<? extends BaseController> parent() default BaseController.class;

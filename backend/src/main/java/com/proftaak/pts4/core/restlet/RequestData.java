@@ -144,7 +144,7 @@ public class RequestData {
         // Check whether the controller can provide the requested object
         if (crudAnnotation.table() == cls) {
             // Get the object from the database
-            String name = cls.getSimpleName().toLowerCase();
+            String name = crudAnnotation.name().isEmpty() ? cls.getSimpleName().toLowerCase() : crudAnnotation.name();
             Object id = getUrlParams().get(name + "Id");
             if (id != null) {
                 return Ebean.find(cls, id);

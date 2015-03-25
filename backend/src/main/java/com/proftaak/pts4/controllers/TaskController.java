@@ -17,9 +17,8 @@ import java.util.Map;
  */
 @CRUDController(table = Task.class, parent = StoryController.class)
 public class TaskController extends BaseController {
-
     /**
-     * Validate a scope object
+     * Validate whether the task and story that are in scope belong together
      */
     @ProcessScopeObject(Task.class)
     public static void validateTaskInStory(RequestData requestData, Task task) throws Exception {

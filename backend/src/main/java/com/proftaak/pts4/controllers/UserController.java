@@ -18,7 +18,7 @@ import java.util.Map;
 @CRUDController(table = User.class)
 public class UserController extends BaseController {
     /**
-     * Validate a scope object
+     * Validate whether the logged in user is the same user as the user in scope, to prevent editing other users
      */
     @ProcessScopeObject(User.class)
     public static boolean validateUserSelf(RequestData requestData, User user) throws Exception {

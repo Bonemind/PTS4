@@ -52,15 +52,17 @@ public class Main extends ServerResource {
                 path += "/";
                 while (controllerList.size() > 1) {
                     crudController = controllerList.remove(controllerList.size() - 1);
-                    path += crudController.table().getSimpleName().toLowerCase();
+                    String name = crudController.name().isEmpty() ? crudController.table().getSimpleName().toLowerCase() : crudController.name();
+                    path += name;
                     path += "/";
-                    path += "{" + crudController.table().getSimpleName().toLowerCase() + "Id}";
+                    path += "{" + name + "Id}";
                     path += "/";
                 }
-                path += controllerList.get(0).table().getSimpleName().toLowerCase();
+                String name = controllerList.get(0).name().isEmpty() ? controllerList.get(0).table().getSimpleName().toLowerCase() : controllerList.get(0).name();
+                path += name;
 
                 component.getDefaultHost().attach(path, controller);
-                component.getDefaultHost().attach(path + "/{" + controllerList.get(0).table().getSimpleName().toLowerCase() + "Id}", controller);
+                component.getDefaultHost().attach(path + "/{" + name + "Id}", controller);
             } else {
                 path += controller.getPackage().getName().substring(CONTROLLER_PACKAGE.length()).replace('.', '/');
                 path += "/";

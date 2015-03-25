@@ -19,6 +19,9 @@ import java.util.Map;
  */
 @CRUDController(table = Team.class)
 public class TeamController extends BaseController {
+    /**
+     * Determine the role(s) the logged in user has within the team, if any
+     */
     @PreRequest
     public static void determineTeamRole(RequestData requestData) throws Exception {
         User user = requestData.getUser();
@@ -41,7 +44,6 @@ public class TeamController extends BaseController {
         if (requestData.getUrlParams().get("teamId") == null) {
             return Ebean.find(Team.class).findList();
         } else {
-            System.out.println(requestData.getScopeRoles());
             return requestData.getScopeObject(Team.class);
         }
     }
