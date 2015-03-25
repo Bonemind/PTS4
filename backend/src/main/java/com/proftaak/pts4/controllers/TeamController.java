@@ -42,7 +42,7 @@ public class TeamController extends BaseController {
     @RequireAuth
     public Object getHandler(RequestData requestData) throws Exception {
         if (requestData.getUrlParams().get("teamId") == null) {
-            return Ebean.find(Team.class).findList();
+            return Ebean.find(Team.class).where().in(Team.FIELD_USERS, requestData.getUser()).findList();
         } else {
             return requestData.getScopeObject(Team.class);
         }
