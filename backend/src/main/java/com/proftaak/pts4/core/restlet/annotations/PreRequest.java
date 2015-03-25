@@ -1,4 +1,4 @@
-package com.proftaak.pts4.core.gson;
+package com.proftaak.pts4.core.restlet.annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -6,11 +6,11 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Use this when you don't want to serialize a field.
+ * Use this for methods that need to be called before every request in the controller, and it's child controllers
  *
  * @author Michon
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.FIELD)
-public @interface GsonExclude {
+@Target(ElementType.METHOD)
+public @interface PreRequest {
 }

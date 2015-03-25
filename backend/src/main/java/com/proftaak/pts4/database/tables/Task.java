@@ -1,29 +1,15 @@
 package com.proftaak.pts4.database.tables;
 
-import com.j256.ormlite.dao.Dao;
-import com.j256.ormlite.dao.DaoManager;
-import com.j256.ormlite.field.DataType;
-import com.j256.ormlite.field.DatabaseField;
-import com.j256.ormlite.table.DatabaseTable;
-import com.proftaak.pts4.core.gson.GsonExclude;
-import com.proftaak.pts4.database.DBTable;
-import com.proftaak.pts4.database.DBUtils;
+import flexjson.JSON;
 
-import java.io.FileNotFoundException;
-import java.sql.SQLException;
+import javax.persistence.*;
 
 /**
  * @author Michon
  */
-@DatabaseTable(tableName = "tasks")
-public class Task extends DBTable {
-
-    public static final String FIELD_ID = "id";
-    public static final String FIELD_NAME = "name";
-    public static final String FIELD_DESCRIPTION = "description";
-    public static final String FIELD_STATUS = "status";
-    public static final String FIELD_STORY = "story";
-
+@Entity
+@Table(name = "tasks")
+public class Task {
     public enum Status {
         /**
          * Task is defined
@@ -41,35 +27,44 @@ public class Task extends DBTable {
         DONE
     }
 
+    public static final String FIELD_ID = "id";
+    public static final String FIELD_NAME = "name";
+    public static final String FIELD_DESCRIPTION = "description";
+    public static final String FIELD_STATUS = "status";
+    public static final String FIELD_STORY = "story_id";
+
     /**
      * The database id of this task
      */
-    @DatabaseField(generatedId = true, columnName = FIELD_ID)
+    @Id
+    @Column(name = FIELD_ID)
     private int id;
 
     /**
      * The name of this task
      */
-    @DatabaseField(canBeNull = false, columnName = FIELD_NAME)
+    @Column(name = FIELD_NAME, nullable = false)
     private String name;
 
     /**
      * The description of this task
      */
-    @DatabaseField(columnName = FIELD_DESCRIPTION)
+    @Column(name = FIELD_DESCRIPTION)
     private String description;
 
     /**
      * The status of this task
      */
-    @DatabaseField(canBeNull = false, dataType = DataType.ENUM_STRING, columnName = FIELD_STATUS)
+    @Column(name = FIELD_STATUS, nullable = false)
+    @Enumerated(EnumType.STRING)
     private Status status;
 
     /**
-     * The user story of this task.
+     * The user story of this task
      */
-    @GsonExclude
-    @DatabaseField(foreign = true, foreignAutoRefresh = true, columnName = FIELD_STORY)
+    @JSON(include = false)
+    @ManyToOne
+    @JoinColumn(name = FIELD_STORY)
     private Story story;
 
     /**
@@ -123,19 +118,5 @@ public class Task extends DBTable {
 
     public Story getStory() {
         return story;
-    }
-
-    @Override
-    public int hashCode() {
-        return Integer.hashCode(this.getId());
-    }
-
-    /**
-     * Get the DAO for this table
-     *
-     * @return The DAO for this table
-     */
-    public static Dao<Task, Integer> getDao() throws FileNotFoundException, SQLException {
-        return DaoManager.createDao(DBUtils.getConnectionSource(), Task.class);
     }
 }

@@ -1,13 +1,14 @@
 package com.proftaak.pts4.controllers;
 
+import com.avaje.ebean.Ebean;
 import com.proftaak.pts4.core.restlet.BaseController;
 import com.proftaak.pts4.core.restlet.HTTPException;
+import com.proftaak.pts4.core.restlet.RequestData;
 import com.proftaak.pts4.core.restlet.annotations.CRUDController;
 import com.proftaak.pts4.core.restlet.annotations.RequireAuth;
-import com.proftaak.pts4.core.restlet.annotations.ValidateScopeObject;
+import com.proftaak.pts4.core.restlet.annotations.ProcessScopeObject;
 import com.proftaak.pts4.database.tables.Story;
 import com.proftaak.pts4.database.tables.Task;
-import org.restlet.data.Status;
 
 import java.util.Map;
 
@@ -16,13 +17,16 @@ import java.util.Map;
  */
 @CRUDController(table = Task.class, parent = StoryController.class)
 public class TaskController extends BaseController {
+
     /**
-     * Validate a scope object.
+     * Validate a scope object
      */
-    @ValidateScopeObject(Task.class)
-    public static boolean validateTaskInStory(RequestData requestData, Task task) throws Exception {
+    @ProcessScopeObject(Task.class)
+    public static void validateTaskInStory(RequestData requestData, Task task) throws Exception {
         Story story = requestData.getScopeObject(Story.class);
-        return story.getId() == task.getStory().getId();
+        if (!story.equals(task.getStory())) {
+            throw HTTPException.ERROR_OBJECT_NOT_FOUND;
+        }
     }
 
     /**
@@ -32,7 +36,7 @@ public class TaskController extends BaseController {
     public Object getHandler(RequestData requestData) throws Exception {
         if (requestData.getUrlParams().get("taskId") == null) {
             Story story = requestData.getScopeObject(Story.class);
-            return Task.getDao().queryBuilder().where().eq(Task.FIELD_STORY, story).query();
+            return Ebean.find(Task.class).where().eq(Task.FIELD_STORY, story.getId()).query().findList();
         } else {
             return requestData.getScopeObject(Task.class);
         }
@@ -43,10 +47,10 @@ public class TaskController extends BaseController {
      */
     @RequireAuth
     public Object postHandler(RequestData requestData) throws Exception {
-        // Get the user story.
+        // Get the user story
         Story story = requestData.getScopeObject(Story.class);
 
-        // Create the new task.
+        // Create the new task
         Task task;
         try {
             task = new Task(
@@ -55,13 +59,13 @@ public class TaskController extends BaseController {
                     (String) requestData.getPayload().get("description"),
                     Task.Status.valueOf(requestData.getPayload().getOrDefault("status", Task.Status.DEFINED.toString()).toString())
             );
-            Task.getDao().create(task);
+            Ebean.save(task);
         } catch (Exception e) {
             e.printStackTrace();
             throw HTTPException.ERROR_BAD_REQUEST;
         }
 
-        // Return the created task.
+        // Return the created task
         return task;
     }
 
@@ -70,11 +74,11 @@ public class TaskController extends BaseController {
      */
     @RequireAuth
     public Object putHandler(RequestData requestData) throws Exception {
-        // Get the user task.
+        // Get the user task
         Task task = requestData.getScopeObject(Task.class);
         Map<String, Object> payload = requestData.getPayload();
 
-        // Change the task.
+        // Change the task
         if (payload.containsKey("name")) {
             task.setName((String) payload.get("name"));
         }
@@ -85,10 +89,10 @@ public class TaskController extends BaseController {
             task.setStatus(Task.Status.valueOf(payload.getOrDefault("status", Task.Status.DEFINED.toString()).toString()));
         }
 
-        // Save the changes.
-        Task.getDao().update(task);
+        // Save the changes
+        Ebean.save(task);
 
-        // Return the changed task.
+        // Return the changed task
         return task;
     }
 
@@ -97,13 +101,13 @@ public class TaskController extends BaseController {
      */
     @RequireAuth
     public Object deleteHandler(RequestData requestData) throws Exception {
-        // Try to get the task.
+        // Try to get the task
         Task task = requestData.getScopeObject(Task.class);
 
-        // Delete the task.
-        Task.getDao().delete(task);
+        // Delete the task
+        Ebean.delete(task);
 
-        // Return nothing.
+        // Return nothing
         return null;
     }
 }

@@ -6,13 +6,17 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Created by Michon on 12-3-2015.
+ * Use this for methods that need to be called when a scope object is requested
+ *
+ * This can be used for validation, permissions checks, ets
+ *
+ * Created by Michon on 12-3-2015
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
-public @interface ValidateScopeObject {
+public @interface ProcessScopeObject {
     /**
-     * The class that this is a validation method for.
+     * The class that this is a process method for
      */
     Class value();
 }

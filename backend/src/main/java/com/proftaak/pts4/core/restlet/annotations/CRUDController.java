@@ -8,7 +8,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Use this for controllers that function as a CRUD controller for a given table class.
+ * Use this for controllers that function as a CRUD controller for a given table class
  *
  * @author Michon
  */
@@ -16,12 +16,12 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 public @interface CRUDController {
     /**
-     * The table class.
+     * The table class
      */
     Class table();
 
     /**
-     * The parent controller.
+     * The parent controller
      */
     Class<? extends BaseController> parent() default BaseController.class;
 }

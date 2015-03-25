@@ -1,62 +1,53 @@
 package com.proftaak.pts4.database;
 
-import com.j256.ormlite.dao.Dao;
-import com.j256.ormlite.jdbc.JdbcPooledConnectionSource;
-import com.j256.ormlite.support.ConnectionSource;
-import com.j256.ormlite.table.DatabaseTable;
-import com.j256.ormlite.table.TableUtils;
+import com.avaje.ebean.Ebean;
+import com.avaje.ebean.EbeanServerFactory;
+import com.avaje.ebean.config.DataSourceConfig;
+import com.avaje.ebean.config.ServerConfig;
 import com.proftaak.pts4.core.PropertiesUtils;
-import com.proftaak.pts4.database.tables.Story;
-import com.proftaak.pts4.database.tables.Task;
-import com.proftaak.pts4.database.tables.Token;
-import com.proftaak.pts4.database.tables.User;
-import org.reflections.Reflections;
+import com.proftaak.pts4.database.tables.*;
+import javassist.NotFoundException;
 
 import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.sql.SQLException;
 import java.util.Properties;
 
 public class DBUtils {
     /**
-     * The name of the package holding the tables.
+     * The name of the package holding the tables
      */
-    private static final String TABLES_PACKAGE = "com.proftaak.pts4.database.tables";
+    private static final String TABLE_PACKAGE = "com.proftaak.pts4.database.tables";
 
-    /**
-     * The connection source.
-     */
-    private static JdbcPooledConnectionSource connSource;
-
-    /**
-     * Creates an open pooled JDBC connection source
-     *
-     * @return a pooled connection source
-     * @throws java.sql.SQLException Thrown if anything went wrong while connecting to the database
-     */
-    public static ConnectionSource getConnectionSource() throws SQLException, FileNotFoundException {
-        if (connSource == null || !connSource.isOpen()) {
-            Properties p = PropertiesUtils.getProperties();
-            connSource = new JdbcPooledConnectionSource(p.getProperty("mysql.url"), p.getProperty("mysql.username"), p.getProperty("mysql.password"));
-        }
-        return connSource;
+    public static void init() throws FileNotFoundException, NotFoundException {
+        initEbeanServer();
+        createTestData();
     }
 
     /**
-     * Recreates all tables, dropping any existing ones in the process
-     *
-     * @throws java.sql.SQLException  Thrown when connecting to the database fails
-     * @throws ClassNotFoundException Thrown when we try to load a class that somehow doesn't exist
-     * @throws java.io.IOException
+     * Initialize the ebean server
      */
-    @SuppressWarnings("unchecked")
-    public static void recreateAllTables() throws SQLException, ClassNotFoundException, IOException {
-        ConnectionSource connSource = DBUtils.getConnectionSource();
-        Reflections r = new Reflections(TABLES_PACKAGE);
-        for (Class<?> tableClass : r.getTypesAnnotatedWith(DatabaseTable.class)) {
-            TableUtils.dropTable(connSource, tableClass, true);
-            TableUtils.createTable(connSource, tableClass);
-        }
+    public static void initEbeanServer() throws FileNotFoundException {
+        ServerConfig config = new ServerConfig();
+        config.setName("main");
+
+        // Read config
+        Properties p = PropertiesUtils.getProperties();
+        DataSourceConfig dbConfig = new DataSourceConfig();
+        dbConfig.setDriver(p.getProperty("database.driver"));
+        dbConfig.setUrl(p.getProperty("database.url"));
+        dbConfig.setUsername(p.getProperty("database.username"));
+        dbConfig.setPassword(p.getProperty("database.password"));
+        config.setDataSourceConfig(dbConfig);
+
+        // Set DDL options..
+        config.setDdlGenerate(true);
+        config.setDdlRun(true);
+
+        // Register the server as the default server
+        config.setDefaultServer(true);
+        config.setRegister(true);
+
+        // Create the instance
+        EbeanServerFactory.create(config);
     }
 
     /**
@@ -64,37 +55,37 @@ public class DBUtils {
      *
      * @throws java.sql.SQLException
      */
-    public static void createTestData() throws SQLException, FileNotFoundException {
-        Dao<User, Integer> userDao = User.getDao();
-        Dao<Token, String> tokenDao = Token.getDao();
-        Dao<Story, Integer> storyDao = Story.getDao();
-        Dao<Task, Integer> taskDao = Task.getDao();
+    public static void createTestData() throws FileNotFoundException {
+        User u1 = new User("test", "test");
+        Ebean.save(u1);
+        User u2 = new User("dev", "dev");
+        Ebean.save(u2);
+        User u3 = new User("productowner", "productowner");
+        Ebean.save(u3);
 
-        User u = new User("test", "test", User.UserRole.PRODUCT_OWNER);
-        userDao.create(u);
+        Token tk1 = new Token(u1, "test");
+        Ebean.save(tk1);
+        Token tk2 = new Token(u2, "dev");
+        Ebean.save(tk2);
+        Token tk3 = new Token(u3, "po");
+        Ebean.save(tk3);
 
-        User u2 = new User("dev", "dev", User.UserRole.DEVELOPER);
-        userDao.create(u2);
-
-
-        User u3 = new User("productowner", "productowner", User.UserRole.PRODUCT_OWNER);
-        userDao.create(u3);
-
-        Token t = new Token(u, "test");
-        tokenDao.create(t);
+        Team tm = new Team("A-team", u1);
+        tm.getUsers().add(u2);
+        Ebean.save(tm);
 
         Story us1 = new Story("Foo");
-        storyDao.create(us1);
+        Ebean.save(us1);
         Story us2 = new Story("Lorem", "Lorem Ipsum Dolor Sit Amet", Story.Status.IN_PROGRESS);
-        storyDao.create(us2);
+        Ebean.save(us2);
 
         Task t11 = new Task(us1, "Frontend");
-        taskDao.create(t11);
+        Ebean.save(t11);
         Task t12 = new Task(us1, "Backend", "Do backend stuff");
-        taskDao.create(t12);
+        Ebean.save(t12);
         Task t21 = new Task(us2, "Frontend");
-        taskDao.create(t21);
+        Ebean.save(t21);
         Task t22 = new Task(us2, "Backend", null, Task.Status.DONE);
-        taskDao.create(t22);
+        Ebean.save(t22);
     }
 }

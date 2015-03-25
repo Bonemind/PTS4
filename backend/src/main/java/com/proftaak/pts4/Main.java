@@ -8,40 +8,34 @@ import org.restlet.Component;
 import org.restlet.data.Protocol;
 import org.restlet.resource.ServerResource;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 /**
- * Created by Michon on 2-3-2015.
+ * Created by Michon on 2-3-2015
  */
 public class Main extends ServerResource {
     /**
-     * The name of the package holding the controllers.
+     * The name of the package holding the controllers
      */
     private static final String CONTROLLER_PACKAGE = "com.proftaak.pts4.controllers";
 
+    private static final int PORT = 8182;
+
     public static void main(String[] args) throws Exception {
-        // Prepare the database.
-        DBUtils.recreateAllTables();
-        DBUtils.createTestData();
+        // Prepare the database
+        DBUtils.init();
 
-        // Prepare the component.
+        // Prepare the component
         Component component = new Component();
-        component.getServers().add(Protocol.HTTP, 8182);
+        component.getServers().add(Protocol.HTTP, PORT);
 
-        // Perform routing.
+        // Perform routing
         Reflections reflections = new Reflections(CONTROLLER_PACKAGE);
         Collection<Class<? extends BaseController>> controllers = reflections.getSubTypesOf(BaseController.class);
         for (Class<? extends BaseController> controller : controllers) {
-            // Inialize the controller.
-            Method init = controller.getMethod("init");
-            if (init != null) {
-                init.invoke(null);
-            }
-
-            // Do the routing.
+            // Do the routing
             String path = "";
             CRUDController crudController = controller.getAnnotation(CRUDController.class);
             if (crudController != null) {
@@ -75,12 +69,12 @@ public class Main extends ServerResource {
                 component.getDefaultHost().attach(path + "/{id}", controller);
             }
 
-            // Add the controller to the routing.
+            // Add the controller to the routing
             component.getDefaultHost().attach(path, controller);
             component.getDefaultHost().attach(path + "/{id}", controller);
         }
 
-        // Start the server.
+        // Start the server
         component.start();
     }
 }

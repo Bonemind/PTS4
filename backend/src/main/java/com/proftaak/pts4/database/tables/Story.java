@@ -1,27 +1,17 @@
 package com.proftaak.pts4.database.tables;
 
-import com.j256.ormlite.dao.Dao;
-import com.j256.ormlite.dao.DaoManager;
-import com.j256.ormlite.field.DataType;
-import com.j256.ormlite.field.DatabaseField;
-import com.j256.ormlite.table.DatabaseTable;
-import com.proftaak.pts4.database.DBTable;
-import com.proftaak.pts4.database.DBUtils;
+import flexjson.JSON;
 
-import java.io.FileNotFoundException;
-import java.sql.SQLException;
+import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Michon
  */
-@DatabaseTable(tableName = "stories")
-public class Story extends DBTable {
-
-    public static final String FIELD_ID = "id";
-    public static final String FIELD_NAME = "name";
-    public static final String FIELD_DESCRIPTION = "description";
-    public static final String FIELD_STATUS = "status";
-
+@Entity
+@Table(name = "stories")
+public class Story {
     public enum Status {
         /**
          * Story is defined
@@ -44,29 +34,42 @@ public class Story extends DBTable {
         ACCEPTED
     }
 
+    public static final String FIELD_ID = "id";
+    public static final String FIELD_NAME = "name";
+    public static final String FIELD_DESCRIPTION = "description";
+    public static final String FIELD_STATUS = "status";
+
     /**
      * The database id of this userstory
      */
-    @DatabaseField(generatedId = true, columnName = FIELD_ID)
+    @Id
+    @Column(name = FIELD_ID)
     private int id;
 
     /**
      * The name of this userstory
      */
-    @DatabaseField(canBeNull = false, columnName = FIELD_NAME)
+    @Column(name = FIELD_NAME, nullable = false)
     private String name;
 
     /**
      * The description of this userstory
      */
-    @DatabaseField(columnName = FIELD_DESCRIPTION)
+    @Column(name = FIELD_DESCRIPTION)
     private String description;
 
     /**
      * The status of this userstory
      */
-    @DatabaseField(canBeNull = false, dataType = DataType.ENUM_STRING, columnName = FIELD_STATUS)
+    @Enumerated(EnumType.STRING)
+    @Column(name = FIELD_STATUS, nullable = false)
     private Status status;
+
+    /**
+     * The tasks of this story
+     */
+    @OneToMany(cascade = CascadeType.ALL)
+    private List<Task> tasks = new ArrayList<>();
 
     /**
      * ORM-Lite no-arg constructor
@@ -116,17 +119,7 @@ public class Story extends DBTable {
         this.status = status;
     }
 
-    @Override
-    public int hashCode() {
-        return Integer.hashCode(this.getId());
-    }
-
-    /**
-     * Get the DAO for this table
-     *
-     * @return The DAO for this table
-     */
-    public static Dao<Story, Integer> getDao() throws FileNotFoundException, SQLException {
-        return DaoManager.createDao(DBUtils.getConnectionSource(), Story.class);
+    public List<Task> getTasks() {
+        return tasks;
     }
 }
