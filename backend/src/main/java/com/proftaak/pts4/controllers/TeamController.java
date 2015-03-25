@@ -53,7 +53,7 @@ public class TeamController extends BaseController {
      */
     @RequireAuth
     public Object postHandler(RequestData requestData) throws Exception {
-        // Create the new user team
+        // Create the new team
         Team team;
         try {
             team = new Team((String) requestData.getPayload().get("name"), requestData.getUser());
@@ -63,7 +63,7 @@ public class TeamController extends BaseController {
             throw HTTPException.ERROR_BAD_REQUEST;
         }
 
-        // Return the created user team
+        // Return the created team
         return team;
     }
 
@@ -72,7 +72,7 @@ public class TeamController extends BaseController {
      */
     @RequireAuth(role = ScopeRole.SCRUM_MASTER)
     public Object putHandler(RequestData requestData) throws Exception {
-        // Try to get the user team
+        // Try to get the team
         Team team = requestData.getScopeObject(Team.class);
         Map<String, Object> payload = requestData.getPayload();
 
@@ -84,7 +84,7 @@ public class TeamController extends BaseController {
         // Save the changes
         Ebean.save(team);
 
-        // Return the changed user team
+        // Return the changed team
         return team;
     }
 
@@ -93,10 +93,10 @@ public class TeamController extends BaseController {
      */
     @RequireAuth(role = ScopeRole.SCRUM_MASTER)
     public Object deleteHandler(RequestData requestData) throws Exception {
-        // Try to get the user team
+        // Try to get the team
         Team team = requestData.getScopeObject(Team.class);
 
-        // Delete the user team
+        // Delete the team
         Ebean.delete(team);
 
         // Return nothing

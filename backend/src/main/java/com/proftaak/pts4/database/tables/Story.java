@@ -1,6 +1,7 @@
 package com.proftaak.pts4.database.tables;
 
 import flexjson.JSON;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -108,7 +109,7 @@ public class Story {
     }
 
     public void setDescription(String description) {
-        this.description = description;
+        this.description = StringUtils.trimToNull(description);
     }
 
     public Status getStatus() {

@@ -81,8 +81,10 @@ public class RequestData {
         this.roles.add(role);
     }
 
-    public boolean hasScopeRole(ScopeRole role) {
-        return this.roles.contains(role);
+    public void requireScopeRole(ScopeRole role) throws HTTPException {
+        if (!this.roles.contains(role)) {
+            throw HTTPException.ERROR_FORBIDDEN;
+        }
     }
 
     public Collection<ScopeRole> getScopeRoles() {

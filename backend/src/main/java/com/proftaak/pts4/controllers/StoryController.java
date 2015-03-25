@@ -4,6 +4,7 @@ import com.avaje.ebean.Ebean;
 import com.proftaak.pts4.core.restlet.BaseController;
 import com.proftaak.pts4.core.restlet.HTTPException;
 import com.proftaak.pts4.core.restlet.RequestData;
+import com.proftaak.pts4.core.restlet.ScopeRole;
 import com.proftaak.pts4.core.restlet.annotations.CRUDController;
 import com.proftaak.pts4.core.restlet.annotations.PreRequest;
 import com.proftaak.pts4.core.restlet.annotations.RequireAuth;
@@ -46,8 +47,7 @@ public class StoryController extends BaseController {
         try {
             Story.Status status = Story.Status.valueOf(requestData.getPayload().getOrDefault("status", Story.Status.DEFINED.toString()).toString());
             if (status == Story.Status.ACCEPTED) {
-                // TODO
-                //requestData.getUser().getRole().require(User.UserRole.PRODUCT_OWNER);
+                requestData.requireScopeRole(ScopeRole.PRODUCT_OWNER);
             }
             story = new Story(
                     (String) requestData.getPayload().get("name"),
@@ -83,8 +83,7 @@ public class StoryController extends BaseController {
         if (payload.containsKey("status")) {
             Story.Status status = Story.Status.valueOf(payload.getOrDefault("status", Story.Status.DEFINED.toString()).toString());
             if (story.getStatus() != Story.Status.ACCEPTED && status == Story.Status.ACCEPTED) {
-                // TODO
-                //requestData.getUser().getRole().require(User.UserRole.PRODUCT_OWNER);
+                requestData.requireScopeRole(ScopeRole.PRODUCT_OWNER);
             }
             story.setStatus(status);
         }

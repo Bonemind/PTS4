@@ -7,6 +7,7 @@ import com.proftaak.pts4.core.restlet.annotations.RequireAuth;
 import com.proftaak.pts4.database.tables.Token;
 import flexjson.JSONDeserializer;
 import flexjson.JSONSerializer;
+import org.apache.commons.lang3.StringUtils;
 import org.reflections.Reflections;
 import org.reflections.scanners.MethodAnnotationsScanner;
 import org.reflections.util.ClasspathHelper;
@@ -20,8 +21,7 @@ import org.restlet.util.Series;
 import java.io.FileNotFoundException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by Michon on 2-3-2015
@@ -31,6 +31,43 @@ abstract public class BaseController extends ServerResource {
      * The key used by restlet for headers
      */
     private static final String RESTLET_HEADER_KEY = "org.restlet.http.headers";
+
+    /**
+     * The name of the package holding the controllers
+     */
+    public static final String CONTROLLER_PACKAGE = "com.proftaak.pts4.controllers";
+
+    /**
+     * Get the route parts for the controller
+     * @param controllerClass The controller class for which to get the route
+     * @return A list of url parts
+     */
+    public static List<String> getRoutes(Class<? extends BaseController> controllerClass) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        List<String> path = new ArrayList<>();
+
+        CRUDController crudController = controllerClass.getAnnotation(CRUDController.class);
+        if (crudController != null) {
+            // CRUD controller - route will be based on either the name value, or if not given, the table class name.
+            // Furthermore, if the controller has a parent controller, the route will live under that one
+            // @CRUDController(table = Test.class) -> /test/{testId}
+            // @CRUDController(table = Test2.class, name = "foobar", parent = TestController) -> /test/{testId}/foobar/{foobarId}
+            if (crudController.parent() != null && crudController.parent().getAnnotation(CRUDController.class) != null) {
+                path = BaseController.getRoutes(crudController.parent());
+            }
+            String name = crudController.name().isEmpty() ? crudController.table().getSimpleName().toLowerCase() : crudController.name();
+            path.add(name);
+            path.add("{" + name + "Id}");
+        } else {
+            // Just a basic controller - route will be the controller name, with the end "Controller" stripped off, split on capital letters.
+            // FooController -> /foo/{id}
+            // FooBarController -> /foo/bar/{id}
+            for (String part : StringUtils.splitByCharacterTypeCamelCase(controllerClass.getSimpleName().replace("Controller", ""))) {
+                path.add(part.toLowerCase());
+            }
+            path.add("{id}");
+        }
+        return path;
+    }
 
     /**
      * Set all applicable cross-origin headers
@@ -158,9 +195,7 @@ abstract public class BaseController extends ServerResource {
             }
 
             // Verify the roles field
-            if (!requestData.hasScopeRole(authAnnotation.role())) {
-                throw HTTPException.ERROR_FORBIDDEN;
-            }
+            requestData.requireScopeRole(authAnnotation.role());
         }
     }
 

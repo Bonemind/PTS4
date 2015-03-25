@@ -1,4 +1,4 @@
-package com.proftaak.pts4.controllers.auth;
+package com.proftaak.pts4.controllers;
 
 import com.avaje.ebean.Ebean;
 import com.proftaak.pts4.core.restlet.BaseController;
@@ -11,8 +11,7 @@ import org.restlet.data.Status;
 /**
  * Created by Michon on 2-3-2015
  */
-public class LoginController extends BaseController {
-    @Override
+public class AuthLoginController extends BaseController {
     public Object postHandler(RequestData requestData) throws Exception {
         // Check the login details
         User user = Ebean.find(User.class).where().eq(User.FIELD_EMAIL, requestData.getPayload().get("email")).findUnique();
