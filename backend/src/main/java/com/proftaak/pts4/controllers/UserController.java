@@ -34,20 +34,16 @@ public class UserController extends BaseController {
     public Object postHandler(RequestData requestData) throws Exception {
         // Create the new user
         User user;
-        try {
-            // Check for email conflicts
-            String email = requestData.getPayload().get("email").toString();
-            if (Ebean.find(User.class).where().eq(User.FIELD_EMAIL, email).findRowCount() > 0) {
-                throw new HTTPException("That email address is already in use", Status.CLIENT_ERROR_CONFLICT);
-            }
 
-            // Create the new user
-            user = new User(email, requestData.getPayload().get("password").toString());
-            Ebean.save(user);
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw HTTPException.ERROR_BAD_REQUEST;
+        // Check for email conflicts
+        String email = requestData.getPayload().get("email").toString();
+        if (Ebean.find(User.class).where().eq(User.FIELD_EMAIL, email).findRowCount() > 0) {
+            throw new HTTPException("That email address is already in use", Status.CLIENT_ERROR_CONFLICT);
         }
+
+        // Create the new user
+        user = new User(email, requestData.getPayload().get("password").toString());
+        Ebean.save(user);
 
         // Return the created user
         return user;
