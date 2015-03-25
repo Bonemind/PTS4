@@ -60,7 +60,7 @@ public class DBUtils {
         Ebean.save(u1);
         User u2 = new User("dev", "dev");
         Ebean.save(u2);
-        User u3 = new User("productowner", "productowner");
+        User u3 = new User("po", "po");
         Ebean.save(u3);
 
         Token tk1 = new Token(u1, "test");
