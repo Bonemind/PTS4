@@ -24,6 +24,7 @@
     "grunt": "~0.4.5",
     "restangular": "~1.4.0",
     "angular-modal-service": "~0.6.3",
-    "underscore": "~1.8.2"
+    "underscore": "~1.8.2",
+    "angular-bootstrap-show-errors": "~2.3.0"
   }
 }
