@@ -56,6 +56,7 @@ public class Project {
      * The user stories of this project
      */
     @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name = Story.FIELD_PROJECT)
     private List<Story> stories = new ArrayList<>();
 
     /**

@@ -78,6 +78,7 @@ public class Story {
      * The tasks of this story
      */
     @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name = Task.FIELD_STORY)
     private List<Task> tasks = new ArrayList<>();
 
     /**

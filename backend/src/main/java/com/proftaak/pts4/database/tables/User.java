@@ -17,7 +17,6 @@ public class User implements Serializable {
     public static final String FIELD_ID = "id";
     public static final String FIELD_EMAIL = "email";
     public static final String FIELD_PASSWORD = "password";
-    public static final String FIELD_TEAMS = "users";
     public static final String TABLE_JOIN_TEAM = Team.TABLE_JOIN_USER;
 
     /**
