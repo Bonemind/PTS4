@@ -35,7 +35,7 @@ public class TaskController extends BaseController {
     public Object getHandler(RequestData requestData) throws Exception {
         if (requestData.getUrlParams().get("taskId") == null) {
             Story story = requestData.getScopeObject(Story.class);
-            return Ebean.find(Task.class).where().eq(Task.FIELD_STORY, story.getId()).query().findList();
+            return story.getTasks();
         } else {
             return requestData.getScopeObject(Task.class);
         }
