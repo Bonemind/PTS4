@@ -63,21 +63,21 @@ public class Token implements Serializable {
     }
 
     public String getToken() {
-        return token;
+        return this.token;
     }
 
     public User getUser() {
-        return user;
+        return this.user;
     }
 
     public Date getDateCreation() {
-        return dateCreation;
+        return this.dateCreation;
     }
 
     /**
      * Check whether the token is still valid
      *
-     * @return True if the token is still valid, False otherwise
+     * @return this.True if the token is still valid, False otherwise
      */
     public boolean isValid() {
         long tokenEndTimestamp = this.dateCreation.getTime() + Token.TIME_TO_LIVE;

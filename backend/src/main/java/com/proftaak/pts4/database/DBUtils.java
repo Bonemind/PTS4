@@ -74,9 +74,12 @@ public class DBUtils {
         tm.getUsers().add(u2);
         Ebean.save(tm);
 
-        Story us1 = new Story("Foo");
+        Project p = new Project(tm, u3, "PTS4", "Proftaak S4");
+        Ebean.save(p);
+
+        Story us1 = new Story(p, "Foo", null);
         Ebean.save(us1);
-        Story us2 = new Story("Lorem", "Lorem Ipsum Dolor Sit Amet", Story.Status.IN_PROGRESS);
+        Story us2 = new Story(p, "Lorem", "Lorem Ipsum Dolor Sit Amet", Story.Status.IN_PROGRESS);
         Ebean.save(us2);
 
         Task t11 = new Task(us1, "Frontend");

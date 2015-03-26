@@ -94,7 +94,7 @@ public class Task {
     }
 
     public String getName() {
-        return name;
+        return this.name;
     }
 
     public void setName(String name) {
@@ -102,7 +102,7 @@ public class Task {
     }
 
     public String getDescription() {
-        return description;
+        return this.description;
     }
 
     public void setDescription(String description) {
@@ -110,7 +110,7 @@ public class Task {
     }
 
     public Status getStatus() {
-        return status;
+        return this.status;
     }
 
     public void setStatus(Status status) {
@@ -118,6 +118,6 @@ public class Task {
     }
 
     public Story getStory() {
-        return story;
+        return this.story;
     }
 }

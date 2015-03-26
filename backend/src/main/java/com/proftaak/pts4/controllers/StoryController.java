@@ -7,15 +7,18 @@ import com.proftaak.pts4.core.restlet.RequestData;
 import com.proftaak.pts4.core.restlet.ScopeRole;
 import com.proftaak.pts4.core.restlet.annotations.CRUDController;
 import com.proftaak.pts4.core.restlet.annotations.PreRequest;
+import com.proftaak.pts4.core.restlet.annotations.ProcessScopeObject;
 import com.proftaak.pts4.core.restlet.annotations.RequireAuth;
+import com.proftaak.pts4.database.tables.Project;
 import com.proftaak.pts4.database.tables.Story;
+import com.proftaak.pts4.database.tables.Task;
 
 import java.util.Map;
 
 /**
  * @author Michon
  */
-@CRUDController(table = Story.class)
+@CRUDController(table = Story.class, parent = ProjectController.class)
 public class StoryController extends BaseController {
     /**
      * For this controller we will want to include the list of tasks in responses
@@ -23,6 +26,17 @@ public class StoryController extends BaseController {
     @PreRequest
     public static void setupSerializer(RequestData requestData) {
         requestData.getSerializer().include("tasks");
+    }
+
+    /**
+     * Validate whether the story and project that are in scope belong together
+     */
+    @ProcessScopeObject(Story.class)
+    public static void validateStoryInStory(RequestData requestData, Story story) throws Exception {
+        Project project = requestData.getScopeObject(Project.class);
+        if (!project.equals(story.getProject())) {
+            throw HTTPException.ERROR_OBJECT_NOT_FOUND;
+        }
     }
 
     /**
@@ -50,9 +64,10 @@ public class StoryController extends BaseController {
                 requestData.requireScopeRole(ScopeRole.PRODUCT_OWNER);
             }
             story = new Story(
-                    (String) requestData.getPayload().get("name"),
-                    (String) requestData.getPayload().get("description"),
-                    status
+                requestData.getScopeObject(Project.class),
+                (String) requestData.getPayload().get("name"),
+                (String) requestData.getPayload().get("description"),
+                status
             );
             Ebean.save(story);
         } catch (Exception e) {
@@ -69,7 +84,7 @@ public class StoryController extends BaseController {
      */
     @RequireAuth
     public Object putHandler(RequestData requestData) throws Exception {
-        // Try to get the user story
+        // Get the user story
         Story story = requestData.getScopeObject(Story.class);
         Map<String, Object> payload = requestData.getPayload();
 
@@ -100,7 +115,7 @@ public class StoryController extends BaseController {
      */
     @RequireAuth
     public Object deleteHandler(RequestData requestData) throws Exception {
-        // Try to get the user story
+        // Get the user story
         Story story = requestData.getScopeObject(Story.class);
 
         // Delete the user story

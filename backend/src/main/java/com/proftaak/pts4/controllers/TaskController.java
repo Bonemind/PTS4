@@ -53,10 +53,10 @@ public class TaskController extends BaseController {
         Task task;
         try {
             task = new Task(
-                    story,
-                    (String) requestData.getPayload().get("name"),
-                    (String) requestData.getPayload().get("description"),
-                    Task.Status.valueOf(requestData.getPayload().getOrDefault("status", Task.Status.DEFINED.toString()).toString())
+                story,
+                (String) requestData.getPayload().get("name"),
+                (String) requestData.getPayload().get("description"),
+                Task.Status.valueOf(requestData.getPayload().getOrDefault("status", Task.Status.DEFINED.toString()).toString())
             );
             Ebean.save(task);
         } catch (Exception e) {
@@ -100,7 +100,7 @@ public class TaskController extends BaseController {
      */
     @RequireAuth
     public Object deleteHandler(RequestData requestData) throws Exception {
-        // Try to get the task
+        // Get the task
         Task task = requestData.getScopeObject(Task.class);
 
         // Delete the task

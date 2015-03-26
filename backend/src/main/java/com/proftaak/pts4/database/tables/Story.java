@@ -39,6 +39,7 @@ public class Story {
     public static final String FIELD_NAME = "name";
     public static final String FIELD_DESCRIPTION = "description";
     public static final String FIELD_STATUS = "status";
+    public static final String FIELD_PROJECT = "project_id";
 
     /**
      * The database id of this userstory
@@ -67,6 +68,13 @@ public class Story {
     private Status status;
 
     /**
+     * The project this userstory belongs to
+     */
+    @ManyToOne
+    @JoinColumn(name = FIELD_PROJECT)
+    private Project project;
+
+    /**
      * The tasks of this story
      */
     @OneToMany(cascade = CascadeType.ALL)
@@ -78,15 +86,16 @@ public class Story {
     public Story() {
     }
 
-    public Story(String name) {
-        this(name, null);
+    public Story(Project project, String name) {
+        this(project, name, null);
     }
 
-    public Story(String name, String description) {
-        this(name, description, Status.DEFINED);
+    public Story(Project project, String name, String description) {
+        this(project, name, description, Status.DEFINED);
     }
 
-    public Story(String name, String description, Status status) {
+    public Story(Project project, String name, String description, Status status) {
+        this.setProject(project);
         this.setName(name);
         this.setDescription(description);
         this.setStatus(status);
@@ -97,7 +106,7 @@ public class Story {
     }
 
     public String getName() {
-        return name;
+        return this.name;
     }
 
     public void setName(String name) {
@@ -105,7 +114,7 @@ public class Story {
     }
 
     public String getDescription() {
-        return description;
+        return this.description;
     }
 
     public void setDescription(String description) {
@@ -113,14 +122,22 @@ public class Story {
     }
 
     public Status getStatus() {
-        return status;
+        return this.status;
     }
 
     public void setStatus(Status status) {
         this.status = status;
     }
 
+    public Project getProject() {
+        return this.project;
+    }
+
+    public void setProject(Project project) {
+        this.project = project;
+    }
+
     public List<Task> getTasks() {
-        return tasks;
+        return this.tasks;
     }
 }

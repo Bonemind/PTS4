@@ -54,6 +54,20 @@ public class User implements Serializable {
     private List<Team> teams = new ArrayList<>();
 
     /**
+     * The teams of which this user is the scrum master
+     */
+    @OneToMany
+    @JoinColumn(name = Team.FIELD_SCRUM_MASTER)
+    private List<Team> ownedTeams = new ArrayList<>();
+
+    /**
+     * The projects of which this user is the product owner
+     */
+    @OneToMany
+    @JoinColumn(name = Project.FIELD_PRODUCT_OWNER)
+    private List<Project> ownedProjects = new ArrayList<>();
+
+    /**
      * ORM-Lite no-arg constructor
      */
     public User() {
@@ -72,7 +86,7 @@ public class User implements Serializable {
     }
 
     public String getEmail() {
-        return email;
+        return this.email;
     }
 
     public void setEmail(String email) {
@@ -93,17 +107,25 @@ public class User implements Serializable {
      * Compares the plaintext password passed to it with the hashed stored version
      *
      * @param pass The plaintext password
-     * @return True if they are the same, false otherwise
+     * @return this.True if they are the same, false otherwise
      */
     public boolean checkPassword(String pass) {
         return BCrypt.checkpw(pass, this.password);
     }
 
     public List<Token> getTokens() {
-        return tokens;
+        return this.tokens;
     }
 
     public List<Team> getTeams() {
-        return teams;
+        return this.teams;
+    }
+
+    public List<Team> getOwnedTeams() {
+        return this.ownedTeams;
+    }
+
+    public List<Project> getOwnedProjects() {
+        return this.ownedProjects;
     }
 }

@@ -20,6 +20,14 @@ import java.util.Map;
 @CRUDController(table = Team.class)
 public class TeamController extends BaseController {
     /**
+     * For this controller we will want to include the list of tasks in responses
+     */
+    @PreRequest
+    public static void setupSerializer(RequestData requestData) {
+        requestData.getSerializer().include("projects");
+    }
+
+    /**
      * Determine the role(s) the logged in user has within the team, if any
      */
     @PreRequest
@@ -56,7 +64,10 @@ public class TeamController extends BaseController {
         // Create the new team
         Team team;
         try {
-            team = new Team((String) requestData.getPayload().get("name"), requestData.getUser());
+            team = new Team(
+                (String) requestData.getPayload().get("name"),
+                requestData.getUser()
+            );
             Ebean.save(team);
         } catch (Exception e) {
             e.printStackTrace();
@@ -72,7 +83,7 @@ public class TeamController extends BaseController {
      */
     @RequireAuth(role = ScopeRole.SCRUM_MASTER)
     public Object putHandler(RequestData requestData) throws Exception {
-        // Try to get the team
+        // Get the team
         Team team = requestData.getScopeObject(Team.class);
         Map<String, Object> payload = requestData.getPayload();
 
@@ -93,7 +104,7 @@ public class TeamController extends BaseController {
      */
     @RequireAuth(role = ScopeRole.SCRUM_MASTER)
     public Object deleteHandler(RequestData requestData) throws Exception {
-        // Try to get the team
+        // Get the team
         Team team = requestData.getScopeObject(Team.class);
 
         // Delete the team

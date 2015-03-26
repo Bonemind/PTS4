@@ -65,7 +65,7 @@ public class TeamMemberController extends BaseController {
         // Get the team
         Team team = requestData.getScopeObject(Team.class);
 
-        // Try to get the user
+        // Get the user
         System.out.println(requestData.getUrlParams());
         User user = requestData.getScopeObject(User.class);
 

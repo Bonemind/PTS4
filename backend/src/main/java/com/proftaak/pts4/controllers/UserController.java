@@ -7,6 +7,7 @@ import com.proftaak.pts4.core.restlet.RequestData;
 import com.proftaak.pts4.core.restlet.annotations.CRUDController;
 import com.proftaak.pts4.core.restlet.annotations.RequireAuth;
 import com.proftaak.pts4.core.restlet.annotations.ProcessScopeObject;
+import com.proftaak.pts4.database.tables.Project;
 import com.proftaak.pts4.database.tables.User;
 import org.restlet.data.Status;
 
@@ -75,8 +76,18 @@ public class UserController extends BaseController {
      */
     @RequireAuth
     public Object deleteHandler(RequestData requestData) throws Exception {
-        // Try to get the user
+        // Get the user
         User user = requestData.getScopeObject(User.class);
+
+        // If the user is scrum master of any teams, refuse to delete him
+        if (user.getOwnedTeams().size() > 0) {
+            throw new HTTPException("This user cannot be removed because he is a SCRUM master of one or more teams", Status.CLIENT_ERROR_CONFLICT);
+        }
+
+        // If the user is still product owner of any projects, refuse to delete him.
+        if (user.getOwnedProjects().size() > 0) {
+            throw new HTTPException("This user cannot be removed because he is a product owner of one or more projects", Status.CLIENT_ERROR_CONFLICT);
+        }
 
         // Delete the user
         Ebean.delete(user);

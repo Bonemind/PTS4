@@ -64,7 +64,7 @@ public class Team {
     }
 
     public String getName() {
-        return name;
+        return this.name;
     }
 
     public void setName(String name) {
@@ -72,7 +72,7 @@ public class Team {
     }
 
     public User getScrumMaster() {
-        return scrumMaster;
+        return this.scrumMaster;
     }
 
     public void setScrumMaster(User scrumMaster) {
@@ -80,6 +80,6 @@ public class Team {
     }
 
     public List<User> getUsers() {
-        return users;
+        return this.users;
     }
 }
