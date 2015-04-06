@@ -60,7 +60,7 @@ public class IterationController {
     /**
      * POST /iteration
      */
-    @RequireAuth(role = ScopeRole.SCRUM_MASTER)
+    @RequireAuth(role = ScopeRole.TEAM_MEMBER)
     @Route(method = Route.Method.POST)
     public static Object postHandler(RequestData requestData) throws Exception {
         // Create the new iteration
@@ -80,7 +80,7 @@ public class IterationController {
     /**
      * PUT /iteration/1
      */
-    @RequireAuth(role = ScopeRole.SCRUM_MASTER)
+    @RequireAuth(role = ScopeRole.TEAM_MEMBER)
     @Route(method = Route.Method.PUT)
     public static Object putHandler(RequestData requestData) throws Exception {
         // Get the iteration
@@ -111,7 +111,7 @@ public class IterationController {
     /**
      * DELETE /iteration/1
      */
-    @RequireAuth(role = ScopeRole.SCRUM_MASTER)
+    @RequireAuth(role = ScopeRole.TEAM_MEMBER)
     @Route(method = Route.Method.DELETE)
     public static Object deleteHandler(RequestData requestData) throws Exception {
         // Get the iteration
