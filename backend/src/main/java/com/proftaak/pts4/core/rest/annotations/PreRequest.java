@@ -1,4 +1,4 @@
-package com.proftaak.pts4.core.restlet.annotations;
+package com.proftaak.pts4.core.rest.annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

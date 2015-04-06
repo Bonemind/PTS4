@@ -1,50 +1,38 @@
 package com.proftaak.pts4.controllers;
 
 import com.avaje.ebean.Ebean;
-import com.proftaak.pts4.core.restlet.BaseController;
-import com.proftaak.pts4.core.restlet.HTTPException;
-import com.proftaak.pts4.core.restlet.RequestData;
-import com.proftaak.pts4.core.restlet.annotations.CRUDController;
-import com.proftaak.pts4.core.restlet.annotations.RequireAuth;
-import com.proftaak.pts4.core.restlet.annotations.ProcessScopeObject;
-import com.proftaak.pts4.database.tables.Project;
+import com.proftaak.pts4.core.rest.HTTPException;
+import com.proftaak.pts4.core.rest.RequestData;
+import com.proftaak.pts4.core.rest.annotations.Controller;
+import com.proftaak.pts4.core.rest.annotations.RequireAuth;
+import com.proftaak.pts4.core.rest.annotations.Route;
+import com.proftaak.pts4.database.EbeanEx;
 import com.proftaak.pts4.database.tables.User;
-import org.restlet.data.Status;
+import org.glassfish.grizzly.http.util.HttpStatus;
 
+import javax.persistence.PersistenceException;
 import java.util.Map;
 
 /**
  * @author Michon
  */
-@CRUDController(table = User.class)
-public class UserController extends BaseController {
-    /**
-     * Validate whether the logged in user is the same user as the user in scope, to prevent editing other users
-     */
-    @ProcessScopeObject(User.class)
-    public static boolean validateUserSelf(RequestData requestData, User user) throws Exception {
-        if (!requestData.getUser().equals(user)) {
-            throw HTTPException.ERROR_FORBIDDEN;
-        }
-        return true;
-    }
-
+@Controller
+public class UserController {
     /**
      * POST /user
      */
-    public Object postHandler(RequestData requestData) throws Exception {
+    @Route(method = Route.Method.POST)
+    public static Object postHandler(RequestData requestData) throws Exception {
         // Create the new user
-        User user;
-
-        // Check for email conflicts
-        String email = requestData.getPayload().get("email").toString();
-        if (Ebean.find(User.class).where().eq(User.FIELD_EMAIL, email).findRowCount() > 0) {
-            throw new HTTPException("That email address is already in use", Status.CLIENT_ERROR_CONFLICT);
+        User user = new User(
+            requestData.getPayload().get("email").toString(),
+            requestData.getPayload().get("password").toString()
+        );
+        try {
+            Ebean.save(user);
+        } catch (PersistenceException e) {
+            throw new HTTPException("That email address is already in use", HttpStatus.CONFLICT_409);
         }
-
-        // Create the new user
-        user = new User(email, requestData.getPayload().get("password").toString());
-        Ebean.save(user);
 
         // Return the created user
         return user;
@@ -54,12 +42,13 @@ public class UserController extends BaseController {
      * PUT /user/1
      */
     @RequireAuth
-    public Object putHandler(RequestData requestData) throws Exception {
+    @Route(method = Route.Method.PUT)
+    public static Object putHandler(RequestData requestData) throws Exception {
         // Get the user
-        User user = requestData.getScopeObject(User.class);
-        Map<String, Object> payload = requestData.getPayload();
+        User user = EbeanEx.require(EbeanEx.find(User.class, requestData.getParameter("id")));
 
         // Change the user
+        Map<String, Object> payload = requestData.getPayload();
         if (payload.containsKey("password")) {
             user.setPassword((String) payload.get("password"));
         }
@@ -75,18 +64,19 @@ public class UserController extends BaseController {
      * DELETE /user/1
      */
     @RequireAuth
-    public Object deleteHandler(RequestData requestData) throws Exception {
+    @Route(method = Route.Method.DELETE)
+    public static Object deleteHandler(RequestData requestData) throws Exception {
         // Get the user
-        User user = requestData.getScopeObject(User.class);
+        User user = EbeanEx.require(EbeanEx.find(User.class, requestData.getParameter("id")));
 
         // If the user is scrum master of any teams, refuse to delete him
         if (user.getOwnedTeams().size() > 0) {
-            throw new HTTPException("This user cannot be removed because he is a SCRUM master of one or more teams", Status.CLIENT_ERROR_CONFLICT);
+            throw new HTTPException("This user cannot be removed because he is a SCRUM master of one or more teams", HttpStatus.CONFLICT_409);
         }
 
         // If the user is still product owner of any projects, refuse to delete him.
         if (user.getOwnedProjects().size() > 0) {
-            throw new HTTPException("This user cannot be removed because he is a product owner of one or more projects", Status.CLIENT_ERROR_CONFLICT);
+            throw new HTTPException("This user cannot be removed because he is a product owner of one or more projects", HttpStatus.CONFLICT_409);
         }
 
         // Delete the user

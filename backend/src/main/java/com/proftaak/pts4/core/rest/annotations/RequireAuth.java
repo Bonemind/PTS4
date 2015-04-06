@@ -1,6 +1,6 @@
-package com.proftaak.pts4.core.restlet.annotations;
+package com.proftaak.pts4.core.rest.annotations;
 
-import com.proftaak.pts4.core.restlet.ScopeRole;
+import com.proftaak.pts4.core.rest.ScopeRole;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

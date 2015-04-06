@@ -48,6 +48,13 @@ public class Team {
     private List<User> users = new ArrayList<>();
 
     /**
+     * The projects of this team
+     */
+    @JSON(include = false)
+    @OneToMany(cascade = CascadeType.ALL)
+    private List<Project> projects = new ArrayList<>();
+
+    /**
      * ORM-Lite no-arg constructor
      */
     public Team() {
@@ -81,5 +88,13 @@ public class Team {
 
     public List<User> getUsers() {
         return this.users;
+    }
+
+    public List<Project> getProjects() {
+        return this.projects;
+    }
+
+    public void setProjects(List<Project> projects) {
+        this.projects = projects;
     }
 }

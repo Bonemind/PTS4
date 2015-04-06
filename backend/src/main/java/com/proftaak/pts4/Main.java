@@ -1,20 +1,15 @@
 package com.proftaak.pts4;
 
-import com.proftaak.pts4.core.restlet.BaseController;
+import com.proftaak.pts4.core.rest.Router;
 import com.proftaak.pts4.database.DBUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.reflections.Reflections;
-import org.restlet.Component;
-import org.restlet.data.Protocol;
-import org.restlet.resource.ServerResource;
+import org.glassfish.grizzly.http.server.*;
 
-import java.util.Collection;
-import java.util.List;
+import java.net.InetSocketAddress;
 
 /**
  * Created by Michon on 2-3-2015
  */
-public class Main extends ServerResource {
+public class Main {
 
     private static final int PORT = 8182;
 
@@ -22,22 +17,20 @@ public class Main extends ServerResource {
         // Prepare the database
         DBUtils.init();
 
-        // Prepare the component
-        Component component = new Component();
-        component.getServers().add(Protocol.HTTP, PORT);
+        // Create the server
+        HttpServer server = HttpServer.createSimpleServer("/", Main.PORT);
 
-        // Perform routing
-        Reflections reflections = new Reflections(BaseController.CONTROLLER_PACKAGE);
-        Collection<Class<? extends BaseController>> controllers = reflections.getSubTypesOf(BaseController.class);
-        for (Class<? extends BaseController> controller : controllers) {
-            // Do the routing
-            List<String> path = BaseController.getRoutes(controller);
-            component.getDefaultHost().attach("/" + StringUtils.join(path, '/'), controller);
-            path.remove(path.size() - 1);
-            component.getDefaultHost().attach("/" + StringUtils.join(path, '/'), controller);
+        // Create the router.
+        Router router = new Router();
+        server.getServerConfiguration().addHttpHandler(router, "/");
+
+        // Run the server
+        try {
+            server.start();
+            System.out.println("Press any key to stop the server...");
+            System.in.read();
+        } catch (Exception e) {
+            System.err.println(e);
         }
-
-        // Start the server
-        component.start();
     }
 }

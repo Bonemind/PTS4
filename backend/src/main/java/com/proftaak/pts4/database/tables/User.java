@@ -56,14 +56,12 @@ public class User implements Serializable {
      * The teams of which this user is the scrum master
      */
     @OneToMany
-    @JoinColumn(name = Team.FIELD_SCRUM_MASTER)
     private List<Team> ownedTeams = new ArrayList<>();
 
     /**
      * The projects of which this user is the product owner
      */
     @OneToMany
-    @JoinColumn(name = Project.FIELD_PRODUCT_OWNER)
     private List<Project> ownedProjects = new ArrayList<>();
 
     /**

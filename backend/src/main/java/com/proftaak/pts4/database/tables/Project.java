@@ -1,6 +1,5 @@
 package com.proftaak.pts4.database.tables;
 
-import flexjson.JSON;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.persistence.*;
@@ -56,7 +55,6 @@ public class Project {
      * The user stories of this project
      */
     @OneToMany(cascade = CascadeType.ALL)
-    @JoinColumn(name = Story.FIELD_PROJECT)
     private List<Story> stories = new ArrayList<>();
 
     /**
