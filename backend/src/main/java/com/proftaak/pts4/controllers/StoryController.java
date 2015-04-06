@@ -9,6 +9,7 @@ import com.proftaak.pts4.core.rest.annotations.PreRequest;
 import com.proftaak.pts4.core.rest.annotations.RequireAuth;
 import com.proftaak.pts4.core.rest.annotations.Route;
 import com.proftaak.pts4.database.EbeanEx;
+import com.proftaak.pts4.database.tables.Iteration;
 import com.proftaak.pts4.database.tables.Project;
 import com.proftaak.pts4.database.tables.Story;
 
@@ -75,9 +76,16 @@ public class StoryController {
             requestData.requireScopeRole(ScopeRole.PRODUCT_OWNER);
         }
 
+        // Determine the story iteration.
+        Iteration iteration = null;
+        if (requestData.getPayload().containsKey("iteration")) {
+            iteration = EbeanEx.require(EbeanEx.find(Iteration.class, requestData.getPayload().get("iteration")));
+        }
+
         // Create the new user story
         Story story = new Story(
             EbeanEx.require(EbeanEx.find(Project.class, requestData.getPayload().get("project"))),
+            iteration,
             (String) requestData.getPayload().get("name"),
             (String) requestData.getPayload().get("description"),
             status
@@ -99,6 +107,9 @@ public class StoryController {
 
         // Change the story
         Map<String, Object> payload = requestData.getPayload();
+        if (payload.containsKey("iteration")) {
+            story.setIteration(EbeanEx.require(EbeanEx.find(Iteration.class, requestData.getPayload().get("iteration"))));
+        }
         if (payload.containsKey("name")) {
             story.setName((String) payload.get("name"));
         }

@@ -39,6 +39,7 @@ public class Story {
     public static final String FIELD_DESCRIPTION = "description";
     public static final String FIELD_STATUS = "status";
     public static final String FIELD_PROJECT = "project_id";
+    public static final String FIELD_ITERATION = "iteration_id";
 
     /**
      * The database id of this userstory
@@ -69,9 +70,16 @@ public class Story {
     /**
      * The project this userstory belongs to
      */
-    @ManyToOne
+    @ManyToOne(optional = false)
     @JoinColumn(name = FIELD_PROJECT)
     private Project project;
+
+    /**
+     * The iteration this userstory belongs to
+     */
+    @ManyToOne
+    @JoinColumn(name = FIELD_ITERATION)
+    private Iteration iteration;
 
     /**
      * The tasks of this story
@@ -85,16 +93,9 @@ public class Story {
     public Story() {
     }
 
-    public Story(Project project, String name) {
-        this(project, name, null);
-    }
-
-    public Story(Project project, String name, String description) {
-        this(project, name, description, Status.DEFINED);
-    }
-
-    public Story(Project project, String name, String description, Status status) {
+    public Story(Project project, Iteration iteration, String name, String description, Status status) {
         this.setProject(project);
+        this.setIteration(iteration);
         this.setName(name);
         this.setDescription(description);
         this.setStatus(status);
@@ -134,6 +135,14 @@ public class Story {
 
     public void setProject(Project project) {
         this.project = project;
+    }
+
+    public Iteration getIteration() {
+        return this.iteration;
+    }
+
+    public void setIteration(Iteration iteration) {
+        this.iteration = iteration;
     }
 
     public List<Task> getTasks() {

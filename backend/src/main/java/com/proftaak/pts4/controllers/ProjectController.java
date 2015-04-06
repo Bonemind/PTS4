@@ -63,12 +63,13 @@ public class ProjectController {
     /**
      * POST /project
      */
+    @RequireAuth(role = ScopeRole.SCRUM_MASTER)
     @Route(method = Route.Method.POST)
     public static Object postHandler(RequestData requestData) throws Exception {
         // Create the new project
         Project project = new Project(
             EbeanEx.require(EbeanEx.find(Team.class, requestData.getPayload().get("team"))),
-            EbeanEx.require(EbeanEx.find(User.class, requestData.getPayload().get("productOwner"))),
+            EbeanEx.require(EbeanEx.find(User.class, User.FIELD_EMAIL, requestData.getPayload().get("productOwner"))),
             (String) requestData.getPayload().get("name"),
             (String) requestData.getPayload().get("description")
         );
@@ -90,7 +91,7 @@ public class ProjectController {
         // Change the project
         Map<String, Object> payload = requestData.getPayload();
         if (payload.containsKey("productOwner")) {
-            project.setProductOwner(EbeanEx.find(User.class, requestData.getPayload().get("productOwner")));
+            project.setProductOwner(EbeanEx.find(User.class, User.FIELD_EMAIL, requestData.getPayload().get("productOwner")));
         }
         if (payload.containsKey("name")) {
             project.setName((String) payload.get("name"));
@@ -130,6 +131,9 @@ public class ProjectController {
     public static Object getStoryHandler(RequestData requestData) throws Exception {
         // Get the project
         Project project = EbeanEx.require(EbeanEx.find(Project.class, requestData.getParameter("id")));
+
+        // Configure the serializer.
+        requestData.exclude("project");
 
         // Return the stories
         return project.getStories();

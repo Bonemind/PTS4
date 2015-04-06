@@ -22,7 +22,7 @@ public class AuthController {
     @Route(method = Route.Method.POST, route = "/auth/login")
     public static Object loginHandler(RequestData requestData) throws Exception {
         // Check the login details
-        User user = EbeanEx.find(Ebean.find(User.class).where().eq(User.FIELD_EMAIL, requestData.getPayload().get("email")).query());
+        User user = EbeanEx.find(User.class, User.FIELD_EMAIL, requestData.getPayload().get("email"));
         if (user == null || !user.checkPassword(requestData.getPayload().get("password").toString())) {
             throw new HTTPException("Invalid login details", HttpStatus.UNAUTHORIZED_401);
         }

@@ -55,7 +55,7 @@ public class RequestData {
      */
     protected RequestData() {
         this.jsonSerializer = new JSONSerializer();
-        this.jsonSerializer.exclude("class");
+        this.jsonSerializer.exclude("*.class");
     }
 
     public Map<String, Object> getPayload() {

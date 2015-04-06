@@ -64,7 +64,7 @@ public class Task {
      * The user story of this task
      */
     @JSON(include = false)
-    @ManyToOne
+    @ManyToOne(optional = false)
     @JoinColumn(name = FIELD_STORY)
     private Story story;
 

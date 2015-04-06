@@ -215,6 +215,9 @@ public class Router extends HttpHandler {
             // Convert the exception, if possible
             userException = (HTTPException) throwable;
         } else {
+            // Output the error.
+            throwable.printStackTrace();
+
             // Default to a generic HTTPException
             userException = HTTPException.ERROR_BAD_REQUEST;
         }

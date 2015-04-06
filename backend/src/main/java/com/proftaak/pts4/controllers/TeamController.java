@@ -162,10 +162,7 @@ public class TeamController {
         Team team = EbeanEx.require(EbeanEx.find(Team.class, requestData.getParameter("id")));
 
         // Get the user
-        User user = Ebean.find(User.class).where().eq(User.FIELD_EMAIL, requestData.getPayload().get("email")).findUnique();
-        if (user == null) {
-            throw HTTPException.ERROR_OBJECT_NOT_FOUND;
-        }
+        User user = EbeanEx.require(EbeanEx.find(User.class, User.FIELD_EMAIL, requestData.getPayload().get("email")));
 
         // Add the user as member of the team.
         if (!team.getUsers().contains(user)) {

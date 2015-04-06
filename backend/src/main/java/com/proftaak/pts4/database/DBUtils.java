@@ -9,6 +9,7 @@ import com.proftaak.pts4.database.tables.*;
 import javassist.NotFoundException;
 
 import java.io.FileNotFoundException;
+import java.time.LocalDate;
 import java.util.Properties;
 
 public class DBUtils {
@@ -74,12 +75,15 @@ public class DBUtils {
         tm.getUsers().add(u2);
         Ebean.save(tm);
 
+        Iteration it = new Iteration(tm, LocalDate.now(), LocalDate.now().plusWeeks(2), "Sprint 1", null);
+        Ebean.save(it);
+
         Project p = new Project(tm, u3, "PTS4", "Proftaak S4");
         Ebean.save(p);
 
-        Story us1 = new Story(p, "Foo", null);
+        Story us1 = new Story(p, null, "Foo", null, Story.Status.DEFINED);
         Ebean.save(us1);
-        Story us2 = new Story(p, "Lorem", "Lorem Ipsum Dolor Sit Amet", Story.Status.IN_PROGRESS);
+        Story us2 = new Story(p, it, "Lorem", "Lorem Ipsum Dolor Sit Amet", Story.Status.IN_PROGRESS);
         Ebean.save(us2);
 
         Task t11 = new Task(us1, "Frontend");

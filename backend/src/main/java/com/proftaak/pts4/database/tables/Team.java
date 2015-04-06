@@ -55,6 +55,13 @@ public class Team {
     private List<Project> projects = new ArrayList<>();
 
     /**
+     * The iterations of this team
+     */
+    @JSON(include = false)
+    @OneToMany(cascade = CascadeType.ALL)
+    private List<Iteration> iterations = new ArrayList<>();
+
+    /**
      * ORM-Lite no-arg constructor
      */
     public Team() {
@@ -96,5 +103,13 @@ public class Team {
 
     public void setProjects(List<Project> projects) {
         this.projects = projects;
+    }
+
+    public List<Iteration> getIterations() {
+        return this.iterations;
+    }
+
+    public void setIterations(List<Iteration> iterations) {
+        this.iterations = iterations;
     }
 }
