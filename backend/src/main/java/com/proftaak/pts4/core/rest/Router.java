@@ -3,6 +3,7 @@ package com.proftaak.pts4.core.rest;
 import com.avaje.ebean.Ebean;
 import com.proftaak.pts4.core.rest.annotations.PreRequest;
 import com.proftaak.pts4.core.rest.annotations.RequireAuth;
+import com.proftaak.pts4.core.rest.annotations.Route;
 import com.proftaak.pts4.database.tables.Token;
 import flexjson.JSONDeserializer;
 import flexjson.JSONSerializer;
@@ -55,6 +56,19 @@ public class Router extends HttpHandler {
     private List<Route> routes = new ArrayList<>();
 
     public Router() {
+        // Keep track of which paths have OPTION handlers.
+        List<String> routesWithOptions = new ArrayList<>();
+
+        // Get the option route.
+        Method optionsMethod = null;
+        com.proftaak.pts4.core.rest.annotations.Route optionsRoute = null;
+        try {
+            optionsMethod = this.getClass().getDeclaredMethod("handleOptions", RequestData.class);
+            optionsRoute = optionsMethod.getAnnotation(com.proftaak.pts4.core.rest.annotations.Route.class);
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+
         // Perform routing
         Reflections reflections = new Reflections(Router.CONTROLLER_PACKAGE, new MethodAnnotationsScanner());
         for (Method method : reflections.getMethodsAnnotatedWith(com.proftaak.pts4.core.rest.annotations.Route.class)) {
@@ -108,6 +122,12 @@ public class Router extends HttpHandler {
 
             // Store the route
             this.routes.add(new Route(routePattern, route, method));
+
+            // If there is no OPTION handler for this route, add it.
+            if (!routesWithOptions.contains(routePatternString)) {
+                routesWithOptions.add(routePatternString);
+                this.routes.add(new Route(routePattern, optionsRoute, optionsMethod));
+            }
         }
     }
 
@@ -125,16 +145,17 @@ public class Router extends HttpHandler {
             if (matcher.matches()) {
                 hasRoute = true;
                 if (route.route.method().method == request.getMethod()) {
-                    handleRequest(request, response, matcher, route.method);
+                    this.handleRequest(request, response, matcher, route.method);
                     return;
                 }
             }
         }
 
-        // No matching route, return error
         if (hasRoute) {
+            // We have routes with this route, but not with this method.
             this.handleError(response, HTTPException.ERROR_METHOD_NOT_ALLOWED);
         } else {
+            // No routes with that route.
             this.handleError(response, HTTPException.ERROR_NOT_FOUND);
         }
     }
@@ -270,5 +291,13 @@ public class Router extends HttpHandler {
         } catch (InvocationTargetException e) {
             throw (Exception) e.getCause();
         }
+    }
+
+    /**
+     * Handle OPTIONS requests.
+     */
+    @com.proftaak.pts4.core.rest.annotations.Route(method = com.proftaak.pts4.core.rest.annotations.Route.Method.OPTIONS)
+    private static Object handleOptions(RequestData requestData) {
+        return null;
     }
 }

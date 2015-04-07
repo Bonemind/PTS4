@@ -148,7 +148,7 @@ public class TeamController {
         // Get the team
         Team team = EbeanEx.require(EbeanEx.find(Team.class, requestData.getParameter("id")));
 
-        // Return the stories
+        // Return the users
         return team.getUsers();
     }
 
@@ -170,8 +170,8 @@ public class TeamController {
             Ebean.save(team);
         }
 
-        // Return nothing
-        return null;
+        // Return the users
+        return team.getUsers();
     }
 
     /**
@@ -195,7 +195,7 @@ public class TeamController {
         team.getUsers().remove(user);
         Ebean.save(team);
 
-        // Return nothing
-        return null;
+        // Return the users
+        return team.getUsers();
     }
 }
