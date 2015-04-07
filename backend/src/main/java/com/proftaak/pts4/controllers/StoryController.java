@@ -96,11 +96,12 @@ public class StoryController {
 
         int points = 0;
         if (requestData.getPayload().containsKey("points")) {
-            try {
-                points = Integer.parseInt((String) requestData.getPayload().get("points"));
-            }catch (NumberFormatException exc) {
-                throw new HTTPException("Points NaN", HttpStatus.BAD_REQUEST_400);
-            }
+            points = (int) requestData.getPayload().get("points");
+        }
+
+        int priority = 0;
+        if (requestData.getPayload().containsKey("priority")) {
+            priority = (int) requestData.getPayload().get("priority");
         }
 
         // Create the new user story
@@ -110,6 +111,7 @@ public class StoryController {
             (String) requestData.getPayload().get("name"),
             (String) requestData.getPayload().get("description"),
             status,
+            priority,
             points
         );
         Ebean.save(story);
@@ -146,12 +148,10 @@ public class StoryController {
             story.setStatus(status);
         }
         if (payload.containsKey("points")) {
-            try {
-                int points = Integer.parseInt((String) payload.get("points"));
-                story.setStoryPoints(points);
-            }catch (NumberFormatException exc) {
-                throw new HTTPException("Points NaN", HttpStatus.BAD_REQUEST_400);
-            }
+            story.setStoryPoints((int) payload.get("points"));
+        }
+        if (payload.containsKey("priority")) {
+            story.setPriority((int) payload.get("priority"));
         }
 
         // Save the changes
