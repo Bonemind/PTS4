@@ -9,10 +9,13 @@ import com.proftaak.pts4.core.rest.annotations.RequireAuth;
 import com.proftaak.pts4.core.rest.annotations.Route;
 import com.proftaak.pts4.database.EbeanEx;
 import com.proftaak.pts4.database.tables.Iteration;
+import com.proftaak.pts4.database.tables.Project;
 import com.proftaak.pts4.database.tables.Team;
 import com.proftaak.pts4.database.tables.User;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Map;
 
 /**
@@ -45,13 +48,18 @@ public class IterationController {
     @RequireAuth
     @Route(method = Route.Method.GET)
     public static Object getAllHandler(RequestData requestData) throws Exception {
-        return Ebean.find(Iteration.class).findList();
+        Collection<Iteration> iterations = new ArrayList<>();
+        User user = requestData.getUser();
+        for (Team team : user.getTeams()) {
+            iterations.addAll(team.getIterations());
+        }
+        return iterations;
     }
 
     /**
      * GET /iteration/1
      */
-    @RequireAuth
+    @RequireAuth(role = ScopeRole.TEAM_MEMBER)
     @Route(method = Route.Method.GET_ONE)
     public static Object getOneHandler(RequestData requestData) throws Exception {
         return EbeanEx.require(EbeanEx.find(Iteration.class, requestData.getParameter("id")));

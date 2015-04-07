@@ -26,6 +26,7 @@ public class TeamController {
     @PreRequest
     public static void setupSerializer(RequestData requestData) {
         requestData.include("projects");
+        requestData.include("scrumMaster");
     }
 
     /**
@@ -45,6 +46,7 @@ public class TeamController {
         if (user != null && team != null) {
             if (team.getScrumMaster().equals(user)) {
                 requestData.addScopeRole(ScopeRole.SCRUM_MASTER);
+                requestData.addScopeRole(ScopeRole.SCRUM_MASTER_OR_PRODUCT_OWNER);
             }
             if (team.getUsers().contains(user)) {
                 requestData.addScopeRole(ScopeRole.DEVELOPER);

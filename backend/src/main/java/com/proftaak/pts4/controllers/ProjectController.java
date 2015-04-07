@@ -13,6 +13,8 @@ import com.proftaak.pts4.database.tables.Project;
 import com.proftaak.pts4.database.tables.Team;
 import com.proftaak.pts4.database.tables.User;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Map;
 
 /**
@@ -44,6 +46,7 @@ public class ProjectController {
         if (user != null && project != null) {
             if (project.getProductOwner().equals(user)) {
                 requestData.addScopeRole(ScopeRole.PRODUCT_OWNER);
+                requestData.addScopeRole(ScopeRole.SCRUM_MASTER_OR_PRODUCT_OWNER);
                 requestData.addScopeRole(ScopeRole.TEAM_MEMBER);
             }
             TeamController.determineScopeRoles(requestData, project.getTeam());
@@ -56,13 +59,18 @@ public class ProjectController {
     @RequireAuth
     @Route(method = Route.Method.GET)
     public static Object getAllHandler(RequestData requestData) throws Exception {
-        return Ebean.find(Project.class).findList();
+        Collection<Project> projects = new ArrayList<>();
+        User user = requestData.getUser();
+        for (Team team : user.getTeams()) {
+            projects.addAll(team.getProjects());
+        }
+        return projects;
     }
 
     /**
      * GET /project/1
      */
-    @RequireAuth
+    @RequireAuth(role = ScopeRole.TEAM_MEMBER)
     @Route(method = Route.Method.GET_ONE)
     public static Object getOneHandler(RequestData requestData) throws Exception {
         return EbeanEx.require(EbeanEx.find(Project.class, requestData.getParameter("id")));
@@ -90,7 +98,7 @@ public class ProjectController {
     /**
      * PUT /project/1
      */
-    @RequireAuth(role = ScopeRole.PRODUCT_OWNER)
+    @RequireAuth(role = ScopeRole.SCRUM_MASTER_OR_PRODUCT_OWNER)
     @Route(method = Route.Method.PUT)
     public static Object putHandler(RequestData requestData) throws Exception {
         // Get the project
@@ -118,7 +126,7 @@ public class ProjectController {
     /**
      * DELETE /project/1
      */
-    @RequireAuth(role = ScopeRole.PRODUCT_OWNER)
+    @RequireAuth(role = ScopeRole.SCRUM_MASTER_OR_PRODUCT_OWNER)
     @Route(method = Route.Method.DELETE)
     public static Object deleteHandler(RequestData requestData) throws Exception {
         // Get the project
