@@ -3,17 +3,18 @@ package com.proftaak.pts4.controllers;
 import com.avaje.ebean.Ebean;
 import com.proftaak.pts4.core.rest.HTTPException;
 import com.proftaak.pts4.core.rest.RequestData;
+import com.proftaak.pts4.core.rest.ScopeRole;
 import com.proftaak.pts4.core.rest.annotations.Controller;
 import com.proftaak.pts4.core.rest.annotations.PreRequest;
 import com.proftaak.pts4.core.rest.annotations.RequireAuth;
 import com.proftaak.pts4.core.rest.annotations.Route;
 import com.proftaak.pts4.database.EbeanEx;
-import com.proftaak.pts4.database.tables.Story;
-import com.proftaak.pts4.database.tables.Task;
-import com.proftaak.pts4.database.tables.User;
 import org.glassfish.grizzly.http.util.HttpStatus;
-
+import com.proftaak.pts4.database.tables.*;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Map;
+import java.util.TreeSet;
 
 /**
  * @author Michon
@@ -37,13 +38,27 @@ public class TaskController {
     @RequireAuth
     @Route(method = Route.Method.GET)
     public static Object getAllHandler(RequestData requestData) throws Exception {
-        return Ebean.find(Task.class).findList();
+        Collection<Task> tasks = new TreeSet<>();
+        User user = requestData.getUser();
+        for (Team team : user.getTeams()) {
+            for (Project project : team.getProjects()) {
+                for (Story story : project.getStories()) {
+                    tasks.addAll(story.getTasks());
+                }
+            }
+        }
+        for (Project project : user.getOwnedProjects()) {
+            for (Story story : project.getStories()) {
+                tasks.addAll(story.getTasks());
+            }
+        }
+        return tasks;
     }
 
     /**
      * GET /task/1
      */
-    @RequireAuth
+    @RequireAuth(role = ScopeRole.TEAM_MEMBER)
     @Route(method = Route.Method.GET_ONE)
     public static Object getOneHandler(RequestData requestData) throws Exception {
         return EbeanEx.require(EbeanEx.find(Task.class, requestData.getParameter("id")));
@@ -52,7 +67,7 @@ public class TaskController {
     /**
      * POST /task
      */
-    @RequireAuth
+    @RequireAuth(role = ScopeRole.TEAM_MEMBER)
     @Route(method = Route.Method.POST)
     public static Object postHandler(RequestData requestData) throws Exception {
         Story story = EbeanEx.require(EbeanEx.find(Story.class, requestData.getPayload().get("story")));
@@ -79,7 +94,7 @@ public class TaskController {
     /**
      * PUT /story/1/task/1
      */
-    @RequireAuth
+    @RequireAuth(role = ScopeRole.TEAM_MEMBER)
     @Route(method = Route.Method.PUT)
     public static Object putHandler(RequestData requestData) throws Exception {
         // Get the user task
@@ -116,7 +131,7 @@ public class TaskController {
     /**
      * DELETE /story/1/task/1
      */
-    @RequireAuth
+    @RequireAuth(role = ScopeRole.TEAM_MEMBER)
     @Route(method = Route.Method.DELETE)
     public static Object deleteHandler(RequestData requestData) throws Exception {
         // Get the task

@@ -26,6 +26,7 @@ public class TeamController {
     @PreRequest
     public static void setupSerializer(RequestData requestData) {
         requestData.include("projects");
+        requestData.include("scrumMaster");
     }
 
     /**
@@ -45,6 +46,7 @@ public class TeamController {
         if (user != null && team != null) {
             if (team.getScrumMaster().equals(user)) {
                 requestData.addScopeRole(ScopeRole.SCRUM_MASTER);
+                requestData.addScopeRole(ScopeRole.SCRUM_MASTER_OR_PRODUCT_OWNER);
             }
             if (team.getUsers().contains(user)) {
                 requestData.addScopeRole(ScopeRole.DEVELOPER);
@@ -59,13 +61,14 @@ public class TeamController {
     @RequireAuth
     @Route(method = Route.Method.GET)
     public static Object getAllHandler(RequestData requestData) throws Exception {
-        return Ebean.find(Team.class).findList();
+        User user = requestData.getUser();
+        return user.getTeams();
     }
 
     /**
      * GET /team/1
      */
-    @RequireAuth
+    @RequireAuth(role = ScopeRole.TEAM_MEMBER)
     @Route(method = Route.Method.GET_ONE)
     public static Object getHandler(RequestData requestData) throws Exception {
         return Ebean.find(Team.class, requestData.getParameter("id"));
@@ -127,7 +130,7 @@ public class TeamController {
     }
 
     /**
-     * GET /team/1/story
+     * GET /team/1/project
      */
     @RequireAuth(role = ScopeRole.TEAM_MEMBER)
     @Route(method = Route.Method.GET, route = "/team/{id}/project")
@@ -148,7 +151,7 @@ public class TeamController {
         // Get the team
         Team team = EbeanEx.require(EbeanEx.find(Team.class, requestData.getParameter("id")));
 
-        // Return the stories
+        // Return the users
         return team.getUsers();
     }
 
@@ -170,8 +173,8 @@ public class TeamController {
             Ebean.save(team);
         }
 
-        // Return nothing
-        return null;
+        // Return the users
+        return team.getUsers();
     }
 
     /**
@@ -195,7 +198,7 @@ public class TeamController {
         team.getUsers().remove(user);
         Ebean.save(team);
 
-        // Return nothing
-        return null;
+        // Return the users
+        return team.getUsers();
     }
 }

@@ -9,11 +9,12 @@ import com.proftaak.pts4.core.rest.annotations.PreRequest;
 import com.proftaak.pts4.core.rest.annotations.RequireAuth;
 import com.proftaak.pts4.core.rest.annotations.Route;
 import com.proftaak.pts4.database.EbeanEx;
-import com.proftaak.pts4.database.tables.Iteration;
-import com.proftaak.pts4.database.tables.Project;
-import com.proftaak.pts4.database.tables.Story;
+import com.proftaak.pts4.database.tables.*;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Map;
+import java.util.TreeSet;
 
 /**
  * @author Michon
@@ -52,13 +53,23 @@ public class StoryController {
     @RequireAuth
     @Route(method = Route.Method.GET)
     public static Object getAllHandler(RequestData requestData) throws Exception {
-        return Ebean.find(Story.class).findList();
+        Collection<Story> stories = new TreeSet<>();
+        User user = requestData.getUser();
+        for (Team team : user.getTeams()) {
+            for (Project project : team.getProjects()) {
+                stories.addAll(project.getStories());
+            }
+        }
+        for (Project project : user.getOwnedProjects()) {
+            stories.addAll(project.getStories());
+        }
+        return stories;
     }
 
     /**
      * GET /story/1
      */
-    @RequireAuth
+    @RequireAuth(role = ScopeRole.TEAM_MEMBER)
     @Route(method = Route.Method.GET_ONE)
     public static Object getOneHandler(RequestData requestData) throws Exception {
         return EbeanEx.require(EbeanEx.find(Story.class, requestData.getParameter("id")));
@@ -67,7 +78,7 @@ public class StoryController {
     /**
      * POST /story
      */
-    @RequireAuth
+    @RequireAuth(role = ScopeRole.TEAM_MEMBER)
     @Route(method = Route.Method.POST)
     public static Object postHandler(RequestData requestData) throws Exception {
         // Determine the story status.
@@ -99,7 +110,7 @@ public class StoryController {
     /**
      * PUT /story/1
      */
-    @RequireAuth
+    @RequireAuth(role = ScopeRole.TEAM_MEMBER)
     @Route(method = Route.Method.PUT)
     public static Object putHandler(RequestData requestData) throws Exception {
         // Get the user story
@@ -134,7 +145,7 @@ public class StoryController {
     /**
      * DELETE /story/1
      */
-    @RequireAuth
+    @RequireAuth(role = ScopeRole.TEAM_MEMBER)
     @Route(method = Route.Method.DELETE)
     public static Object deleteHandler(RequestData requestData) throws Exception {
         // Get the user story

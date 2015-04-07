@@ -37,5 +37,10 @@ public enum ScopeRole {
      * <p>
      * If there is no currently relevant project, this role will not be present
      */
-    PRODUCT_OWNER;
+    PRODUCT_OWNER,
+
+    /**
+     * This role will be present if the user has either the SCRUM_MASTER or the PRODUCT_OWNER role.
+     */
+    SCRUM_MASTER_OR_PRODUCT_OWNER;
 }

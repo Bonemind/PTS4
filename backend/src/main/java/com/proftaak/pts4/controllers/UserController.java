@@ -47,6 +47,11 @@ public class UserController {
         // Get the user
         User user = EbeanEx.require(EbeanEx.find(User.class, requestData.getParameter("id")));
 
+        // Check whether this matches the currently logged in user
+        if (!user.equals(requestData.getUser())) {
+            throw HTTPException.ERROR_FORBIDDEN;
+        }
+
         // Change the user
         Map<String, Object> payload = requestData.getPayload();
         if (payload.containsKey("password")) {
@@ -68,6 +73,11 @@ public class UserController {
     public static Object deleteHandler(RequestData requestData) throws Exception {
         // Get the user
         User user = EbeanEx.require(EbeanEx.find(User.class, requestData.getParameter("id")));
+
+        // Check whether this matches the currently logged in user
+        if (!user.equals(requestData.getUser())) {
+            throw HTTPException.ERROR_FORBIDDEN;
+        }
 
         // If the user is scrum master of any teams, refuse to delete him
         if (user.getOwnedTeams().size() > 0) {
