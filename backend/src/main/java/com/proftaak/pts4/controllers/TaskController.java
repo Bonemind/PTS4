@@ -14,6 +14,7 @@ import com.proftaak.pts4.database.tables.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
+import java.util.TreeSet;
 
 /**
  * @author Michon
@@ -37,13 +38,18 @@ public class TaskController {
     @RequireAuth
     @Route(method = Route.Method.GET)
     public static Object getAllHandler(RequestData requestData) throws Exception {
-        Collection<Task> tasks = new ArrayList<>();
+        Collection<Task> tasks = new TreeSet<>();
         User user = requestData.getUser();
         for (Team team : user.getTeams()) {
             for (Project project : team.getProjects()) {
                 for (Story story : project.getStories()) {
                     tasks.addAll(story.getTasks());
                 }
+            }
+        }
+        for (Project project : user.getOwnedProjects()) {
+            for (Story story : project.getStories()) {
+                tasks.addAll(story.getTasks());
             }
         }
         return tasks;
