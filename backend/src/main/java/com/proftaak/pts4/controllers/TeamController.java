@@ -59,13 +59,14 @@ public class TeamController {
     @RequireAuth
     @Route(method = Route.Method.GET)
     public static Object getAllHandler(RequestData requestData) throws Exception {
-        return Ebean.find(Team.class).findList();
+        User user = requestData.getUser();
+        return user.getTeams();
     }
 
     /**
      * GET /team/1
      */
-    @RequireAuth
+    @RequireAuth(role = ScopeRole.TEAM_MEMBER)
     @Route(method = Route.Method.GET_ONE)
     public static Object getHandler(RequestData requestData) throws Exception {
         return Ebean.find(Team.class, requestData.getParameter("id"));
@@ -127,7 +128,7 @@ public class TeamController {
     }
 
     /**
-     * GET /team/1/story
+     * GET /team/1/project
      */
     @RequireAuth(role = ScopeRole.TEAM_MEMBER)
     @Route(method = Route.Method.GET, route = "/team/{id}/project")

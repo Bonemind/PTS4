@@ -27,6 +27,13 @@ public class ProjectController {
     public static void determineScopeRoles(RequestData requestData) throws Exception {
         Project project = EbeanEx.find(Project.class, requestData.getParameter("id"));
         ProjectController.determineScopeRoles(requestData, project);
+
+        if (requestData.getPayload() != null && requestData.getPayload().containsKey("team")) {
+            Team team = EbeanEx.find(Team.class, requestData.getPayload().get("team"));
+            if (team != null) {
+                TeamController.determineScopeRoles(requestData, team);
+            }
+        }
     }
 
     /**
@@ -39,6 +46,7 @@ public class ProjectController {
                 requestData.addScopeRole(ScopeRole.PRODUCT_OWNER);
                 requestData.addScopeRole(ScopeRole.TEAM_MEMBER);
             }
+            TeamController.determineScopeRoles(requestData, project.getTeam());
         }
     }
 
