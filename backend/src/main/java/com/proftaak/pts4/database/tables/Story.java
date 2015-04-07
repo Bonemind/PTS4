@@ -41,6 +41,7 @@ public class Story {
     public static final String FIELD_PROJECT = "project_id";
     public static final String FIELD_ITERATION = "iteration_id";
     public static final String FIELD_STORY_POINTS = "story_points";
+    public static final String FIELD_PRIORITY = "priority";
 
     /**
      * The database id of this userstory
@@ -95,6 +96,12 @@ public class Story {
     private int storyPoints;
 
     /**
+     * The priority of this story.
+     */
+    @Column(name = FIELD_PRIORITY)
+    private int priority;
+
+    /**
      * ORM-Lite no-arg constructor
      */
     public Story() {
@@ -104,12 +111,17 @@ public class Story {
         this(project, iteration, name, description, status, 0);
     }
 
-    public Story(Project project, Iteration iteration, String name, String description, Status status, int storyPoints) {
+    public Story(Project project, Iteration iteration, String name, String description, Status status, int priority) {
+        this(project, iteration, name, description, status, priority, 0);
+    }
+
+    public Story(Project project, Iteration iteration, String name, String description, Status status, int priority, int storyPoints) {
         this.setProject(project);
         this.setIteration(iteration);
         this.setName(name);
         this.setDescription(description);
         this.setStatus(status);
+        this.setPriority(priority);
         this.setStoryPoints(storyPoints);
     }
 
@@ -167,5 +179,13 @@ public class Story {
 
     public void setStoryPoints(int storyPoints) {
         this.storyPoints = storyPoints;
+    }
+
+    public int getPriority() {
+        return this.priority;
+    }
+
+    public void setPriority(int priority) {
+        this.priority = priority;
     }
 }

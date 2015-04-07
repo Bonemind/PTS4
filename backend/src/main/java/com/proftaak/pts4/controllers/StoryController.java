@@ -102,6 +102,7 @@ public class StoryController {
             requestData.getPayload().getString("name"),
             requestData.getPayload().getString("description"),
             status,
+            requestData.getPayload().getInt("priority", 0),
             requestData.getPayload().getInt("points", 0)
         );
         Ebean.save(story);
@@ -139,6 +140,9 @@ public class StoryController {
         }
         if (payload.containsKey("points")) {
             story.setStoryPoints(payload.getInt("points"));
+        }
+        if (payload.containsKey("priority")) {
+            story.setStoryPoints(payload.getInt("priority"));
         }
 
         // Save the changes
