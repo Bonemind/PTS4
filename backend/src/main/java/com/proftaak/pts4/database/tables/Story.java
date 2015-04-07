@@ -34,7 +34,32 @@ public class Story {
         ACCEPTED
     }
 
+    public enum Type {
+        /**
+         * An user story
+         *
+         * This is functionality for the end user
+         * It is usually described as "As a _ I can _ so that I can _"
+         */
+        USER_STORY,
+
+        /**
+         * A defect
+         *
+         * This is something that is broken that needs fixing
+         */
+        DEFECT,
+
+        /**
+         * Stuff
+         *
+         * This is everything that needs to be done that is not either functionality for the end user or a bugfix
+         */
+        STUFF;
+    }
+
     public static final String FIELD_ID = "id";
+    public static final String FIELD_TYPE = "type";
     public static final String FIELD_NAME = "name";
     public static final String FIELD_DESCRIPTION = "description";
     public static final String FIELD_STATUS = "status";
@@ -49,6 +74,13 @@ public class Story {
     @Id
     @Column(name = FIELD_ID)
     private int id;
+
+    /**
+     * The type of this userstory
+     */
+    @Column(name = FIELD_TYPE)
+    @Enumerated(EnumType.STRING)
+    private Type type;
 
     /**
      * The name of this userstory
@@ -108,22 +140,22 @@ public class Story {
     private int priority;
 
     /**
+     * The tasks of this story
+     */
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name = Task.FIELD_STORY)
+    private List<Task> tasks = new ArrayList<>();
+
+    /**
      * ORM-Lite no-arg constructor
      */
     public Story() {
     }
 
-    public Story(Project project, Iteration iteration, String name, String description, Status status) {
-        this(project, iteration, name, description, status, 0);
-    }
-
-    public Story(Project project, Iteration iteration, String name, String description, Status status, int priority) {
-        this(project, iteration, name, description, status, priority, 0);
-    }
-
-    public Story(Project project, Iteration iteration, String name, String description, Status status, int priority, int storyPoints) {
+    public Story(Project project, Iteration iteration, Type type, String name, String description, Status status, int priority, int storyPoints) {
         this.setProject(project);
         this.setIteration(iteration);
+        this.type = type;
         this.setName(name);
         this.setDescription(description);
         this.setStatus(status);
@@ -133,6 +165,10 @@ public class Story {
 
     public int getId() {
         return this.id;
+    }
+
+    public Type getType() {
+        return this.type;
     }
 
     public String getName() {

@@ -16,7 +16,7 @@ import org.glassfish.grizzly.http.util.HttpStatus;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
-import java.util.TreeSet;
+import java.util.HashSet;
 
 /**
  * @author Michon
@@ -42,20 +42,12 @@ public class StoryController {
     }
 
     /**
-     * For this controller we will want to include the list of tasks in responses
-     */
-    @PreRequest
-    public static void setupSerializer(RequestData requestData) {
-        requestData.include("tasks");
-    }
-
-    /**
      * GET /story
      */
     @RequireAuth
     @Route(method = Route.Method.GET)
     public static Object getAllHandler(RequestData requestData) throws Exception {
-        Collection<Story> stories = new TreeSet<>();
+        Collection<Story> stories = new HashSet<>();
         User user = requestData.getUser();
         for (Team team : user.getTeams()) {
             for (Project project : team.getProjects()) {
@@ -83,13 +75,13 @@ public class StoryController {
     @RequireAuth(role = ScopeRole.TEAM_MEMBER)
     @Route(method = Route.Method.POST)
     public static Object postHandler(RequestData requestData) throws Exception {
-        // Determine the story status.
+        // Determine the story status
         Story.Status status = Story.Status.valueOf(requestData.getPayload().getOrDefault("status", Story.Status.DEFINED.toString()).toString());
         if (status == Story.Status.ACCEPTED) {
             requestData.requireScopeRole(ScopeRole.PRODUCT_OWNER);
         }
 
-        // Determine the story iteration.
+        // Determine the story iteration
         Iteration iteration = null;
         if (requestData.getPayload().containsKey("iteration")) {
             iteration = EbeanEx.require(EbeanEx.find(Iteration.class, requestData.getPayload().get("iteration")));
@@ -99,10 +91,11 @@ public class StoryController {
         Story story = new Story(
             EbeanEx.require(EbeanEx.find(Project.class, requestData.getPayload().get("project"))),
             iteration,
+            Story.Type.valueOf(requestData.getPayload().getOrDefault("type", Story.Type.USER_STORY.toString()).toString()),
             requestData.getPayload().getString("name"),
             requestData.getPayload().getString("description"),
             status,
-            requestData.getPayload().getInt("priority", 0),
+            0, // Priority
             requestData.getPayload().getInt("points", 0)
         );
         Ebean.save(story);
@@ -142,7 +135,11 @@ public class StoryController {
             story.setStoryPoints(payload.getInt("points"));
         }
         if (payload.containsKey("priority")) {
-            story.setPriority(payload.getInt("priority"));
+            if (story.getProject().getProductOwner().equals(requestData.getUser())) {
+                story.setPriority(payload.getInt("priority"));
+            } else {
+                throw HTTPException.ERROR_FORBIDDEN;
+            }
         }
 
         // Save the changes

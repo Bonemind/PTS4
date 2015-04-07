@@ -17,6 +17,8 @@ public class TaskProgress {
     public static final String FIELD_TASK = "task_id";
     public static final String FIELD_USER = "user_id";
     public static final String FIELD_EFFORT = "effort";
+    public static final String FIELD_TODO_BEFORE = "todo_before";
+    public static final String FIELD_TODO_AFTER = "todo_after";
     public static final String FIELD_TIMESTAMP = "timestamp";
 
     /**
@@ -47,6 +49,18 @@ public class TaskProgress {
     private double effort;
 
     /**
+     * The remaining to-do before this work
+     */
+    @Column(name = FIELD_TODO_BEFORE, nullable = false)
+    private double todoBefore;
+
+    /**
+     * The remaining to-do after this work
+     */
+    @Column(name = FIELD_TODO_AFTER, nullable = false)
+    private double todoAfter;
+
+    /**
      * When this work was done
      */
     @JSON(transformer = ToStringTransformer.class)
@@ -57,11 +71,22 @@ public class TaskProgress {
 
     }
 
-    public TaskProgress(Task task, User user, double effort) {
+    public TaskProgress(Task task, User user, double effort, double todo) {
         this.task = task;
         this.user = user;
         this.effort = effort;
         this.timestamp = LocalDateTime.now();
+        this.todoBefore = task.getTodo();
+
+        task.getProgress().add(this);
+        if (todo > 0) {
+            // Todo is set, so set the todo of the task as well.
+            this.todoAfter = todo;
+            task.setTodo(todo);
+        } else {
+            // No todo set, let the task determine the todo.
+            this.todoAfter = task.getTodo();
+        }
     }
 
     public int getId() {
@@ -78,6 +103,14 @@ public class TaskProgress {
 
     public double getEffort() {
         return this.effort;
+    }
+
+    public double getTodoBefore() {
+        return this.todoBefore;
+    }
+
+    public double getTodoAfter() {
+        return this.todoAfter;
     }
 
     public LocalDateTime getTimestamp() {

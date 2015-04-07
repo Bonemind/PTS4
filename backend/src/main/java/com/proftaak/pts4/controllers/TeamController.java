@@ -10,10 +10,11 @@ import com.proftaak.pts4.core.rest.annotations.PreRequest;
 import com.proftaak.pts4.core.rest.annotations.RequireAuth;
 import com.proftaak.pts4.core.rest.annotations.Route;
 import com.proftaak.pts4.database.EbeanEx;
-import com.proftaak.pts4.database.tables.Team;
-import com.proftaak.pts4.database.tables.User;
+import com.proftaak.pts4.database.tables.*;
 import org.glassfish.grizzly.http.util.HttpStatus;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Map;
 
 /**
@@ -148,7 +149,7 @@ public class TeamController {
      */
     @RequireAuth(role = ScopeRole.TEAM_MEMBER)
     @Route(method = Route.Method.GET, route = "/team/{id}/user")
-    public static Object getStoryHandler(RequestData requestData) throws Exception {
+    public static Object getUserHandler(RequestData requestData) throws Exception {
         // Get the team
         Team team = EbeanEx.require(EbeanEx.find(Team.class, requestData.getParameter("id")));
 
@@ -201,5 +202,35 @@ public class TeamController {
 
         // Return the users
         return team.getUsers();
+    }
+
+    /**
+     * GET /team/1/story
+     */
+    @RequireAuth(role = ScopeRole.TEAM_MEMBER)
+    @Route(method = Route.Method.GET, route = "/team/{id}/story")
+    public static Object getStoryHandler(RequestData requestData) throws Exception {
+        // Get the team
+        Team team = EbeanEx.require(EbeanEx.find(Team.class, requestData.getParameter("id")));
+
+        // Get all stories
+        Collection<Story> stories = new ArrayList<>();
+        for (Project project : team.getProjects()) {
+            stories.addAll(project.getStories());
+        }
+        return stories;
+    }
+
+    /**
+     * GET /team/1/iteration
+     */
+    @RequireAuth(role = ScopeRole.TEAM_MEMBER)
+    @Route(method = Route.Method.GET, route = "/team/{id}/iteration")
+    public static Object getIterationHandler(RequestData requestData) throws Exception {
+        // Get the team
+        Team team = EbeanEx.require(EbeanEx.find(Team.class, requestData.getParameter("id")));
+
+        // Return the iterations
+        return team.getIterations();
     }
 }

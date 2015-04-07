@@ -18,7 +18,7 @@ import java.util.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
-import java.util.TreeSet;
+import java.util.HashSet;
 
 /**
  * @author Michon
@@ -51,7 +51,7 @@ public class TaskController {
     @RequireAuth
     @Route(method = Route.Method.GET)
     public static Object getAllHandler(RequestData requestData) throws Exception {
-        Collection<Task> tasks = new TreeSet<>();
+        Collection<Task> tasks = new HashSet<>();
         User user = requestData.getUser();
         for (Team team : user.getTeams()) {
             for (Project project : team.getProjects()) {
@@ -188,7 +188,8 @@ public class TaskController {
         TaskProgress progress = new TaskProgress(
             task,
             requestData.getUser(),
-            requestData.getPayload().getDouble("effort")
+            requestData.getPayload().getDouble("effort"),
+            requestData.getPayload().getDouble("todo", -1d)
         );
         Ebean.save(progress);
 
