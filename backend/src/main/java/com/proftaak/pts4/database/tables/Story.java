@@ -90,6 +90,12 @@ public class Story {
     private List<Task> tasks = new ArrayList<>();
 
     /**
+     * The tasks of this story
+     */
+    @OneToMany(cascade = CascadeType.ALL)
+    private List<Task> tests = new ArrayList<>();
+
+    /**
      * The amount of story points this story has.
      */
     @Column(name = FIELD_STORY_POINTS)
@@ -188,4 +194,9 @@ public class Story {
     public void setPriority(int priority) {
         this.priority = priority;
     }
+
+    public List<Task> getTests() {
+        return this.tests;
+    }
+
 }
