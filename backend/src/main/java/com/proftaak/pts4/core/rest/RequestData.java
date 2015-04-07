@@ -41,7 +41,7 @@ public class RequestData {
     /**
      * The roles the current user has within the current scope.
      */
-    private Collection<ScopeRole> roles = new TreeSet<>();
+    private Collection<ScopeRole> roles = new HashSet<>();
 
     /**
      * The JSONSerializer that will be used to serialize the returned object
