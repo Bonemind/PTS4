@@ -47,7 +47,7 @@ public class TestController {
     @RequireAuth
     @Route(method = Route.Method.GET)
     public static Object getAllHandler(RequestData requestData) throws Exception {
-        Collection<Task> tests = new TreeSet<>();
+        Collection<Test> tests = new TreeSet<>();
         User user = requestData.getUser();
         for (Team team : user.getTeams()) {
             for (Project project : team.getProjects()) {

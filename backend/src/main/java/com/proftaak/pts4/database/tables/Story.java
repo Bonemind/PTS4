@@ -119,13 +119,7 @@ public class Story {
      * The tasks of this story
      */
     @OneToMany(cascade = CascadeType.ALL)
-    private List<Task> tasks = new ArrayList<>();
-
-    /**
-     * The tasks of this story
-     */
-    @OneToMany(cascade = CascadeType.ALL)
-    private List<Task> tests = new ArrayList<>();
+    private List<Test> tests = new ArrayList<>();
 
     /**
      * The amount of story points this story has.
@@ -231,7 +225,7 @@ public class Story {
         this.priority = priority;
     }
 
-    public List<Task> getTests() {
+    public List<Test> getTests() {
         return this.tests;
     }
 
