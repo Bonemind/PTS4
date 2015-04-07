@@ -10,6 +10,8 @@ import com.proftaak.pts4.core.rest.annotations.Route;
 import com.proftaak.pts4.database.EbeanEx;
 import com.proftaak.pts4.database.tables.Story;
 import com.proftaak.pts4.database.tables.Task;
+import com.proftaak.pts4.database.tables.User;
+import org.glassfish.grizzly.http.util.HttpStatus;
 
 import java.util.Map;
 
@@ -53,12 +55,20 @@ public class TaskController {
     @RequireAuth
     @Route(method = Route.Method.POST)
     public static Object postHandler(RequestData requestData) throws Exception {
+        Story story = EbeanEx.require(EbeanEx.find(Story.class, requestData.getPayload().get("story")));
+        User assignedOwner = EbeanEx.find(User.class, requestData.getPayload().get("owner"));
+
+        if(!story.getProject().getTeam().getUsers().contains(assignedOwner)) {
+            throw new HTTPException("User not part of team", HttpStatus.BAD_REQUEST_400);
+        }
+
         // Create the new task
         Task task = new Task(
-            EbeanEx.require(EbeanEx.find(Story.class, requestData.getPayload().get("story"))),
+            story,
             (String) requestData.getPayload().get("name"),
             (String) requestData.getPayload().get("description"),
-            Task.Status.valueOf(requestData.getPayload().getOrDefault("status", Task.Status.DEFINED.toString()).toString())
+            Task.Status.valueOf(requestData.getPayload().getOrDefault("status", Task.Status.DEFINED.toString()).toString()),
+            assignedOwner
         );
         Ebean.save(task);
 
@@ -85,6 +95,15 @@ public class TaskController {
         }
         if (payload.containsKey("status")) {
             task.setStatus(Task.Status.valueOf(payload.getOrDefault("status", Task.Status.DEFINED.toString()).toString()));
+        }
+        if(payload.containsKey("owner")) {
+            User assignedOwner = EbeanEx.require(EbeanEx.find(User.class, requestData.getPayload().get("owner")));
+
+            if(!task.getStory().getProject().getTeam().getUsers().contains(assignedOwner)) {
+                throw new HTTPException("User not part of team", HttpStatus.BAD_REQUEST_400);
+            }
+
+            task.setOwner(assignedOwner);
         }
 
         // Save the changes
