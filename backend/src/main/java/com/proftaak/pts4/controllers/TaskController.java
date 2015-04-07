@@ -187,7 +187,8 @@ public class TaskController {
         TaskProgress progress = new TaskProgress(
             task,
             requestData.getUser(),
-            requestData.getPayload().getDouble("effort")
+            requestData.getPayload().getDouble("effort"),
+            requestData.getPayload().getDouble("todo", -1d)
         );
         Ebean.save(progress);
 

@@ -95,7 +95,7 @@ public class DBUtils {
         Task t22 = new Task(us2, null, "Backend", null, 1, Task.Status.DONE);
         Ebean.save(t22);
 
-        TaskProgress tp1 = new TaskProgress(t12, u1, 0.25);
+        TaskProgress tp1 = new TaskProgress(t12, u1, 0.25, -1);
         Ebean.save(tp1);
     }
 }

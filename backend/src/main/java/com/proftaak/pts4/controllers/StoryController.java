@@ -42,14 +42,6 @@ public class StoryController {
     }
 
     /**
-     * For this controller we will want to include the list of tasks in responses
-     */
-    @PreRequest
-    public static void setupSerializer(RequestData requestData) {
-        requestData.include("tasks");
-    }
-
-    /**
      * GET /story
      */
     @RequireAuth
