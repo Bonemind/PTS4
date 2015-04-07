@@ -81,9 +81,9 @@ public class DBUtils {
         Project p = new Project(tm, u3, "PTS4", "Proftaak S4");
         Ebean.save(p);
 
-        Story us1 = new Story(p, null, "Foo", null, Story.Status.DEFINED);
+        Story us1 = new Story(p, null, Story.Type.DEFECT, "Foo", null, Story.Status.DEFINED, 0, 3);
         Ebean.save(us1);
-        Story us2 = new Story(p, it, "Lorem", "Lorem Ipsum Dolor Sit Amet", Story.Status.IN_PROGRESS, 3);
+        Story us2 = new Story(p, it, Story.Type.USER_STORY, "Lorem", "Lorem Ipsum Dolor Sit Amet", Story.Status.IN_PROGRESS, 1, 4);
         Ebean.save(us2);
 
         Task t11 = new Task(us1, null, "Frontend", null, 2, Task.Status.DEFINED);

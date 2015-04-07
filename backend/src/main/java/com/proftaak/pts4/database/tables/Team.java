@@ -52,6 +52,7 @@ public class Team {
      */
     @JSON(include = false)
     @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name = Project.FIELD_TEAM)
     private List<Project> projects = new ArrayList<>();
 
     /**
@@ -59,6 +60,7 @@ public class Team {
      */
     @JSON(include = false)
     @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name = Iteration.FIELD_TEAM)
     private List<Iteration> iterations = new ArrayList<>();
 
     /**

@@ -89,6 +89,7 @@ public class Task {
      * The progress of this task
      */
     @OneToMany
+    @JoinColumn(name = TaskProgress.FIELD_TASK)
     private List<TaskProgress> progress = new ArrayList<>();
 
     /**

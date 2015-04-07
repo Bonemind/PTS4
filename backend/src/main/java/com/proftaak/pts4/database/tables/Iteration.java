@@ -65,6 +65,7 @@ public class Iteration {
      * The user stories of this iteration
      */
     @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name = Story.FIELD_ITERATION)
     private List<Story> stories = new ArrayList<>();
 
     public Iteration() {
