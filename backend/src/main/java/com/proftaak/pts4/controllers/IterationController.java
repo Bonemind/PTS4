@@ -15,7 +15,6 @@ import com.proftaak.pts4.database.tables.Team;
 import com.proftaak.pts4.database.tables.User;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
@@ -76,8 +75,8 @@ public class IterationController {
         // Create the new iteration
         Iteration iteration = new Iteration(
             EbeanEx.require(EbeanEx.find(Team.class, requestData.getPayload().get("team"))),
-            LocalDate.parse(requestData.getPayload().getString("start"), DateTimeFormatter.BASIC_ISO_DATE),
-            LocalDate.parse(requestData.getPayload().getString("end"), DateTimeFormatter.BASIC_ISO_DATE),
+            LocalDate.parse(requestData.getPayload().getString("start")),
+            LocalDate.parse(requestData.getPayload().getString("end")),
             requestData.getPayload().getString("name"),
             requestData.getPayload().getString("description")
         );
@@ -99,10 +98,10 @@ public class IterationController {
         // Change the iteration
         Payload payload = requestData.getPayload();
         if (payload.containsKey("start")) {
-            iteration.setStart(LocalDate.parse(payload.getString("start"), DateTimeFormatter.BASIC_ISO_DATE));
+            iteration.setStart(LocalDate.parse(payload.getString("start")));
         }
         if (payload.containsKey("end")) {
-            iteration.setStart(LocalDate.parse(payload.getString("end"), DateTimeFormatter.BASIC_ISO_DATE));
+            iteration.setStart(LocalDate.parse(payload.getString("end")));
         }
         if (payload.containsKey("name")) {
             iteration.setName(payload.getString("name"));
