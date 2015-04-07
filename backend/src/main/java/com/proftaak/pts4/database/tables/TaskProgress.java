@@ -53,6 +53,10 @@ public class TaskProgress {
     @Column(name = FIELD_TIMESTAMP, nullable = false)
     private LocalDateTime timestamp;
 
+    public TaskProgress() {
+
+    }
+
     public TaskProgress(Task task, User user, double effort) {
         this.task = task;
         this.user = user;
