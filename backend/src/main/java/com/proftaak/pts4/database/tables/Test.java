@@ -19,7 +19,7 @@ public class Test {
         /**
          * Acceptance test has been completed
          */
-        DONE
+        ACCEPTED
     }
 
     public static final String FIELD_ID = "id";
@@ -62,8 +62,7 @@ public class Test {
     @JoinColumn(name = FIELD_STORY)
     private Story story;
 
-    public Test(Story story, String name, String description,Status status, int id) {
-        this.id = id;
+    public Test(Story story, String name, String description,Status status) {
         this.name = name;
         this.description = description;
         this.status = status;

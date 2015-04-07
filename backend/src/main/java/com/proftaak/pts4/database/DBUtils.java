@@ -95,6 +95,13 @@ public class DBUtils {
         Task t22 = new Task(us2, null, "Backend", null, 1, Task.Status.DONE);
         Ebean.save(t22);
 
+        Test test1 = new Test(us1, "us1Test", "test some stuff", Test.Status.DEFINED);
+        Ebean.save(test1);
+        Test test2 = new Test(us1, "us1Test1", "test some stuff", Test.Status.ACCEPTED);
+        Ebean.save(test2);
+        Test test3 = new Test(us2, "us2Test", "test some stuff", Test.Status.DEFINED);
+        Ebean.save(test3);
+
         TaskProgress tp1 = new TaskProgress(t12, u1, 0.25, -1);
         Ebean.save(tp1);
     }

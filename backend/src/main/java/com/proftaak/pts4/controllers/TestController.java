@@ -14,6 +14,7 @@ import com.proftaak.pts4.database.tables.*;
 import org.glassfish.grizzly.http.util.HttpStatus;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.TreeSet;
 
 /**
@@ -47,7 +48,7 @@ public class TestController {
     @RequireAuth
     @Route(method = Route.Method.GET)
     public static Object getAllHandler(RequestData requestData) throws Exception {
-        Collection<Test> tests = new TreeSet<>();
+        Collection<Test> tests = new HashSet<>();
         User user = requestData.getUser();
         for (Team team : user.getTeams()) {
             for (Project project : team.getProjects()) {
@@ -83,11 +84,11 @@ public class TestController {
 
         // Create the new test
         Test test = new Test(
-                EbeanEx.require(EbeanEx.find(Story.class, requestData.getPayload().get("Test"))),
+                story,
                 requestData.getPayload().getString("name"),
                 requestData.getPayload().getString("description"),
-                Test.Status.valueOf(requestData.getPayload().getOrDefault("status", Test.Status.DEFINED.toString()).toString()),
-                requestData.getPayload().getInt("id"));
+                Test.Status.valueOf(requestData.getPayload().getOrDefault("status", Test.Status.DEFINED.toString()).toString())
+        );
         Ebean.save(test);
 
         // Return the created Test
