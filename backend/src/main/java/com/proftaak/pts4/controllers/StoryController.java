@@ -102,7 +102,7 @@ public class StoryController {
             requestData.getPayload().getString("name"),
             requestData.getPayload().getString("description"),
             status,
-            requestData.getPayload().getInt("priority", 0),
+            0, // Priority
             requestData.getPayload().getInt("points", 0)
         );
         Ebean.save(story);
@@ -142,7 +142,11 @@ public class StoryController {
             story.setStoryPoints(payload.getInt("points"));
         }
         if (payload.containsKey("priority")) {
-            story.setPriority(payload.getInt("priority"));
+            if (story.getProject().getProductOwner().equals(requestData.getUser())) {
+                story.setPriority(payload.getInt("priority"));
+            } else {
+                throw HTTPException.ERROR_FORBIDDEN;
+            }
         }
 
         // Save the changes
