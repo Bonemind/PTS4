@@ -36,6 +36,7 @@ public class Task {
     public static final String FIELD_STATUS = "status";
     public static final String FIELD_ESTIMATE = "estimate";
     public static final String FIELD_STORY = "story_id";
+    public static final String FIELD_OWNER = "owner";
 
     /**
      * The database id of this task
@@ -78,7 +79,14 @@ public class Task {
     private Story story;
 
     /**
-     * The progress of this tas
+     * The user who owns this task
+     */
+    @ManyToOne(optional = true)
+    @JoinColumn(name = FIELD_OWNER)
+    private User owner;
+
+    /**
+     * The progress of this task
      */
     @OneToMany
     private List<TaskProgress> progress = new ArrayList<>();
@@ -89,12 +97,13 @@ public class Task {
     public Task() {
     }
 
-    public Task(Story story, String name, String description, double estimate, Status status) {
+    public Task(Story story, User owner, String name, String description, double estimate, Status status) {
         this.story = story;
         this.setName(name);
         this.setDescription(description);
         this.setEstimate(estimate);
         this.setStatus(status);
+        this.setOwner(owner);
     }
 
     public int getId() {
@@ -135,6 +144,14 @@ public class Task {
 
     public Story getStory() {
         return this.story;
+    }
+
+    public void setOwner(User owner) {
+        this.owner = owner;
+    }
+
+    public User getOwner() {
+        return this.owner;
     }
 
     public List<TaskProgress> getProgress() {

@@ -11,6 +11,7 @@ import com.proftaak.pts4.core.rest.annotations.RequireAuth;
 import com.proftaak.pts4.core.rest.annotations.Route;
 import com.proftaak.pts4.database.EbeanEx;
 import com.proftaak.pts4.database.tables.*;
+import org.glassfish.grizzly.http.util.HttpStatus;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -100,7 +101,8 @@ public class StoryController {
             iteration,
             requestData.getPayload().getString("name"),
             requestData.getPayload().getString("description"),
-            status
+            status,
+            requestData.getPayload().getInt("points", 0)
         );
         Ebean.save(story);
 
@@ -115,7 +117,7 @@ public class StoryController {
     @Route(method = Route.Method.PUT)
     public static Object putHandler(RequestData requestData) throws Exception {
         // Get the user story
-        Story story = EbeanEx.require(EbeanEx.find(Story.class, requestData.getPayload().get("id")));
+        Story story = EbeanEx.require(EbeanEx.find(Story.class, requestData.getParameter("id")));
 
         // Change the story
         Payload payload = requestData.getPayload();
@@ -134,6 +136,9 @@ public class StoryController {
                 requestData.requireScopeRole(ScopeRole.PRODUCT_OWNER);
             }
             story.setStatus(status);
+        }
+        if (payload.containsKey("points")) {
+            story.setStoryPoints(payload.getInt("points"));
         }
 
         // Save the changes

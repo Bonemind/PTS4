@@ -11,9 +11,14 @@ import com.proftaak.pts4.core.rest.annotations.PreRequest;
 import com.proftaak.pts4.core.rest.annotations.RequireAuth;
 import com.proftaak.pts4.core.rest.annotations.Route;
 import com.proftaak.pts4.database.EbeanEx;
+import org.glassfish.grizzly.http.util.HttpStatus;
 import com.proftaak.pts4.database.tables.*;
 
 import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Map;
+import java.util.TreeSet;
 
 /**
  * @author Michon
@@ -77,9 +82,18 @@ public class TaskController {
     @RequireAuth(role = ScopeRole.TEAM_MEMBER)
     @Route(method = Route.Method.POST)
     public static Object postHandler(RequestData requestData) throws Exception {
+        Story story = EbeanEx.require(EbeanEx.find(Story.class, requestData.getPayload().get("story")));
+
+        // Get the new owner
+        User assignedOwner = EbeanEx.find(User.class, requestData.getPayload().get("owner"));
+        if (!story.getProject().getTeam().getUsers().contains(assignedOwner)) {
+            throw new HTTPException("User not part of team", HttpStatus.BAD_REQUEST_400);
+        }
+
         // Create the new task
         Task task = new Task(
             EbeanEx.require(EbeanEx.find(Story.class, requestData.getPayload().get("story"))),
+            assignedOwner,
             requestData.getPayload().getString("name"),
             requestData.getPayload().getString("description"),
             requestData.getPayload().getInt("estimate", 0),
@@ -113,6 +127,15 @@ public class TaskController {
         }
         if (payload.containsKey("status")) {
             task.setStatus(Task.Status.valueOf(payload.getOrDefault("status", Task.Status.DEFINED.toString()).toString()));
+        }
+        if (payload.containsKey("owner")) {
+            User assignedOwner = EbeanEx.require(EbeanEx.find(User.class, requestData.getPayload().get("owner")));
+
+            if (!task.getStory().getProject().getTeam().getUsers().contains(assignedOwner)) {
+                throw new HTTPException("User not part of team", HttpStatus.BAD_REQUEST_400);
+            }
+
+            task.setOwner(assignedOwner);
         }
 
         // Save the changes
