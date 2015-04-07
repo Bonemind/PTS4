@@ -11,9 +11,7 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Collection;
-import java.util.Map;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.regex.Matcher;
 
 /**
@@ -28,7 +26,7 @@ public class RequestData {
     /**
      * The payload that has been sent from the client
      */
-    protected Map<String, Object> payload;
+    protected Payload payload;
 
     /**
      * The currently logged in user, if any
@@ -58,12 +56,17 @@ public class RequestData {
         this.jsonSerializer.exclude("*.class");
     }
 
-    public Map<String, Object> getPayload() {
+    public Payload getPayload() {
         return this.payload;
     }
 
     public User getUser() {
         return this.user;
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode();
     }
 
     public Token getToken() {
@@ -124,7 +127,7 @@ public class RequestData {
         JSONDeserializer<Map> deserializer = new JSONDeserializer<>();
         try {
             if (reader.ready()) {
-                data.payload = deserializer.deserialize(reader.readLine());
+                data.payload = new Payload((HashMap<String, Object>) deserializer.deserialize(reader.readLine()));
             }
         } catch (IOException e) {
             e.printStackTrace();

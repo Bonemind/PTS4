@@ -2,6 +2,7 @@ package com.proftaak.pts4.controllers;
 
 import com.avaje.ebean.Ebean;
 import com.proftaak.pts4.core.rest.HTTPException;
+import com.proftaak.pts4.core.rest.Payload;
 import com.proftaak.pts4.core.rest.RequestData;
 import com.proftaak.pts4.core.rest.annotations.Controller;
 import com.proftaak.pts4.core.rest.annotations.RequireAuth;
@@ -53,9 +54,9 @@ public class UserController {
         }
 
         // Change the user
-        Map<String, Object> payload = requestData.getPayload();
+        Payload payload = requestData.getPayload();
         if (payload.containsKey("password")) {
-            user.setPassword((String) payload.get("password"));
+            user.setPassword(payload.getString("password"));
         }
 
         // Save the changes

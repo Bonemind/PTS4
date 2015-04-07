@@ -1,6 +1,7 @@
 package com.proftaak.pts4.controllers;
 
 import com.avaje.ebean.Ebean;
+import com.proftaak.pts4.core.rest.Payload;
 import com.proftaak.pts4.core.rest.RequestData;
 import com.proftaak.pts4.core.rest.ScopeRole;
 import com.proftaak.pts4.core.rest.annotations.Controller;
@@ -59,7 +60,7 @@ public class IterationController {
     /**
      * GET /iteration/1
      */
-    @RequireAuth(role = ScopeRole.TEAM_MEMBER)
+    @RequireAuth
     @Route(method = Route.Method.GET_ONE)
     public static Object getOneHandler(RequestData requestData) throws Exception {
         return EbeanEx.require(EbeanEx.find(Iteration.class, requestData.getParameter("id")));
@@ -74,10 +75,10 @@ public class IterationController {
         // Create the new iteration
         Iteration iteration = new Iteration(
             EbeanEx.require(EbeanEx.find(Team.class, requestData.getPayload().get("team"))),
-            LocalDate.parse((String) requestData.getPayload().get("start")),
-            LocalDate.parse((String) requestData.getPayload().get("end")),
-            (String) requestData.getPayload().get("name"),
-            (String) requestData.getPayload().get("description")
+            LocalDate.parse(requestData.getPayload().getString("start")),
+            LocalDate.parse(requestData.getPayload().getString("end")),
+            requestData.getPayload().getString("name"),
+            requestData.getPayload().getString("description")
         );
         Ebean.save(iteration);
 
@@ -95,18 +96,18 @@ public class IterationController {
         Iteration iteration = EbeanEx.require(EbeanEx.find(Iteration.class, requestData.getParameter("id")));
 
         // Change the iteration
-        Map<String, Object> payload = requestData.getPayload();
+        Payload payload = requestData.getPayload();
         if (payload.containsKey("start")) {
-            iteration.setStart(LocalDate.parse((String) payload.get("start")));
+            iteration.setStart(LocalDate.parse(payload.getString("start")));
         }
         if (payload.containsKey("end")) {
-            iteration.setStart(LocalDate.parse((String) payload.get("end")));
+            iteration.setStart(LocalDate.parse(payload.getString("end")));
         }
         if (payload.containsKey("name")) {
-            iteration.setName((String) payload.get("name"));
+            iteration.setName(payload.getString("name"));
         }
         if (payload.containsKey("description")) {
-            iteration.setDescription((String) payload.get("description"));
+            iteration.setDescription(payload.getString("description"));
         }
 
         // Save the changes

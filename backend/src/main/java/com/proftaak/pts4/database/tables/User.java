@@ -65,6 +65,12 @@ public class User implements Serializable {
     private List<Project> ownedProjects = new ArrayList<>();
 
     /**
+     * The work this user has done.
+     */
+    @OneToMany
+    private List<TaskProgress> executedTaskProgress = new ArrayList<>();
+
+    /**
      * ORM-Lite no-arg constructor
      */
     public User() {
@@ -124,5 +130,9 @@ public class User implements Serializable {
 
     public List<Project> getOwnedProjects() {
         return this.ownedProjects;
+    }
+
+    public List<TaskProgress> getExecutedTaskProgress() {
+        return this.executedTaskProgress;
     }
 }

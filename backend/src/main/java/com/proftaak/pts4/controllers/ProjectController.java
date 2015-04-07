@@ -2,6 +2,7 @@ package com.proftaak.pts4.controllers;
 
 import com.avaje.ebean.Ebean;
 import com.proftaak.pts4.core.rest.HTTPException;
+import com.proftaak.pts4.core.rest.Payload;
 import com.proftaak.pts4.core.rest.RequestData;
 import com.proftaak.pts4.core.rest.ScopeRole;
 import com.proftaak.pts4.core.rest.annotations.Controller;
@@ -88,8 +89,8 @@ public class ProjectController {
         Project project = new Project(
             EbeanEx.require(EbeanEx.find(Team.class, requestData.getPayload().get("team"))),
             EbeanEx.require(EbeanEx.find(User.class, User.FIELD_EMAIL, requestData.getPayload().get("productOwner"))),
-            (String) requestData.getPayload().get("name"),
-            (String) requestData.getPayload().get("description")
+            requestData.getPayload().getString("name"),
+            requestData.getPayload().getString("description")
         );
         Ebean.save(project);
 
@@ -107,15 +108,15 @@ public class ProjectController {
         Project project = EbeanEx.require(EbeanEx.find(Project.class, requestData.getParameter("id")));
 
         // Change the project
-        Map<String, Object> payload = requestData.getPayload();
+        Payload payload = requestData.getPayload();
         if (payload.containsKey("productOwner")) {
             project.setProductOwner(EbeanEx.find(User.class, User.FIELD_EMAIL, requestData.getPayload().get("productOwner")));
         }
         if (payload.containsKey("name")) {
-            project.setName((String) payload.get("name"));
+            project.setName(payload.getString("name"));
         }
         if (payload.containsKey("description")) {
-            project.setDescription((String) payload.get("description"));
+            project.setDescription(payload.getString("description"));
         }
 
         // Save the changes

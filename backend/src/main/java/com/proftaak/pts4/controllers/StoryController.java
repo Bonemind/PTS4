@@ -2,6 +2,7 @@ package com.proftaak.pts4.controllers;
 
 import com.avaje.ebean.Ebean;
 import com.proftaak.pts4.core.rest.HTTPException;
+import com.proftaak.pts4.core.rest.Payload;
 import com.proftaak.pts4.core.rest.RequestData;
 import com.proftaak.pts4.core.rest.ScopeRole;
 import com.proftaak.pts4.core.rest.annotations.Controller;
@@ -94,25 +95,15 @@ public class StoryController {
             iteration = EbeanEx.require(EbeanEx.find(Iteration.class, requestData.getPayload().get("iteration")));
         }
 
-        int points = 0;
-        if (requestData.getPayload().containsKey("points")) {
-            points = (int) requestData.getPayload().get("points");
-        }
-
-        int priority = 0;
-        if (requestData.getPayload().containsKey("priority")) {
-            priority = (int) requestData.getPayload().get("priority");
-        }
-
         // Create the new user story
         Story story = new Story(
             EbeanEx.require(EbeanEx.find(Project.class, requestData.getPayload().get("project"))),
             iteration,
-            (String) requestData.getPayload().get("name"),
-            (String) requestData.getPayload().get("description"),
+            requestData.getPayload().getString("name"),
+            requestData.getPayload().getString("description"),
             status,
-            priority,
-            points
+            requestData.getPayload().getInt("priority", 0),
+            requestData.getPayload().getInt("points", 0)
         );
         Ebean.save(story);
 
@@ -130,15 +121,15 @@ public class StoryController {
         Story story = EbeanEx.require(EbeanEx.find(Story.class, requestData.getParameter("id")));
 
         // Change the story
-        Map<String, Object> payload = requestData.getPayload();
+        Payload payload = requestData.getPayload();
         if (payload.containsKey("iteration")) {
             story.setIteration(EbeanEx.require(EbeanEx.find(Iteration.class, requestData.getPayload().get("iteration"))));
         }
         if (payload.containsKey("name")) {
-            story.setName((String) payload.get("name"));
+            story.setName(payload.getString("name"));
         }
         if (payload.containsKey("description")) {
-            story.setDescription((String) payload.get("description"));
+            story.setDescription(payload.getString("description"));
         }
         if (payload.containsKey("status")) {
             Story.Status status = Story.Status.valueOf(payload.getOrDefault("status", Story.Status.DEFINED.toString()).toString());
@@ -148,10 +139,10 @@ public class StoryController {
             story.setStatus(status);
         }
         if (payload.containsKey("points")) {
-            story.setStoryPoints((int) payload.get("points"));
+            story.setStoryPoints(payload.getInt("points"));
         }
         if (payload.containsKey("priority")) {
-            story.setPriority((int) payload.get("priority"));
+            story.setStoryPoints(payload.getInt("priority"));
         }
 
         // Save the changes

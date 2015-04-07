@@ -4,6 +4,8 @@ import flexjson.JSON;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Michon
@@ -32,6 +34,7 @@ public class Task {
     public static final String FIELD_NAME = "name";
     public static final String FIELD_DESCRIPTION = "description";
     public static final String FIELD_STATUS = "status";
+    public static final String FIELD_ESTIMATE = "estimate";
     public static final String FIELD_STORY = "story_id";
     public static final String FIELD_OWNER = "owner";
 
@@ -62,6 +65,12 @@ public class Task {
     private Status status;
 
     /**
+     * The time estimate of this task
+     */
+    @Column(name = FIELD_ESTIMATE, nullable = false)
+    private double estimate = 0;
+
+    /**
      * The user story of this task
      */
     @JSON(include = false)
@@ -70,11 +79,17 @@ public class Task {
     private Story story;
 
     /**
-     * The user who owns this task.
+     * The user who owns this task
      */
     @ManyToOne(optional = true)
     @JoinColumn(name = FIELD_OWNER)
     private User owner;
+
+    /**
+     * The progress of this task
+     */
+    @OneToMany
+    private List<TaskProgress> progress = new ArrayList<>();
 
     /**
      * ORM-Lite no-arg constructor
@@ -82,22 +97,11 @@ public class Task {
     public Task() {
     }
 
-    public Task(Story story, String name) {
-        this(story, name, null);
-    }
-
-    public Task(Story story, String name, String description) {
-        this(story, name, description, Status.DEFINED);
-    }
-
-    public Task(Story story, String name, String description, Status status) {
-        this(story, name, description, status, null);
-    }
-
-    public Task(Story story, String name, String description, Status status, User owner) {
+    public Task(Story story, User owner, String name, String description, double estimate, Status status) {
         this.story = story;
         this.setName(name);
         this.setDescription(description);
+        this.setEstimate(estimate);
         this.setStatus(status);
         this.setOwner(owner);
     }
@@ -122,6 +126,14 @@ public class Task {
         this.description = StringUtils.trimToNull(description);
     }
 
+    public double getEstimate() {
+        return this.estimate;
+    }
+
+    public void setEstimate(double estimate) {
+        this.estimate = estimate;
+    }
+
     public Status getStatus() {
         return this.status;
     }
@@ -140,5 +152,36 @@ public class Task {
 
     public User getOwner() {
         return this.owner;
+    }
+
+    public List<TaskProgress> getProgress() {
+        return this.progress;
+    }
+
+    /**
+     * Get the todo.
+     *
+     * This is effort - combined task progress.
+     * This will never be lower than 0.
+     */
+    public double getTodo() {
+        double done = 0;
+        for (TaskProgress progress : this.getProgress()) {
+            done += progress.getEffort();
+        }
+        return Math.max(estimate - done, 0);
+    }
+
+    /**
+     * Set the todo.
+     *
+     * This will set effort to combined task progress + new todo.
+     */
+    public void setTodo(double todo) {
+        double done = 0;
+        for (TaskProgress progress : this.getProgress()) {
+            done += progress.getEffort();
+        }
+        this.setEstimate(done + todo);
     }
 }

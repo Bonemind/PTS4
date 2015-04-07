@@ -23,7 +23,7 @@ public class AuthController {
     public static Object loginHandler(RequestData requestData) throws Exception {
         // Check the login details
         User user = EbeanEx.find(User.class, User.FIELD_EMAIL, requestData.getPayload().get("email"));
-        if (user == null || !user.checkPassword(requestData.getPayload().get("password").toString())) {
+        if (user == null || !user.checkPassword(requestData.getPayload().getString("password"))) {
             throw new HTTPException("Invalid login details", HttpStatus.UNAUTHORIZED_401);
         }
 
