@@ -142,7 +142,7 @@ public class StoryController {
             story.setStoryPoints(payload.getInt("points"));
         }
         if (payload.containsKey("priority")) {
-            story.setStoryPoints(payload.getInt("priority"));
+            story.setPriority(payload.getInt("priority"));
         }
 
         // Save the changes
