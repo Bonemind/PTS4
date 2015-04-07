@@ -10,10 +10,7 @@ import com.proftaak.pts4.core.rest.annotations.PreRequest;
 import com.proftaak.pts4.core.rest.annotations.RequireAuth;
 import com.proftaak.pts4.core.rest.annotations.Route;
 import com.proftaak.pts4.database.EbeanEx;
-import com.proftaak.pts4.database.tables.Project;
-import com.proftaak.pts4.database.tables.Story;
-import com.proftaak.pts4.database.tables.Team;
-import com.proftaak.pts4.database.tables.User;
+import com.proftaak.pts4.database.tables.*;
 import org.glassfish.grizzly.http.util.HttpStatus;
 
 import java.util.ArrayList;
@@ -222,5 +219,18 @@ public class TeamController {
             stories.addAll(project.getStories());
         }
         return stories;
+    }
+
+    /**
+     * GET /team/1/iteration
+     */
+    @RequireAuth(role = ScopeRole.TEAM_MEMBER)
+    @Route(method = Route.Method.GET, route = "/team/{id}/iteration")
+    public static Object getIterationHandler(RequestData requestData) throws Exception {
+        // Get the team
+        Team team = EbeanEx.require(EbeanEx.find(Team.class, requestData.getParameter("id")));
+
+        // Return the iterations
+        return team.getIterations();
     }
 }
