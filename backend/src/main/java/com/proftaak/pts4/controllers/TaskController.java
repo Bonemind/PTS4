@@ -1,7 +1,9 @@
 package com.proftaak.pts4.controllers;
 
 import com.avaje.ebean.Ebean;
+import com.avaje.ebeaninternal.server.lib.util.Str;
 import com.proftaak.pts4.core.rest.HTTPException;
+import com.proftaak.pts4.core.rest.Payload;
 import com.proftaak.pts4.core.rest.RequestData;
 import com.proftaak.pts4.core.rest.ScopeRole;
 import com.proftaak.pts4.core.rest.annotations.Controller;
@@ -11,16 +13,21 @@ import com.proftaak.pts4.core.rest.annotations.Route;
 import com.proftaak.pts4.database.EbeanEx;
 import com.proftaak.pts4.database.tables.*;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Map;
-import java.util.TreeSet;
+import java.util.*;
 
 /**
  * @author Michon
  */
 @Controller
 public class TaskController {
+    /**
+     * For this controller we will want to include the list of tasks in responses
+     */
+    @PreRequest
+    public static void setupSerializer(RequestData requestData) {
+        requestData.exclude("*.task");
+    }
+
     /**
      * Determine the role(s) the logged in user has within the task, if any
      */
@@ -73,8 +80,9 @@ public class TaskController {
         // Create the new task
         Task task = new Task(
             EbeanEx.require(EbeanEx.find(Story.class, requestData.getPayload().get("story"))),
-            (String) requestData.getPayload().get("name"),
-            (String) requestData.getPayload().get("description"),
+            requestData.getPayload().getString("name"),
+            requestData.getPayload().getString("description"),
+            requestData.getPayload().getInt("estimate", 0),
             Task.Status.valueOf(requestData.getPayload().getOrDefault("status", Task.Status.DEFINED.toString()).toString())
         );
         Ebean.save(task);
@@ -84,7 +92,7 @@ public class TaskController {
     }
 
     /**
-     * PUT /story/1/task/1
+     * PUT /task/1
      */
     @RequireAuth(role = ScopeRole.TEAM_MEMBER)
     @Route(method = Route.Method.PUT)
@@ -93,12 +101,15 @@ public class TaskController {
         Task task = EbeanEx.require(EbeanEx.find(Task.class, requestData.getParameter("id")));
 
         // Change the task
-        Map<String, Object> payload = requestData.getPayload();
+        Payload payload = requestData.getPayload();
         if (payload.containsKey("name")) {
-            task.setName((String) payload.get("name"));
+            task.setName(payload.getString("name"));
         }
         if (payload.containsKey("description")) {
-            task.setDescription((String) payload.get("description"));
+            task.setDescription(payload.getString("description"));
+        }
+        if (payload.containsKey("estimate")) {
+            task.setEstimate(payload.getInt("estimate"));
         }
         if (payload.containsKey("status")) {
             task.setStatus(Task.Status.valueOf(payload.getOrDefault("status", Task.Status.DEFINED.toString()).toString()));
@@ -112,7 +123,7 @@ public class TaskController {
     }
 
     /**
-     * DELETE /story/1/task/1
+     * DELETE /task/1
      */
     @RequireAuth(role = ScopeRole.TEAM_MEMBER)
     @Route(method = Route.Method.DELETE)
@@ -125,5 +136,39 @@ public class TaskController {
 
         // Return nothing
         return null;
+    }
+
+    /**
+     * GET /task/1/progress
+     */
+    @RequireAuth(role = ScopeRole.TEAM_MEMBER)
+    @Route(method = Route.Method.GET, route = "/task/{id}/progress")
+    public static Object getProgressHandler(RequestData requestData) throws Exception {
+        // Get the task
+        Task task = EbeanEx.require(EbeanEx.find(Task.class, requestData.getParameter("id")));
+
+        // Return the task progress.
+        return task.getProgress();
+    }
+
+    /**
+     * POST /task/1/progress
+     */
+    @RequireAuth(role = ScopeRole.DEVELOPER)
+    @Route(method = Route.Method.POST, route = "/task/{id}/progress")
+    public static Object postProgressHandler(RequestData requestData) throws Exception {
+        // Get the task
+        Task task = EbeanEx.require(EbeanEx.find(Task.class, requestData.getParameter("id")));
+
+        // Add the progress
+        TaskProgress progress = new TaskProgress(
+            task,
+            requestData.getUser(),
+            requestData.getPayload().getDouble("effort")
+        );
+        Ebean.save(progress);
+
+        // Return the new progress
+        return progress;
     }
 }

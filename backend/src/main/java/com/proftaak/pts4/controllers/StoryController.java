@@ -2,6 +2,7 @@ package com.proftaak.pts4.controllers;
 
 import com.avaje.ebean.Ebean;
 import com.proftaak.pts4.core.rest.HTTPException;
+import com.proftaak.pts4.core.rest.Payload;
 import com.proftaak.pts4.core.rest.RequestData;
 import com.proftaak.pts4.core.rest.ScopeRole;
 import com.proftaak.pts4.core.rest.annotations.Controller;
@@ -97,8 +98,8 @@ public class StoryController {
         Story story = new Story(
             EbeanEx.require(EbeanEx.find(Project.class, requestData.getPayload().get("project"))),
             iteration,
-            (String) requestData.getPayload().get("name"),
-            (String) requestData.getPayload().get("description"),
+            requestData.getPayload().getString("name"),
+            requestData.getPayload().getString("description"),
             status
         );
         Ebean.save(story);
@@ -117,15 +118,15 @@ public class StoryController {
         Story story = EbeanEx.require(EbeanEx.find(Story.class, requestData.getPayload().get("id")));
 
         // Change the story
-        Map<String, Object> payload = requestData.getPayload();
+        Payload payload = requestData.getPayload();
         if (payload.containsKey("iteration")) {
             story.setIteration(EbeanEx.require(EbeanEx.find(Iteration.class, requestData.getPayload().get("iteration"))));
         }
         if (payload.containsKey("name")) {
-            story.setName((String) payload.get("name"));
+            story.setName(payload.getString("name"));
         }
         if (payload.containsKey("description")) {
-            story.setDescription((String) payload.get("description"));
+            story.setDescription(payload.getString("description"));
         }
         if (payload.containsKey("status")) {
             Story.Status status = Story.Status.valueOf(payload.getOrDefault("status", Story.Status.DEFINED.toString()).toString());

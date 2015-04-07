@@ -2,6 +2,7 @@ package com.proftaak.pts4.controllers;
 
 import com.avaje.ebean.Ebean;
 import com.proftaak.pts4.core.rest.HTTPException;
+import com.proftaak.pts4.core.rest.Payload;
 import com.proftaak.pts4.core.rest.RequestData;
 import com.proftaak.pts4.core.rest.ScopeRole;
 import com.proftaak.pts4.core.rest.annotations.Controller;
@@ -82,7 +83,7 @@ public class TeamController {
     public static Object postHandler(RequestData requestData) throws Exception {
         // Create the new team
         Team team = new Team(
-            (String) requestData.getPayload().get("name"),
+            requestData.getPayload().getString("name"),
             requestData.getUser()
         );
         Ebean.save(team);
@@ -101,9 +102,9 @@ public class TeamController {
         Team team = EbeanEx.require(EbeanEx.find(Team.class, requestData.getParameter("id")));
 
         // Change the team
-        Map<String, Object> payload = requestData.getPayload();
+        Payload payload = requestData.getPayload();
         if (payload.containsKey("name")) {
-            team.setName((String) payload.get("name"));
+            team.setName(payload.getString("name"));
         }
 
         // Save the changes
