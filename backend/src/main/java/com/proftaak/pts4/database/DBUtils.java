@@ -83,7 +83,7 @@ public class DBUtils {
 
         Story us1 = new Story(p, null, "Foo", null, Story.Status.DEFINED);
         Ebean.save(us1);
-        Story us2 = new Story(p, it, "Lorem", "Lorem Ipsum Dolor Sit Amet", Story.Status.IN_PROGRESS);
+        Story us2 = new Story(p, it, "Lorem", "Lorem Ipsum Dolor Sit Amet", Story.Status.IN_PROGRESS, 3);
         Ebean.save(us2);
 
         Task t11 = new Task(us1, "Frontend");

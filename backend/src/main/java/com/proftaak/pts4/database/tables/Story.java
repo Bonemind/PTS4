@@ -40,6 +40,7 @@ public class Story {
     public static final String FIELD_STATUS = "status";
     public static final String FIELD_PROJECT = "project_id";
     public static final String FIELD_ITERATION = "iteration_id";
+    public static final String FIELD_STORY_POINTS = "story_points";
 
     /**
      * The database id of this userstory
@@ -88,17 +89,28 @@ public class Story {
     private List<Task> tasks = new ArrayList<>();
 
     /**
+     * The amount of story points this story has.
+     */
+    @Column(name = FIELD_STORY_POINTS)
+    private int storyPoints;
+
+    /**
      * ORM-Lite no-arg constructor
      */
     public Story() {
     }
 
     public Story(Project project, Iteration iteration, String name, String description, Status status) {
+        this(project, iteration, name, description, status, 0);
+    }
+
+    public Story(Project project, Iteration iteration, String name, String description, Status status, int storyPoints) {
         this.setProject(project);
         this.setIteration(iteration);
         this.setName(name);
         this.setDescription(description);
         this.setStatus(status);
+        this.setStoryPoints(storyPoints);
     }
 
     public int getId() {
@@ -147,5 +159,13 @@ public class Story {
 
     public List<Task> getTasks() {
         return this.tasks;
+    }
+
+    public int getStoryPoints() {
+        return this.storyPoints;
+    }
+
+    public void setStoryPoints(int storyPoints) {
+        this.storyPoints = storyPoints;
     }
 }

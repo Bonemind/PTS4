@@ -10,6 +10,7 @@ import com.proftaak.pts4.core.rest.annotations.RequireAuth;
 import com.proftaak.pts4.core.rest.annotations.Route;
 import com.proftaak.pts4.database.EbeanEx;
 import com.proftaak.pts4.database.tables.*;
+import org.glassfish.grizzly.http.util.HttpStatus;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -93,13 +94,23 @@ public class StoryController {
             iteration = EbeanEx.require(EbeanEx.find(Iteration.class, requestData.getPayload().get("iteration")));
         }
 
+        int points = 0;
+        if (requestData.getPayload().containsKey("points")) {
+            try {
+                points = Integer.parseInt((String) requestData.getPayload().get("points"));
+            }catch (NumberFormatException exc) {
+                throw new HTTPException("Points NaN", HttpStatus.BAD_REQUEST_400);
+            }
+        }
+
         // Create the new user story
         Story story = new Story(
             EbeanEx.require(EbeanEx.find(Project.class, requestData.getPayload().get("project"))),
             iteration,
             (String) requestData.getPayload().get("name"),
             (String) requestData.getPayload().get("description"),
-            status
+            status,
+            points
         );
         Ebean.save(story);
 
@@ -114,7 +125,7 @@ public class StoryController {
     @Route(method = Route.Method.PUT)
     public static Object putHandler(RequestData requestData) throws Exception {
         // Get the user story
-        Story story = EbeanEx.require(EbeanEx.find(Story.class, requestData.getPayload().get("id")));
+        Story story = EbeanEx.require(EbeanEx.find(Story.class, requestData.getParameter("id")));
 
         // Change the story
         Map<String, Object> payload = requestData.getPayload();
@@ -133,6 +144,14 @@ public class StoryController {
                 requestData.requireScopeRole(ScopeRole.PRODUCT_OWNER);
             }
             story.setStatus(status);
+        }
+        if (payload.containsKey("points")) {
+            try {
+                int points = Integer.parseInt((String) payload.get("points"));
+                story.setStoryPoints(points);
+            }catch (NumberFormatException exc) {
+                throw new HTTPException("Points NaN", HttpStatus.BAD_REQUEST_400);
+            }
         }
 
         // Save the changes
