@@ -1,9 +1,11 @@
 package com.proftaak.pts4.database.tables;
 
+import com.proftaak.pts4.core.flexjson.ToStringTransformer;
+import flexjson.JSON;
+
 import javax.persistence.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -41,12 +43,14 @@ public class Iteration {
     /**
      * The start of this iteration
      */
+    @JSON(transformer = ToStringTransformer.class)
     @Column(name = FIELD_START, nullable = true)
     private LocalDate start;
 
     /**
      * The end of this iteration
      */
+    @JSON(transformer = ToStringTransformer.class)
     @Column(name = FIELD_END, nullable = true)
     private LocalDate end;
 
@@ -63,7 +67,8 @@ public class Iteration {
     @OneToMany(cascade = CascadeType.ALL)
     private List<Story> stories = new ArrayList<>();
 
-    public Iteration() {}
+    public Iteration() {
+    }
 
     public Iteration(Team team, LocalDate start, LocalDate end, String name, String description) {
         this.setTeam(team);
