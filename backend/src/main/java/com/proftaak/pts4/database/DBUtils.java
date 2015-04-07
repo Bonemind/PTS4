@@ -86,13 +86,13 @@ public class DBUtils {
         Story us2 = new Story(p, it, "Lorem", "Lorem Ipsum Dolor Sit Amet", Story.Status.IN_PROGRESS, 3);
         Ebean.save(us2);
 
-        Task t11 = new Task(us1, "Frontend", null, 2, Task.Status.DEFINED);
+        Task t11 = new Task(us1, null, "Frontend", null, 2, Task.Status.DEFINED);
         Ebean.save(t11);
-        Task t12 = new Task(us1, "Backend", "Do backend stuff", 3.5, Task.Status.DEFINED);
+        Task t12 = new Task(us1, u1, "Backend", "Do backend stuff", 3.5, Task.Status.IN_PROGRESS);
         Ebean.save(t12);
-        Task t21 = new Task(us2, "Frontend", null, 1, Task.Status.DEFINED);
+        Task t21 = new Task(us2, null, "Frontend", null, 1, Task.Status.DEFINED);
         Ebean.save(t21);
-        Task t22 = new Task(us2, "Backend", null, 1, Task.Status.DONE);
+        Task t22 = new Task(us2, null, "Backend", null, 1, Task.Status.DONE);
         Ebean.save(t22);
 
         TaskProgress tp1 = new TaskProgress(t12, u1, 0.25);
