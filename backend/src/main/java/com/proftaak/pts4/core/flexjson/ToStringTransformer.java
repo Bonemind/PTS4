@@ -11,6 +11,10 @@ import java.util.Date;
 public class ToStringTransformer extends AbstractTransformer {
     @Override
     public void transform(Object o) {
-        getContext().writeQuoted(o.toString());
+        if (o != null) {
+            getContext().writeQuoted(o.toString());
+        } else {
+            getContext().write(null);
+        }
     }
 }

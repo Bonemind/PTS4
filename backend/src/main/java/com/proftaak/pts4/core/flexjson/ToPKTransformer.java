@@ -9,9 +9,7 @@ import flexjson.transformer.AbstractTransformer;
 public class ToPKTransformer extends AbstractTransformer {
     @Override
     public void transform(Object object) {
-        if (object == null) {
-            getContext().write(null);
-        } else {
+        if (object != null) {
             if (object instanceof DatabaseModel) {
                 Object pk = ((DatabaseModel) object).getPK();
                 if (pk instanceof String) {
@@ -20,6 +18,8 @@ public class ToPKTransformer extends AbstractTransformer {
                     getContext().write(pk.toString());
                 }
             }
+        } else {
+            getContext().write(null);
         }
     }
 }

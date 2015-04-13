@@ -1,11 +1,13 @@
 package com.proftaak.pts4.database.tables;
 
 import com.proftaak.pts4.core.flexjson.ToPKTransformer;
+import com.proftaak.pts4.core.flexjson.ToStringTransformer;
 import com.proftaak.pts4.database.DatabaseModel;
 import flexjson.JSON;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -66,6 +68,7 @@ public class Story implements DatabaseModel {
     public static final String FIELD_NAME = "name";
     public static final String FIELD_DESCRIPTION = "description";
     public static final String FIELD_STATUS = "status";
+    public static final String FIELD_COMPLETED_ON = "completed_on";
     public static final String FIELD_PROJECT = "project_id";
     public static final String FIELD_ITERATION = "iteration_id";
     public static final String FIELD_STORY_POINTS = "story_points";
@@ -103,6 +106,13 @@ public class Story implements DatabaseModel {
     @Enumerated(EnumType.STRING)
     @Column(name = FIELD_STATUS, nullable = false)
     private Status status;
+
+    /**
+     * When the userstory was completed
+     */
+    @JSON(transformer = ToStringTransformer.class)
+    @Column(name = FIELD_COMPLETED_ON)
+    private LocalDateTime completedOn;
 
     /**
      * The project this userstory belongs to
@@ -199,7 +209,27 @@ public class Story implements DatabaseModel {
     }
 
     public void setStatus(Status status) {
+        // Update the completedOn field
+        switch (status) {
+            case DEFINED:
+            case IN_PROGRESS:
+                this.completedOn = null;
+                break;
+
+            case DONE:
+            case ACCEPTED:
+                if (this.completedOn == null) {
+                    this.completedOn = LocalDateTime.now();
+                }
+                break;
+        }
+
+        // Store the new status
         this.status = status;
+    }
+
+    public LocalDateTime getCompletedOn() {
+        return completedOn;
     }
 
     public Project getProject() {
@@ -241,5 +271,4 @@ public class Story implements DatabaseModel {
     public List<Test> getTests() {
         return this.tests;
     }
-
 }
