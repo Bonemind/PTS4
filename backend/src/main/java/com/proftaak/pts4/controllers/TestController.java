@@ -87,7 +87,7 @@ public class TestController {
         );
         Ebean.save(test);
 
-        // Return the created Test
+        // Return the created test
         return test;
     }
 
@@ -97,10 +97,10 @@ public class TestController {
     @RequireAuth(role = ScopeRole.TEAM_MEMBER)
     @Route(method = Route.Method.PUT)
     public static Object putHandler(RequestData requestData) throws Exception {
-        // Get the user Test
+        // Get the test
         Test test = EbeanEx.require(EbeanEx.find(Test.class, requestData.getParameter("id")));
 
-        // Change the Test
+        // Change the test
         Payload payload = requestData.getPayload();
         if (payload.containsKey("name")) {
             test.setName(payload.getString("name"));
