@@ -162,7 +162,7 @@ public class Story implements DatabaseModel {
         this.setDescription(description);
         this.setStatus(status);
         this.setPriority(priority);
-        this.setStoryPoints(storyPoints);
+        this.setPoints(storyPoints);
     }
 
     @Override

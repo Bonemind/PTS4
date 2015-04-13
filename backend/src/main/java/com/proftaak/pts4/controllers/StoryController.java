@@ -131,7 +131,7 @@ public class StoryController {
             story.setStatus(status);
         }
         if (payload.containsKey("points")) {
-            story.setStoryPoints(payload.getInt("points"));
+            story.setPoints(payload.getInt("points"));
         }
         if (payload.containsKey("priority")) {
             int priority = payload.getInt("priority");
