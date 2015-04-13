@@ -6,6 +6,7 @@ import com.proftaak.pts4.core.rest.Payload;
 import com.proftaak.pts4.core.rest.RequestData;
 import com.proftaak.pts4.core.rest.annotations.Controller;
 import com.proftaak.pts4.core.rest.annotations.RequireAuth;
+import com.proftaak.pts4.core.rest.annotations.RequireFields;
 import com.proftaak.pts4.core.rest.annotations.Route;
 import com.proftaak.pts4.database.EbeanEx;
 import com.proftaak.pts4.database.tables.User;
@@ -40,6 +41,7 @@ public class UserController {
     /**
      * POST /user
      */
+    @RequireFields(fields = {"email", "password"})
     @Route(method = Route.Method.POST)
     public static Object postHandler(RequestData requestData) throws Exception {
         // Create the new user

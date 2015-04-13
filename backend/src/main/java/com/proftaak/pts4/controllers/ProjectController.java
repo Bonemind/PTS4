@@ -5,10 +5,7 @@ import com.proftaak.pts4.core.rest.HTTPException;
 import com.proftaak.pts4.core.rest.Payload;
 import com.proftaak.pts4.core.rest.RequestData;
 import com.proftaak.pts4.core.rest.ScopeRole;
-import com.proftaak.pts4.core.rest.annotations.Controller;
-import com.proftaak.pts4.core.rest.annotations.PreRequest;
-import com.proftaak.pts4.core.rest.annotations.RequireAuth;
-import com.proftaak.pts4.core.rest.annotations.Route;
+import com.proftaak.pts4.core.rest.annotations.*;
 import com.proftaak.pts4.database.EbeanEx;
 import com.proftaak.pts4.database.tables.Project;
 import com.proftaak.pts4.database.tables.Team;
@@ -85,6 +82,7 @@ public class ProjectController {
      * POST /project
      */
     @RequireAuth(role = ScopeRole.SCRUM_MASTER)
+    @RequireFields(fields = {"team", "productOwner", "name"})
     @Route(method = Route.Method.POST)
     public static Object postHandler(RequestData requestData) throws Exception {
         // Create the new project

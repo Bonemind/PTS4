@@ -3,6 +3,7 @@ package com.proftaak.pts4.core.rest;
 import com.avaje.ebean.Ebean;
 import com.proftaak.pts4.core.rest.annotations.PreRequest;
 import com.proftaak.pts4.core.rest.annotations.RequireAuth;
+import com.proftaak.pts4.core.rest.annotations.RequireFields;
 import com.proftaak.pts4.core.rest.annotations.Route;
 import com.proftaak.pts4.database.tables.Token;
 import flexjson.JSONDeserializer;
@@ -185,6 +186,13 @@ public class Router extends HttpHandler {
 
         Object responseObject = null;
         try {
+            // Require payload data for some methods.
+            if (requestData.getPayload() == null &&
+                (request.getMethod() == org.glassfish.grizzly.http.Method.POST ||
+                 request.getMethod() == org.glassfish.grizzly.http.Method.PUT)) {
+                throw new HTTPException("This method requires a payload");
+            }
+
             // Call the pre-request methods
             this.handlePrerequests(method, requestData);
 
@@ -259,6 +267,16 @@ public class Router extends HttpHandler {
      * @param requestData The data for the current request
      */
     private void handleAnnotations(Method method, RequestData requestData) throws HTTPException {
+        // The require fields annotation
+        RequireFields fieldsAnnotation = method.getAnnotation(RequireFields.class);
+        if (fieldsAnnotation != null) {
+            for (String field : fieldsAnnotation.fields()) {
+                if (requestData.getPayload().getOrDefault(field, null) == null) {
+                    throw new HTTPException("Missing required parameter: " + field, HttpStatus.BAD_REQUEST_400);
+                }
+            }
+        }
+
         // The require auth annotation
         RequireAuth authAnnotation = method.getAnnotation(RequireAuth.class);
         if (authAnnotation != null) {

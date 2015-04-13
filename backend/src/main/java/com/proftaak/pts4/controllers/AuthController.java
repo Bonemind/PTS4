@@ -5,6 +5,7 @@ import com.proftaak.pts4.core.rest.HTTPException;
 import com.proftaak.pts4.core.rest.RequestData;
 import com.proftaak.pts4.core.rest.annotations.Controller;
 import com.proftaak.pts4.core.rest.annotations.RequireAuth;
+import com.proftaak.pts4.core.rest.annotations.RequireFields;
 import com.proftaak.pts4.core.rest.annotations.Route;
 import com.proftaak.pts4.database.EbeanEx;
 import com.proftaak.pts4.database.tables.Token;
@@ -19,6 +20,7 @@ public class AuthController {
     /**
      * POST /auth/login
      */
+    @RequireFields(fields = {"email", "password"})
     @Route(method = Route.Method.POST, route = "/auth/login")
     public static Object loginHandler(RequestData requestData) throws Exception {
         // Check the login details

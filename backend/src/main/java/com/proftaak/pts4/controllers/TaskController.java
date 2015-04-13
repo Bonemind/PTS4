@@ -6,10 +6,7 @@ import com.proftaak.pts4.core.rest.HTTPException;
 import com.proftaak.pts4.core.rest.Payload;
 import com.proftaak.pts4.core.rest.RequestData;
 import com.proftaak.pts4.core.rest.ScopeRole;
-import com.proftaak.pts4.core.rest.annotations.Controller;
-import com.proftaak.pts4.core.rest.annotations.PreRequest;
-import com.proftaak.pts4.core.rest.annotations.RequireAuth;
-import com.proftaak.pts4.core.rest.annotations.Route;
+import com.proftaak.pts4.core.rest.annotations.*;
 import com.proftaak.pts4.database.EbeanEx;
 import org.glassfish.grizzly.http.util.HttpStatus;
 import com.proftaak.pts4.database.tables.*;
@@ -81,6 +78,7 @@ public class TaskController {
      * POST /task
      */
     @RequireAuth(role = ScopeRole.TEAM_MEMBER)
+    @RequireFields(fields = {"story", "name"})
     @Route(method = Route.Method.POST)
     public static Object postHandler(RequestData requestData) throws Exception {
         Story story = EbeanEx.require(EbeanEx.find(Story.class, requestData.getPayload().get("story")));
@@ -93,7 +91,7 @@ public class TaskController {
 
         // Create the new task
         Task task = new Task(
-            EbeanEx.require(EbeanEx.find(Story.class, requestData.getPayload().get("story"))),
+            story,
             assignedOwner,
             requestData.getPayload().getString("name"),
             requestData.getPayload().getString("description"),
