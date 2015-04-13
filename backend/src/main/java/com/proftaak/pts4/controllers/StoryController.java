@@ -129,11 +129,11 @@ public class StoryController {
             story.setStoryPoints(payload.getInt("points"));
         }
         if (payload.containsKey("priority")) {
-            if (story.getProject().getProductOwner().equals(requestData.getUser())) {
-                story.setPriority(payload.getInt("priority"));
-            } else {
-                throw HTTPException.ERROR_FORBIDDEN;
+            int priority = payload.getInt("priority");
+            if (story.getPriority() != priority) {
+                requestData.requireScopeRole(ScopeRole.PRODUCT_OWNER);
             }
+            story.setPriority(priority);
         }
 
         // Save the changes
