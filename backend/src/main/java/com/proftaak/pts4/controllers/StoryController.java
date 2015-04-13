@@ -175,7 +175,20 @@ public class StoryController {
         // Get the story
         Story story = EbeanEx.require(EbeanEx.find(Story.class, requestData.getParameter("id")));
 
-        // Return the stories
+        // Return the tasks
         return story.getTasks();
+    }
+
+    /**
+     * GET /story/1/test
+     */
+    @RequireAuth(role = ScopeRole.TEAM_MEMBER)
+    @Route(method = Route.Method.GET, route = "/story/{id}/test")
+    public static Object getTest(RequestData requestData) throws Exception {
+        // Get the story
+        Story story = EbeanEx.require(EbeanEx.find(Story.class, requestData.getParameter("id")));
+
+        // Return the tests
+        return story.getTests();
     }
 }
