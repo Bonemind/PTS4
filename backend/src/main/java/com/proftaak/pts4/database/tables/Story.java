@@ -124,7 +124,7 @@ public class Story implements DatabaseModel {
      * The amount of story points this story has.
      */
     @Column(name = FIELD_STORY_POINTS)
-    private int storyPoints;
+    private int points;
 
     /**
      * The priority of this story.
@@ -222,12 +222,12 @@ public class Story implements DatabaseModel {
         return this.tasks;
     }
 
-    public int getStoryPoints() {
-        return this.storyPoints;
+    public int getPoints() {
+        return this.points;
     }
 
-    public void setStoryPoints(int storyPoints) {
-        this.storyPoints = storyPoints;
+    public void setPoints(int points) {
+        this.points = points;
     }
 
     public int getPriority() {
