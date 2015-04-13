@@ -9,7 +9,9 @@ import com.proftaak.pts4.database.tables.*;
 import javassist.NotFoundException;
 
 import java.io.FileNotFoundException;
+import java.lang.reflect.Field;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Properties;
 
 public class DBUtils {
@@ -75,16 +77,41 @@ public class DBUtils {
         tm.getUsers().add(u2);
         Ebean.save(tm);
 
-        Iteration it = new Iteration(tm, LocalDate.now(), LocalDate.now().plusWeeks(2), "Sprint 1", null);
+        Iteration it = new Iteration(tm, LocalDate.now().minusWeeks(1), LocalDate.now().plusWeeks(1), "Sprint 1", null);
         Ebean.save(it);
 
         Project p = new Project(tm, u3, "PTS4", "Proftaak S4");
         Ebean.save(p);
 
+        Field completedOnField = null;
+        try {
+            completedOnField = Story.class.getDeclaredField("completedOn");
+            completedOnField.setAccessible(true);
+        } catch (NoSuchFieldException ignored) {
+        }
+
         Story us1 = new Story(p, null, Story.Type.DEFECT, "Foo", null, Story.Status.DEFINED, 0, 3);
         Ebean.save(us1);
         Story us2 = new Story(p, it, Story.Type.USER_STORY, "Lorem", "Lorem Ipsum Dolor Sit Amet", Story.Status.IN_PROGRESS, 1, 4);
         Ebean.save(us2);
+        Story us3 = new Story(p, it, Story.Type.USER_STORY, "Bar", null, Story.Status.DONE, 0, 3);
+        Ebean.save(us3);
+        try {
+            completedOnField.set(us3, LocalDateTime.now().minusDays(6).minusHours(4));
+        } catch (IllegalAccessException ignored) {
+        }
+        Story us4 = new Story(p, it, Story.Type.USER_STORY, "Foo Bar", null, Story.Status.DONE, 1, 4);
+        try {
+            completedOnField.set(us4, LocalDateTime.now().minusDays(4).minusHours(1));
+        } catch (IllegalAccessException ignored) {
+        }
+        Ebean.save(us4);
+        Story us5 = new Story(p, it, Story.Type.USER_STORY, "Stuff", null, Story.Status.DONE, 1, 6);
+        try {
+            completedOnField.set(us5, LocalDateTime.now().minusDays(1).minusHours(5));
+        } catch (IllegalAccessException ignored) {
+        }
+        Ebean.save(us5);
 
         Task t11 = new Task(us1, null, "Frontend", null, 2, Task.Status.DEFINED);
         Ebean.save(t11);
