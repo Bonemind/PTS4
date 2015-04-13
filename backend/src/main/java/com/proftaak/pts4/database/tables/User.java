@@ -1,5 +1,6 @@
 package com.proftaak.pts4.database.tables;
 
+import com.proftaak.pts4.database.DatabaseModel;
 import flexjson.JSON;
 import org.mindrot.jbcrypt.BCrypt;
 
@@ -13,7 +14,7 @@ import java.util.List;
  */
 @Entity
 @Table(name = "users")
-public class User implements Serializable {
+public class User implements DatabaseModel {
     public static final String FIELD_ID = "id";
     public static final String FIELD_EMAIL = "email";
     public static final String FIELD_PASSWORD = "password";
@@ -42,6 +43,7 @@ public class User implements Serializable {
     /**
      * The tokens of this user
      */
+    @JSON(include = false)
     @OneToMany(cascade = CascadeType.ALL)
     private List<Token> tokens = new ArrayList<>();
 
@@ -55,6 +57,7 @@ public class User implements Serializable {
     /**
      * The teams of which this user is the scrum master
      */
+    @JSON(include = false)
     @OneToMany
     @JoinColumn(name = Team.FIELD_SCRUM_MASTER)
     private List<Team> ownedTeams = new ArrayList<>();
@@ -62,6 +65,7 @@ public class User implements Serializable {
     /**
      * The projects of which this user is the product owner
      */
+    @JSON(include = false)
     @OneToMany
     @JoinColumn(name = Project.FIELD_PRODUCT_OWNER)
     private List<Project> ownedProjects = new ArrayList<>();
@@ -69,6 +73,7 @@ public class User implements Serializable {
     /**
      * The work this user has done.
      */
+    @JSON(include = false)
     @OneToMany
     @JoinColumn(name = TaskProgress.FIELD_USER)
     private List<TaskProgress> executedTaskProgress = new ArrayList<>();
@@ -85,6 +90,11 @@ public class User implements Serializable {
     public User(String email, String password) {
         this.setEmail(email);
         this.setPassword(password);
+    }
+
+    @Override
+    public Object getPK() {
+        return this.getId();
     }
 
     public int getId() {

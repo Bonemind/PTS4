@@ -1,5 +1,9 @@
 package com.proftaak.pts4.database.tables;
 
+import com.proftaak.pts4.core.flexjson.ToPKTransformer;
+import com.proftaak.pts4.database.DatabaseModel;
+import flexjson.JSON;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
@@ -10,7 +14,7 @@ import java.util.UUID;
  */
 @Entity
 @Table(name = "tokens")
-public class Token implements Serializable {
+public class Token implements DatabaseModel {
     public static final String FIELD_TOKEN = "token";
     public static final String FIELD_USER = "user_id";
     public static final String FIELD_DATE_CREATION = "date_creation";
@@ -60,6 +64,11 @@ public class Token implements Serializable {
     public Token(User user, String token) {
         this(user);
         this.token = token;
+    }
+
+    @Override
+    public Object getPK() {
+        return this.getToken();
     }
 
     public String getToken() {

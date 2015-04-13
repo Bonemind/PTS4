@@ -1,6 +1,8 @@
 package com.proftaak.pts4.database.tables;
 
+import com.proftaak.pts4.core.flexjson.ToPKTransformer;
 import com.proftaak.pts4.core.flexjson.ToStringTransformer;
+import com.proftaak.pts4.database.DatabaseModel;
 import flexjson.JSON;
 
 import javax.jws.soap.SOAPBinding;
@@ -12,7 +14,7 @@ import java.time.LocalDateTime;
  */
 @Entity
 @Table(name = "taskprogress")
-public class TaskProgress {
+public class TaskProgress implements DatabaseModel {
     public static final String FIELD_ID = "id";
     public static final String FIELD_TASK = "task_id";
     public static final String FIELD_USER = "user_id";
@@ -31,6 +33,7 @@ public class TaskProgress {
     /**
      * The task that this work was for
      */
+    @JSON(transformer = ToPKTransformer.class)
     @ManyToOne(optional = false)
     @JoinColumn(name = FIELD_TASK)
     private Task task;
@@ -38,6 +41,7 @@ public class TaskProgress {
     /**
      * The user that did this work
      */
+    @JSON(transformer = ToPKTransformer.class)
     @ManyToOne(optional = false)
     @JoinColumn(name = FIELD_USER)
     private User user;
@@ -87,6 +91,11 @@ public class TaskProgress {
             // No todo set, let the task determine the todo.
             this.todoAfter = task.getTodo();
         }
+    }
+
+    @Override
+    public Object getPK() {
+        return this.getId();
     }
 
     public int getId() {

@@ -1,5 +1,8 @@
 package com.proftaak.pts4.database.tables;
 
+import com.proftaak.pts4.core.flexjson.ToPKTransformer;
+import com.proftaak.pts4.database.DatabaseModel;
+import flexjson.JSON;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.persistence.*;
@@ -11,7 +14,7 @@ import java.util.List;
  */
 @Entity
 @Table(name = "stories")
-public class Story {
+public class Story implements DatabaseModel {
     public enum Status {
         /**
          * Story is defined
@@ -104,6 +107,7 @@ public class Story {
     /**
      * The project this userstory belongs to
      */
+    @JSON(transformer = ToPKTransformer.class)
     @ManyToOne(optional = false)
     @JoinColumn(name = FIELD_PROJECT)
     private Project project;
@@ -111,15 +115,10 @@ public class Story {
     /**
      * The iteration this userstory belongs to
      */
+    @JSON(transformer = ToPKTransformer.class)
     @ManyToOne
     @JoinColumn(name = FIELD_ITERATION)
     private Iteration iteration;
-
-    /**
-     * The tasks of this story
-     */
-    @OneToMany(cascade = CascadeType.ALL)
-    private List<Test> tests = new ArrayList<>();
 
     /**
      * The amount of story points this story has.
@@ -136,9 +135,18 @@ public class Story {
     /**
      * The tasks of this story
      */
+    @JSON(include = false)
     @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = Task.FIELD_STORY)
     private List<Task> tasks = new ArrayList<>();
+
+    /**
+     * The tests of this story
+     */
+    @JSON(include = false)
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name = Test.FIELD_STORY)
+    private List<Test> tests = new ArrayList<>();
 
     /**
      * ORM-Lite no-arg constructor
@@ -155,6 +163,11 @@ public class Story {
         this.setStatus(status);
         this.setPriority(priority);
         this.setStoryPoints(storyPoints);
+    }
+
+    @Override
+    public Object getPK() {
+        return this.getId();
     }
 
     public int getId() {

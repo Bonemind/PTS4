@@ -1,5 +1,8 @@
 package com.proftaak.pts4.database.tables;
 
+import com.proftaak.pts4.core.flexjson.ToPKTransformer;
+import com.proftaak.pts4.database.DatabaseModel;
+import flexjson.JSON;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.persistence.*;
@@ -11,7 +14,7 @@ import java.util.List;
  */
 @Entity
 @Table(name = "projects")
-public class Project {
+public class Project implements DatabaseModel {
     public static final String FIELD_ID = "id";
     public static final String FIELD_NAME = "name";
     public static final String FIELD_DESCRIPTION = "description";
@@ -40,6 +43,7 @@ public class Project {
     /**
      * The team this project belongs to
      */
+    @JSON(transformer = ToPKTransformer.class)
     @ManyToOne(optional = false)
     @JoinColumn(name = FIELD_TEAM)
     private Team team;
@@ -47,6 +51,7 @@ public class Project {
     /**
      * The product owner of this project
      */
+    @JSON(transformer = ToPKTransformer.class)
     @ManyToOne(optional = false)
     @JoinColumn(name = FIELD_PRODUCT_OWNER)
     private User productOwner;
@@ -54,6 +59,7 @@ public class Project {
     /**
      * The user stories of this project
      */
+    @JSON(include = false)
     @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = Story.FIELD_PROJECT)
     private List<Story> stories = new ArrayList<>();
@@ -69,6 +75,11 @@ public class Project {
         this.setProductOwner(productOwner);
         this.setName(name);
         this.setDescription(description);
+    }
+
+    @Override
+    public Object getPK() {
+        return this.getId();
     }
 
     public int getId() {

@@ -1,6 +1,8 @@
 package com.proftaak.pts4.core.rest;
 
 import com.avaje.ebean.Ebean;
+import com.proftaak.pts4.core.flexjson.ToPKTransformer;
+import com.proftaak.pts4.database.DatabaseModel;
 import com.proftaak.pts4.database.tables.Token;
 import com.proftaak.pts4.database.tables.User;
 import flexjson.JSONDeserializer;
@@ -52,8 +54,14 @@ public class RequestData {
      * Constructs a new RequestData.
      */
     protected RequestData() {
+        // Create a new JSON serializer.
         this.jsonSerializer = new JSONSerializer();
+
+        // Exclude the class properties, as these are completely irrelevant for the frontend.
         this.jsonSerializer.exclude("*.class");
+
+        // Exclude the PK property, ad this is already included under it's primary name.
+        this.jsonSerializer.exclude("*.PK");
     }
 
     public Payload getPayload() {

@@ -1,6 +1,8 @@
 package com.proftaak.pts4.database.tables;
 
+import com.proftaak.pts4.core.flexjson.ToPKTransformer;
 import com.proftaak.pts4.core.flexjson.ToStringTransformer;
+import com.proftaak.pts4.database.DatabaseModel;
 import flexjson.JSON;
 
 import javax.persistence.*;
@@ -13,7 +15,7 @@ import java.util.List;
  */
 @Entity
 @Table(name = "iterations")
-public class Iteration {
+public class Iteration implements DatabaseModel {
     public static final String FIELD_ID = "id";
     public static final String FIELD_NAME = "name";
     public static final String FIELD_DESCRIPTION = "description";
@@ -57,6 +59,7 @@ public class Iteration {
     /**
      * The team this iteration belongs to
      */
+    @JSON(transformer = ToPKTransformer.class)
     @ManyToOne(optional = false)
     @JoinColumn(name = FIELD_TEAM)
     private Team team;
@@ -64,6 +67,7 @@ public class Iteration {
     /**
      * The user stories of this iteration
      */
+    @JSON(include = false)
     @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = Story.FIELD_ITERATION)
     private List<Story> stories = new ArrayList<>();
@@ -77,6 +81,11 @@ public class Iteration {
         this.setEnd(end);
         this.setName(name);
         this.setDescription(description);
+    }
+
+    @Override
+    public Object getPK() {
+        return this.getId();
     }
 
     public int getId() {

@@ -1,5 +1,7 @@
 package com.proftaak.pts4.database.tables;
 
+import com.proftaak.pts4.core.flexjson.ToPKTransformer;
+import com.proftaak.pts4.database.DatabaseModel;
 import flexjson.JSON;
 
 import javax.persistence.*;
@@ -12,7 +14,7 @@ import java.util.List;
  */
 @Entity
 @Table(name = "teams")
-public class Team {
+public class Team implements DatabaseModel {
     public static final String FIELD_ID = "id";
     public static final String FIELD_NAME = "name";
     public static final String FIELD_SCRUM_MASTER = "scrum_master";
@@ -35,7 +37,7 @@ public class Team {
     /**
      * The SCRUM master of this team
      */
-    @JSON(include = false)
+    @JSON(transformer = ToPKTransformer.class)
     @ManyToOne(optional = false)
     @JoinColumn(name = FIELD_SCRUM_MASTER)
     private User scrumMaster;
@@ -73,6 +75,11 @@ public class Team {
         this.setName(name);
         this.setScrumMaster(scrumMaster);
         this.users.add(scrumMaster);
+    }
+
+    @Override
+    public Object getPK() {
+        return this.getId();
     }
 
     public int getId() {

@@ -1,5 +1,7 @@
 package com.proftaak.pts4.database.tables;
 
+import com.proftaak.pts4.core.flexjson.ToPKTransformer;
+import com.proftaak.pts4.database.DatabaseModel;
 import flexjson.JSON;
 
 import javax.persistence.*;
@@ -9,7 +11,7 @@ import javax.persistence.*;
  */
 @Entity
 @Table(name = "Tests")
-public class Test {
+public class Test implements DatabaseModel {
     public enum Status{
         /**
          * Acceptance test is defined
@@ -57,7 +59,7 @@ public class Test {
     /**
      * The user story of this task
      */
-    @JSON(include = false)
+    @JSON(transformer = ToPKTransformer.class)
     @ManyToOne(optional = false)
     @JoinColumn(name = FIELD_STORY)
     private Story story;
@@ -70,6 +72,11 @@ public class Test {
     }
 
     public Test() {
+    }
+
+    @Override
+    public Object getPK() {
+        return this.getId();
     }
 
     public int getId() {

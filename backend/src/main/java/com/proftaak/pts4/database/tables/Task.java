@@ -1,5 +1,7 @@
 package com.proftaak.pts4.database.tables;
 
+import com.proftaak.pts4.core.flexjson.ToPKTransformer;
+import com.proftaak.pts4.database.DatabaseModel;
 import flexjson.JSON;
 import org.apache.commons.lang3.StringUtils;
 
@@ -12,7 +14,7 @@ import java.util.List;
  */
 @Entity
 @Table(name = "tasks")
-public class Task {
+public class Task implements DatabaseModel {
     public enum Status {
         /**
          * Task is defined
@@ -73,7 +75,7 @@ public class Task {
     /**
      * The user story of this task
      */
-    @JSON(include = false)
+    @JSON(transformer = ToPKTransformer.class)
     @ManyToOne(optional = false)
     @JoinColumn(name = FIELD_STORY)
     private Story story;
@@ -81,6 +83,7 @@ public class Task {
     /**
      * The user who owns this task
      */
+    @JSON(transformer = ToPKTransformer.class)
     @ManyToOne(optional = true)
     @JoinColumn(name = FIELD_OWNER)
     private User owner;
@@ -88,6 +91,7 @@ public class Task {
     /**
      * The progress of this task
      */
+    @JSON(include = false)
     @OneToMany
     @JoinColumn(name = TaskProgress.FIELD_TASK)
     private List<TaskProgress> progress = new ArrayList<>();
@@ -105,6 +109,11 @@ public class Task {
         this.setEstimate(estimate);
         this.setStatus(status);
         this.setOwner(owner);
+    }
+
+    @Override
+    public Object getPK() {
+        return this.getId();
     }
 
     public int getId() {
