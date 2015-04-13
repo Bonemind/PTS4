@@ -71,14 +71,6 @@ public class User implements DatabaseModel {
     private List<Project> ownedProjects = new ArrayList<>();
 
     /**
-     * The work this user has done.
-     */
-    @JSON(include = false)
-    @OneToMany
-    @JoinColumn(name = TaskProgress.FIELD_USER)
-    private List<TaskProgress> executedTaskProgress = new ArrayList<>();
-
-    /**
      * ORM-Lite no-arg constructor
      */
     public User() {
@@ -143,9 +135,5 @@ public class User implements DatabaseModel {
 
     public List<Project> getOwnedProjects() {
         return this.ownedProjects;
-    }
-
-    public List<TaskProgress> getExecutedTaskProgress() {
-        return this.executedTaskProgress;
     }
 }

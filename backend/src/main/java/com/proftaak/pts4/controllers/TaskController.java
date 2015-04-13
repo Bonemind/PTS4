@@ -95,7 +95,7 @@ public class TaskController {
             assignedOwner,
             requestData.getPayload().getString("name"),
             requestData.getPayload().getString("description"),
-            requestData.getPayload().getInt("estimate", 0),
+            requestData.getPayload().getDouble("estimate", 0.0),
             Task.Status.valueOf(requestData.getPayload().getOrDefault("status", Task.Status.DEFINED.toString()).toString())
         );
         Ebean.save(task);
@@ -122,7 +122,10 @@ public class TaskController {
             task.setDescription(payload.getString("description"));
         }
         if (payload.containsKey("estimate")) {
-            task.setEstimate(payload.getInt("estimate"));
+            task.setEstimate(payload.getDouble("estimate"));
+        }
+        if (payload.containsKey("todo")) {
+            task.setTodo(payload.getDouble("todo"));
         }
         if (payload.containsKey("status")) {
             task.setStatus(Task.Status.valueOf(payload.getOrDefault("status", Task.Status.DEFINED.toString()).toString()));
@@ -158,40 +161,5 @@ public class TaskController {
 
         // Return nothing
         return null;
-    }
-
-    /**
-     * GET /task/1/progress
-     */
-    @RequireAuth(role = ScopeRole.TEAM_MEMBER)
-    @Route(method = Route.Method.GET, route = "/task/{id}/progress")
-    public static Object getProgressHandler(RequestData requestData) throws Exception {
-        // Get the task
-        Task task = EbeanEx.require(EbeanEx.find(Task.class, requestData.getParameter("id")));
-
-        // Return the task progress.
-        return task.getProgress();
-    }
-
-    /**
-     * POST /task/1/progress
-     */
-    @RequireAuth(role = ScopeRole.DEVELOPER)
-    @Route(method = Route.Method.POST, route = "/task/{id}/progress")
-    public static Object postProgressHandler(RequestData requestData) throws Exception {
-        // Get the task
-        Task task = EbeanEx.require(EbeanEx.find(Task.class, requestData.getParameter("id")));
-
-        // Add the progress
-        TaskProgress progress = new TaskProgress(
-            task,
-            requestData.getUser(),
-            requestData.getPayload().getDouble("effort"),
-            requestData.getPayload().getDouble("todo", -1d)
-        );
-        Ebean.save(progress);
-
-        // Return the new progress
-        return progress;
     }
 }

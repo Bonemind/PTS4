@@ -37,6 +37,7 @@ public class Task implements DatabaseModel {
     public static final String FIELD_DESCRIPTION = "description";
     public static final String FIELD_STATUS = "status";
     public static final String FIELD_ESTIMATE = "estimate";
+    public static final String FIELD_TODO = "todo";
     public static final String FIELD_STORY = "story_id";
     public static final String FIELD_OWNER = "owner";
 
@@ -73,6 +74,12 @@ public class Task implements DatabaseModel {
     private double estimate = 0;
 
     /**
+     * The remaining time estimate of this task.
+     */
+    @Column(name = FIELD_TODO, nullable = false)
+    private double todo = 0;
+
+    /**
      * The user story of this task
      */
     @JSON(transformer = ToPKTransformer.class)
@@ -87,14 +94,6 @@ public class Task implements DatabaseModel {
     @ManyToOne(optional = true)
     @JoinColumn(name = FIELD_OWNER)
     private User owner;
-
-    /**
-     * The progress of this task
-     */
-    @JSON(include = false)
-    @OneToMany
-    @JoinColumn(name = TaskProgress.FIELD_TASK)
-    private List<TaskProgress> progress = new ArrayList<>();
 
     /**
      * ORM-Lite no-arg constructor
@@ -144,6 +143,14 @@ public class Task implements DatabaseModel {
         this.estimate = estimate;
     }
 
+    public double getTodo() {
+        return this.todo;
+    }
+
+    public void setTodo(double todo) {
+        this.todo = todo;
+    }
+
     public Status getStatus() {
         return this.status;
     }
@@ -162,36 +169,5 @@ public class Task implements DatabaseModel {
 
     public User getOwner() {
         return this.owner;
-    }
-
-    public List<TaskProgress> getProgress() {
-        return this.progress;
-    }
-
-    /**
-     * Get the todo.
-     *
-     * This is effort - combined task progress.
-     * This will never be lower than 0.
-     */
-    public double getTodo() {
-        double done = 0;
-        for (TaskProgress progress : this.getProgress()) {
-            done += progress.getEffort();
-        }
-        return Math.max(estimate - done, 0);
-    }
-
-    /**
-     * Set the todo.
-     *
-     * This will set effort to combined task progress + new todo.
-     */
-    public void setTodo(double todo) {
-        double done = 0;
-        for (TaskProgress progress : this.getProgress()) {
-            done += progress.getEffort();
-        }
-        this.setEstimate(done + todo);
     }
 }

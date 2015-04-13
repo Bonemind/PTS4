@@ -101,8 +101,5 @@ public class DBUtils {
         Ebean.save(test2);
         Test test3 = new Test(us2, "us2Test", "test some stuff", Test.Status.DEFINED);
         Ebean.save(test3);
-
-        TaskProgress tp1 = new TaskProgress(t12, u1, 0.25, -1);
-        Ebean.save(tp1);
     }
 }
