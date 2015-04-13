@@ -81,16 +81,10 @@ public class StoryController {
             requestData.requireScopeRole(ScopeRole.PRODUCT_OWNER);
         }
 
-        // Determine the story iteration
-        Iteration iteration = null;
-        if (requestData.getPayload().containsKey("iteration")) {
-            iteration = EbeanEx.require(EbeanEx.find(Iteration.class, requestData.getPayload().get("iteration")));
-        }
-
         // Create the new user story
         Story story = new Story(
             EbeanEx.require(EbeanEx.find(Project.class, requestData.getPayload().get("project"))),
-            iteration,
+            EbeanEx.find(Iteration.class, requestData.getPayload().get("iteration")),
             Story.Type.valueOf(requestData.getPayload().getOrDefault("type", Story.Type.USER_STORY.toString()).toString()),
             requestData.getPayload().getString("name"),
             requestData.getPayload().getString("description"),
@@ -116,7 +110,7 @@ public class StoryController {
         // Change the story
         Payload payload = requestData.getPayload();
         if (payload.containsKey("iteration")) {
-            story.setIteration(EbeanEx.require(EbeanEx.find(Iteration.class, requestData.getPayload().get("iteration"))));
+            story.setIteration(EbeanEx.find(Iteration.class, requestData.getPayload().get("iteration")));
         }
         if (payload.containsKey("name")) {
             story.setName(payload.getString("name"));
