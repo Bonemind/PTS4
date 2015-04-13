@@ -151,9 +151,6 @@ public class ProjectController {
         // Get the project
         Project project = EbeanEx.require(EbeanEx.find(Project.class, requestData.getParameter("id")));
 
-        // Configure the serializer.
-        requestData.exclude("project");
-
         // Return the stories
         return project.getStories();
     }

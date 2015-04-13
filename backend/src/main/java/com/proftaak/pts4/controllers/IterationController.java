@@ -145,9 +145,6 @@ public class IterationController {
         // Get the iteration
         Iteration iteration = EbeanEx.require(EbeanEx.find(Iteration.class, requestData.getParameter("id")));
 
-        // Configure the serializer.
-        requestData.exclude("iteration");
-
         // Return the stories
         return iteration.getStories();
     }

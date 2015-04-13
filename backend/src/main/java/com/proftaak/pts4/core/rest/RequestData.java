@@ -100,24 +100,6 @@ public class RequestData {
     }
 
     /**
-     * Include a field in the response
-     *
-     * @param field The field to include
-     */
-    public void include(String field) {
-        this.jsonSerializer.include(field);
-    }
-
-    /**
-     * Exclude a field in the response
-     *
-     * @param field The field to exclude
-     */
-    public void exclude(String field) {
-        this.jsonSerializer.exclude(field);
-    }
-
-    /**
      * Build a RequestData object for the current request
      *
      * @param request The request
