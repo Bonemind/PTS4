@@ -24,7 +24,7 @@ public class HTTPException extends Exception {
     /**
      * The requested object does not exist
      */
-    public static final HTTPException ERROR_OBJECT_NOT_FOUND = new HTTPException("The requested object does not exist", HttpStatus.BAD_REQUEST_400);
+    public static final HTTPException ERROR_OBJECT_NOT_FOUND = new HTTPException("The referenced object does not exist", HttpStatus.BAD_REQUEST_400);
 
     /**
      * The requested route does not exist

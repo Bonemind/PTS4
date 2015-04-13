@@ -14,11 +14,18 @@ public class EbeanEx {
      *
      * Will return null if no object is found.
      */
-    public static <T> T find(Class<T> cls, Object pk) {
-        T obj = null;
-        try {
-            obj = Ebean.find(cls, pk);
-        } catch (NullPointerException e) {
+    public static <T> T find(Class<T> cls, Object pk) throws HTTPException {
+        // If no primary key, return null.
+        if (pk == null) {
+            return null;
+        }
+
+        // The primary key is given, so get the object.
+        T obj = Ebean.find(cls, pk);
+
+        // The primary key is given, so require the object to be non-null.
+        if (obj == null) {
+            throw HTTPException.ERROR_OBJECT_NOT_FOUND;
         }
         return obj;
     }
