@@ -12,6 +12,7 @@ import org.glassfish.grizzly.http.util.HttpStatus;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Map;
 
 /**
@@ -42,7 +43,7 @@ public class TeamController {
                 requestData.addScopeRole(ScopeRole.DEVELOPER);
                 requestData.addScopeRole(ScopeRole.TEAM_MEMBER);
             }
-            // TODO: remove this
+            // TODO: remove the being a part of a team if you're product owner of one of their projects
             for (Project project : team.getProjects()) {
                 if (project.getProductOwner().equals(user)) {
                     requestData.addScopeRole(ScopeRole.TEAM_MEMBER);
@@ -71,7 +72,13 @@ public class TeamController {
     @Route(method = Route.Method.GET)
     public static Object getAllHandler(RequestData requestData) throws Exception {
         User user = requestData.getUser();
-        return user.getTeams();
+        // TODO: remove the being a part of a team if you're product owner of one of their projects
+        Collection<Team> teams = new HashSet<>();
+        teams.addAll(user.getTeams());
+        for (Project project : user.getOwnedProjects()) {
+            teams.add(project.getTeam());
+        }
+        return teams;
     }
 
     /**
