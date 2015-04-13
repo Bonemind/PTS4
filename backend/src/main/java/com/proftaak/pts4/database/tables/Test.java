@@ -12,22 +12,10 @@ import javax.persistence.*;
 @Entity
 @Table(name = "Tests")
 public class Test implements DatabaseModel {
-    public enum Status{
-        /**
-         * Acceptance test is defined
-         */
-        DEFINED,
-
-        /**
-         * Acceptance test has been completed
-         */
-        ACCEPTED
-    }
-
     public static final String FIELD_ID = "id";
-    public static final String FIELD_STATUS = "status";
-    public static final String FIELD_DESCRIPTION = "description";
     public static final String FIELD_NAME = "name";
+    public static final String FIELD_DESCRIPTION = "description";
+    public static final String FIELD_ACCEPTED = "accepted";
     public static final String FIELD_STORY = "story_id";
 
     /**
@@ -52,9 +40,8 @@ public class Test implements DatabaseModel {
     /**
      * The status of this Test
      */
-    @Column(name = FIELD_STATUS, nullable = false)
-    @Enumerated(EnumType.STRING)
-    private Status status;
+    @Column(name = FIELD_ACCEPTED, nullable = false)
+    private boolean accepted = false;
 
     /**
      * The user story of this task
@@ -64,14 +51,13 @@ public class Test implements DatabaseModel {
     @JoinColumn(name = FIELD_STORY)
     private Story story;
 
-    public Test(Story story, String name, String description,Status status) {
-        this.name = name;
-        this.description = description;
-        this.status = status;
-        this.story = story;
+    public Test() {
     }
 
-    public Test() {
+    public Test(Story story, String name, String description) {
+        this.name = name;
+        this.description = description;
+        this.story = story;
     }
 
     @Override
@@ -103,12 +89,12 @@ public class Test implements DatabaseModel {
         this.description = description;
     }
 
-    public Status getStatus() {
-        return this.status;
+    public boolean isAccepted() {
+        return accepted;
     }
 
-    public void setStatus(Status status) {
-        this.status = status;
+    public void setAccepted(boolean accepted) {
+        this.accepted = accepted;
     }
 
     public Story getStory() {

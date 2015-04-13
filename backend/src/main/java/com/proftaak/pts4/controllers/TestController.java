@@ -84,8 +84,7 @@ public class TestController {
         Test test = new Test(
                 story,
                 requestData.getPayload().getString("name"),
-                requestData.getPayload().getString("description"),
-                Test.Status.valueOf(requestData.getPayload().getOrDefault("status", Test.Status.DEFINED.toString()).toString())
+                requestData.getPayload().getString("description")
         );
         Ebean.save(test);
 
@@ -110,8 +109,8 @@ public class TestController {
         if (payload.containsKey("description")) {
             test.setDescription(payload.getString("description"));
         }
-        if (payload.containsKey("status")) {
-            test.setStatus(Test.Status.valueOf(payload.getOrDefault("status", Test.Status.DEFINED.toString()).toString()));
+        if (payload.containsKey("accepted")) {
+            test.setAccepted(payload.getBoolean("accepted"));
         }
 
         // Save the changes
