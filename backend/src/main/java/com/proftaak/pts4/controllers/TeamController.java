@@ -42,6 +42,12 @@ public class TeamController {
                 requestData.addScopeRole(ScopeRole.DEVELOPER);
                 requestData.addScopeRole(ScopeRole.TEAM_MEMBER);
             }
+            // TODO: remove this
+            for (Project project : team.getProjects()) {
+                if (project.getProductOwner().equals(user)) {
+                    requestData.addScopeRole(ScopeRole.TEAM_MEMBER);
+                }
+            }
         }
     }
 
