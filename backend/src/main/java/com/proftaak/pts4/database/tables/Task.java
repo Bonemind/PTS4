@@ -106,6 +106,7 @@ public class Task implements DatabaseModel {
         this.setName(name);
         this.setDescription(description);
         this.setEstimate(estimate);
+        this.setTodo(estimate);
         this.setStatus(status);
         this.setOwner(owner);
     }
