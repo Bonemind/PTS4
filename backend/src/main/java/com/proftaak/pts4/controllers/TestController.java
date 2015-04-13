@@ -39,6 +39,19 @@ public class TestController {
     }
 
     /**
+     * GET /test/1
+     */
+    @RequireAuth(role = ScopeRole.TEAM_MEMBER)
+    @Route(method = Route.Method.GET_ONE)
+    public static Object getOneHandler(RequestData requestData) throws Exception {
+        Test test = EbeanEx.find(Test.class, requestData.getParameter("id"));
+        if (test == null) {
+            throw HTTPException.ERROR_NOT_FOUND;
+        }
+        return test;
+    }
+
+    /**
      * GET /test
      */
     @RequireAuth
@@ -62,16 +75,7 @@ public class TestController {
     }
 
     /**
-     * GET /test/1
-     */
-    @RequireAuth(role = ScopeRole.TEAM_MEMBER)
-    @Route(method = Route.Method.GET_ONE)
-    public static Object getOneHandler(RequestData requestData) throws Exception {
-        return EbeanEx.require(EbeanEx.find(Test.class, requestData.getParameter("id")));
-    }
-
-    /**
-     * POST /Test
+     * POST /test
      */
     @RequireAuth(role = ScopeRole.TEAM_MEMBER)
     @Route(method = Route.Method.POST)
@@ -92,7 +96,7 @@ public class TestController {
     }
 
     /**
-     * PUT /Test/1
+     * PUT /test/1
      */
     @RequireAuth(role = ScopeRole.TEAM_MEMBER)
     @Route(method = Route.Method.PUT)
@@ -120,7 +124,7 @@ public class TestController {
     }
 
     /**
-     * DELETE /Test/1
+     * DELETE /test/1
      */
     @RequireAuth(role = ScopeRole.TEAM_MEMBER)
     @Route(method = Route.Method.DELETE)

@@ -42,6 +42,19 @@ public class TaskController {
     }
 
     /**
+     * GET /task/1
+     */
+    @RequireAuth(role = ScopeRole.TEAM_MEMBER)
+    @Route(method = Route.Method.GET_ONE)
+    public static Object getOneHandler(RequestData requestData) throws Exception {
+        Task task = EbeanEx.find(Task.class, requestData.getParameter("id"));
+        if (task == null) {
+            throw HTTPException.ERROR_NOT_FOUND;
+        }
+        return task;
+    }
+
+    /**
      * GET /task
      */
     @RequireAuth
@@ -62,15 +75,6 @@ public class TaskController {
             }
         }
         return tasks;
-    }
-
-    /**
-     * GET /task/1
-     */
-    @RequireAuth(role = ScopeRole.TEAM_MEMBER)
-    @Route(method = Route.Method.GET_ONE)
-    public static Object getOneHandler(RequestData requestData) throws Exception {
-        return EbeanEx.require(EbeanEx.find(Task.class, requestData.getParameter("id")));
     }
 
     /**

@@ -20,6 +20,24 @@ import java.util.Map;
 @Controller
 public class UserController {
     /**
+     * PUT /user/1
+     */
+    @RequireAuth
+    @Route(method = Route.Method.GET_ONE)
+    public static Object getOneHandler(RequestData requestData) throws Exception {
+        // Get the user
+        User user = EbeanEx.find(User.class, requestData.getParameter("id"));
+
+        // Check whether this matches the currently logged in user
+        if (!user.equals(requestData.getUser())) {
+            throw HTTPException.ERROR_FORBIDDEN;
+        }
+
+        // Return the user
+        return user;
+    }
+
+    /**
      * POST /user
      */
     @Route(method = Route.Method.POST)

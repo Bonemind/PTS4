@@ -49,6 +49,19 @@ public class TeamController {
     }
 
     /**
+     * GET /team/1
+     */
+    @RequireAuth(role = ScopeRole.TEAM_MEMBER)
+    @Route(method = Route.Method.GET_ONE)
+    public static Object getHandler(RequestData requestData) throws Exception {
+        Team team = EbeanEx.find(Team.class, requestData.getParameter("id"));
+        if (team == null) {
+            throw HTTPException.ERROR_NOT_FOUND;
+        }
+        return team;
+    }
+
+    /**
      * GET /team
      */
     @RequireAuth
@@ -56,15 +69,6 @@ public class TeamController {
     public static Object getAllHandler(RequestData requestData) throws Exception {
         User user = requestData.getUser();
         return user.getTeams();
-    }
-
-    /**
-     * GET /team/1
-     */
-    @RequireAuth(role = ScopeRole.TEAM_MEMBER)
-    @Route(method = Route.Method.GET_ONE)
-    public static Object getHandler(RequestData requestData) throws Exception {
-        return Ebean.find(Team.class, requestData.getParameter("id"));
     }
 
     /**

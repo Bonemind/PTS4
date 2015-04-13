@@ -54,6 +54,19 @@ public class ProjectController {
     }
 
     /**
+     * GET /project/1
+     */
+    @RequireAuth(role = ScopeRole.TEAM_MEMBER)
+    @Route(method = Route.Method.GET_ONE)
+    public static Object getOneHandler(RequestData requestData) throws Exception {
+        Project project = EbeanEx.find(Project.class, requestData.getParameter("id"));
+        if (project == null) {
+            throw HTTPException.ERROR_NOT_FOUND;
+        }
+        return project;
+    }
+
+    /**
      * GET /project
      */
     @RequireAuth
@@ -66,15 +79,6 @@ public class ProjectController {
         }
         projects.addAll(user.getOwnedProjects());
         return projects;
-    }
-
-    /**
-     * GET /project/1
-     */
-    @RequireAuth(role = ScopeRole.TEAM_MEMBER)
-    @Route(method = Route.Method.GET_ONE)
-    public static Object getOneHandler(RequestData requestData) throws Exception {
-        return EbeanEx.require(EbeanEx.find(Project.class, requestData.getParameter("id")));
     }
 
     /**

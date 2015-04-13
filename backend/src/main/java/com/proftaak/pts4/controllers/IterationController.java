@@ -1,6 +1,7 @@
 package com.proftaak.pts4.controllers;
 
 import com.avaje.ebean.Ebean;
+import com.proftaak.pts4.core.rest.HTTPException;
 import com.proftaak.pts4.core.rest.Payload;
 import com.proftaak.pts4.core.rest.RequestData;
 import com.proftaak.pts4.core.rest.ScopeRole;
@@ -44,6 +45,19 @@ public class IterationController {
     }
 
     /**
+     * GET /iteration/1
+     */
+    @RequireAuth
+    @Route(method = Route.Method.GET_ONE)
+    public static Object getOneHandler(RequestData requestData) throws Exception {
+        Iteration iteration = EbeanEx.find(Iteration.class, requestData.getParameter("id"));
+        if (iteration == null) {
+            throw HTTPException.ERROR_NOT_FOUND;
+        }
+        return iteration;
+    }
+
+    /**
      * GET /iteration
      */
     @RequireAuth
@@ -55,15 +69,6 @@ public class IterationController {
             iterations.addAll(team.getIterations());
         }
         return iterations;
-    }
-
-    /**
-     * GET /iteration/1
-     */
-    @RequireAuth
-    @Route(method = Route.Method.GET_ONE)
-    public static Object getOneHandler(RequestData requestData) throws Exception {
-        return EbeanEx.require(EbeanEx.find(Iteration.class, requestData.getParameter("id")));
     }
 
     /**

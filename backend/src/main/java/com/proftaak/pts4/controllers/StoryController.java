@@ -47,6 +47,19 @@ public class StoryController {
     }
 
     /**
+     * GET /story/1
+     */
+    @RequireAuth(role = ScopeRole.TEAM_MEMBER)
+    @Route(method = Route.Method.GET_ONE)
+    public static Object getOneHandler(RequestData requestData) throws Exception {
+        Story story = EbeanEx.find(Story.class, requestData.getParameter("id"));
+        if (story == null) {
+            throw HTTPException.ERROR_NOT_FOUND;
+        }
+        return story;
+    }
+
+    /**
      * GET /story
      */
     @RequireAuth
@@ -63,15 +76,6 @@ public class StoryController {
             stories.addAll(project.getStories());
         }
         return stories;
-    }
-
-    /**
-     * GET /story/1
-     */
-    @RequireAuth(role = ScopeRole.TEAM_MEMBER)
-    @Route(method = Route.Method.GET_ONE)
-    public static Object getOneHandler(RequestData requestData) throws Exception {
-        return EbeanEx.require(EbeanEx.find(Story.class, requestData.getParameter("id")));
     }
 
     /**
