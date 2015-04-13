@@ -131,7 +131,7 @@ public class TaskController {
             task.setStatus(Task.Status.valueOf(payload.getOrDefault("status", Task.Status.DEFINED.toString()).toString()));
         }
         if (payload.containsKey("owner")) {
-            User assignedOwner = EbeanEx.require(EbeanEx.find(User.class, requestData.getPayload().get("owner")));
+            User assignedOwner = EbeanEx.find(User.class, requestData.getPayload().get("owner"));
 
             if (assignedOwner != null && !task.getStory().getProject().getTeam().getUsers().contains(assignedOwner)) {
                 throw new HTTPException("User not part of team", HttpStatus.BAD_REQUEST_400);
