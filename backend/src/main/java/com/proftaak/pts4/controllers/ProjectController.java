@@ -34,9 +34,7 @@ public class ProjectController {
 
         if (requestData.getPayload() != null && requestData.getPayload().containsKey("team")) {
             Team team = EbeanEx.find(Team.class, requestData.getPayload().get("team"));
-            if (team != null) {
-                TeamController.determineScopeRoles(requestData, team);
-            }
+            TeamController.determineScopeRoles(requestData, team);
         }
     }
 

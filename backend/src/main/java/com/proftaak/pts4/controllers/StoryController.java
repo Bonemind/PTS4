@@ -30,6 +30,11 @@ public class StoryController {
     public static void determineScopeRoles(RequestData requestData) throws Exception {
         Story story = EbeanEx.find(Story.class, requestData.getParameter("id"));
         StoryController.determineScopeRoles(requestData, story);
+
+        if (requestData.getPayload() != null && requestData.getPayload().containsKey("project")) {
+            Project project = EbeanEx.find(Project.class, requestData.getPayload().get("project"));
+            ProjectController.determineScopeRoles(requestData, project);
+        }
     }
 
     /**

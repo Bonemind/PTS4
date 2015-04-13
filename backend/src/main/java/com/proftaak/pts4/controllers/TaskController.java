@@ -26,15 +26,6 @@ import java.util.HashSet;
 @Controller
 public class TaskController {
     /**
-     * For this controller we will want to include the list of tasks in responses
-     */
-    @PreRequest
-    public static void setupSerializer(RequestData requestData) {
-        requestData.exclude("*.task");
-        requestData.exclude("*.test");
-    }
-
-    /**
      * Determine the role(s) the logged in user has within the task, if any
      */
     @PreRequest
@@ -42,6 +33,11 @@ public class TaskController {
         Task task = EbeanEx.find(Task.class, requestData.getParameter("id"));
         if (task != null) {
             StoryController.determineScopeRoles(requestData, task.getStory());
+        }
+
+        if (requestData.getPayload() != null && requestData.getPayload().containsKey("story")) {
+            Story story = EbeanEx.find(Story.class, requestData.getPayload().get("story"));
+            StoryController.determineScopeRoles(requestData, story);
         }
     }
 

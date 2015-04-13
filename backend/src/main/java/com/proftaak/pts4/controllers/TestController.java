@@ -23,15 +23,6 @@ import java.util.TreeSet;
 @Controller
 public class TestController {
     /**
-     * For this controller we will want to include the list of test in responses
-     */
-    @PreRequest
-    public static void setupSerializer(RequestData requestData) {
-        requestData.exclude("*.task");
-        requestData.exclude("*.test");
-    }
-
-    /**
      * Determine the role(s) the logged in user has within the test, if any
      */
     @PreRequest
@@ -39,6 +30,11 @@ public class TestController {
         Test test = EbeanEx.find(Test.class, requestData.getParameter("id"));
         if (test != null) {
             StoryController.determineScopeRoles(requestData, test.getStory());
+        }
+
+        if (requestData.getPayload() != null && requestData.getPayload().containsKey("story")) {
+            Story story = EbeanEx.find(Story.class, requestData.getPayload().get("story"));
+            StoryController.determineScopeRoles(requestData, story);
         }
     }
 

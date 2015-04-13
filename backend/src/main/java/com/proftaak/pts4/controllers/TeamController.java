@@ -23,15 +23,6 @@ import java.util.Map;
 @Controller
 public class TeamController {
     /**
-     * For this controller we will want to include the list of tasks in responses
-     */
-    @PreRequest
-    public static void setupSerializer(RequestData requestData) {
-        requestData.include("projects");
-        requestData.include("scrumMaster");
-    }
-
-    /**
      * Determine the role(s) the logged in user has within the team, if any
      */
     @PreRequest
