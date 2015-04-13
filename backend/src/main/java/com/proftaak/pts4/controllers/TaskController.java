@@ -31,6 +31,7 @@ public class TaskController {
     @PreRequest
     public static void setupSerializer(RequestData requestData) {
         requestData.exclude("*.task");
+        requestData.exclude("*.test");
     }
 
     /**
