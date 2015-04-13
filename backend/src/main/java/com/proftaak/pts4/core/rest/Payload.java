@@ -20,13 +20,7 @@ public class Payload extends HashMap<String, Object> {
     }
 
     public Integer getInt(String key) {
-        Object value = this.get(key);
-        if (value instanceof Long) {
-            return ((Long) value).intValue();
-        } else if (value instanceof Double) {
-            return ((Double) value).intValue();
-        }
-        return -1;
+        return this.getInt(key, -1);
     }
 
     public Integer getInt(String key, Integer def) {
@@ -35,18 +29,14 @@ public class Payload extends HashMap<String, Object> {
             return ((Long) value).intValue();
         } else if (value instanceof Double) {
             return ((Double) value).intValue();
+        } else if (value instanceof String) {
+            return Integer.parseInt((String) value);
         }
         return def;
     }
 
     public Double getDouble(String key) {
-        Object value = this.get(key);
-        if (value instanceof Long) {
-            return ((Long) value).doubleValue();
-        } else if (value instanceof Double) {
-            return (Double) value;
-        }
-        return -1d;
+        return this.getDouble(key, -1.0);
     }
 
     public Double getDouble(String key, Double def) {
@@ -55,6 +45,8 @@ public class Payload extends HashMap<String, Object> {
             return ((Long) value).doubleValue();
         } else if (value instanceof Double) {
             return (Double) value;
+        } else if (value instanceof String) {
+            return Double.parseDouble((String) value);
         }
         return def;
     }
