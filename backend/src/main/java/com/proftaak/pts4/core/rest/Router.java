@@ -1,14 +1,8 @@
 package com.proftaak.pts4.core.rest;
 
-import com.avaje.ebean.Ebean;
 import com.proftaak.pts4.core.rest.annotations.PreRequest;
 import com.proftaak.pts4.core.rest.annotations.RequireAuth;
 import com.proftaak.pts4.core.rest.annotations.RequireFields;
-import com.proftaak.pts4.core.rest.annotations.Route;
-import com.proftaak.pts4.database.tables.Token;
-import flexjson.JSONDeserializer;
-import flexjson.JSONSerializer;
-import org.apache.commons.lang3.ObjectUtils;
 import org.glassfish.grizzly.http.server.HttpHandler;
 import org.glassfish.grizzly.http.server.Request;
 import org.glassfish.grizzly.http.server.Response;
@@ -17,11 +11,8 @@ import org.reflections.Reflections;
 import org.reflections.scanners.MethodAnnotationsScanner;
 import org.reflections.util.ClasspathHelper;
 
-import javax.naming.PartialResultException;
-import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.lang.annotation.AnnotationTypeMismatchException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -135,7 +126,7 @@ public class Router extends HttpHandler {
     /**
      * Process a HTTP request
      *
-     * @param request The request
+     * @param request  The request
      * @param response The response
      */
     public void service(Request request, Response response) {
@@ -164,10 +155,10 @@ public class Router extends HttpHandler {
     /**
      * Relay an exception back to the client
      *
-     * @param request The request
+     * @param request  The request
      * @param response The response
-     * @param matcher The matcher for the current route
-     * @param method The handler for the current route
+     * @param matcher  The matcher for the current route
+     * @param method   The handler for the current route
      */
     private void handleRequest(Request request, Response response, Matcher matcher, Method method) {
         // Set the CORS headers
@@ -189,7 +180,7 @@ public class Router extends HttpHandler {
             // Require payload data for some methods.
             if (requestData.getPayload() == null &&
                 (request.getMethod() == org.glassfish.grizzly.http.Method.POST ||
-                 request.getMethod() == org.glassfish.grizzly.http.Method.PUT)) {
+                    request.getMethod() == org.glassfish.grizzly.http.Method.PUT)) {
                 throw new HTTPException("This method requires a payload");
             }
 
@@ -235,7 +226,7 @@ public class Router extends HttpHandler {
     /**
      * Handle an exception, returning information about what went wrong
      *
-     * @param response The response to configure
+     * @param response  The response to configure
      * @param throwable The throwable that occurred
      */
     private Object handleError(Response response, Throwable throwable) {
@@ -263,7 +254,7 @@ public class Router extends HttpHandler {
     /**
      * Process the annotations of the route that is being accessed
      *
-     * @param method The method to process the annotations of
+     * @param method      The method to process the annotations of
      * @param requestData The data for the current request
      */
     private void handleAnnotations(Method method, RequestData requestData) throws HTTPException {
@@ -293,7 +284,7 @@ public class Router extends HttpHandler {
     /**
      * Call all pre-request methods in the current controller
      *
-     * @param method The method to call the pre-request methods for
+     * @param method      The method to call the pre-request methods for
      * @param requestData The data for the current request
      */
     private void handlePrerequests(Method method, RequestData requestData) throws Exception {

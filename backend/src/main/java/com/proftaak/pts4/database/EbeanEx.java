@@ -3,7 +3,6 @@ package com.proftaak.pts4.database;
 import com.avaje.ebean.Ebean;
 import com.avaje.ebean.Query;
 import com.proftaak.pts4.core.rest.HTTPException;
-import org.apache.commons.lang3.ObjectUtils;
 
 /**
  * Created by Michon on 31-3-2015.
@@ -11,7 +10,7 @@ import org.apache.commons.lang3.ObjectUtils;
 public class EbeanEx {
     /**
      * Like Ebean.find, but safer.
-     *
+     * <p>
      * Will return null if no object is found.
      */
     public static <T> T find(Class<T> cls, Object pk) throws HTTPException {
@@ -32,7 +31,7 @@ public class EbeanEx {
 
     /**
      * Lookup one object by a given field.
-     *
+     * <p>
      * Will return null if no object is found, or if multiple objects are found.
      */
     public static <T> T find(Class<T> cls, String field, Object value) {
@@ -41,7 +40,7 @@ public class EbeanEx {
 
     /**
      * Like Query.findUnique, but safer.
-     *
+     * <p>
      * Will return null if no object is found, or if multiple objects are found.
      */
     public static <T> T find(Query<T> query) {

@@ -11,9 +11,7 @@ import com.proftaak.pts4.database.tables.Project;
 import com.proftaak.pts4.database.tables.Team;
 import com.proftaak.pts4.database.tables.User;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Map;
 import java.util.HashSet;
 
 /**

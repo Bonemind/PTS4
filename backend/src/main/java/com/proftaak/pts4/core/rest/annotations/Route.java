@@ -43,6 +43,7 @@ public @interface Route {
         OPTIONS(org.glassfish.grizzly.http.Method.OPTIONS);
 
         public final org.glassfish.grizzly.http.Method method;
+
         Method(org.glassfish.grizzly.http.Method method) {
             this.method = method;
         }

@@ -42,7 +42,7 @@ public class Story implements DatabaseModel {
     public enum Type {
         /**
          * An user story
-         *
+         * <p>
          * This is functionality for the end user
          * It is usually described as "As a _ I can _ so that I can _"
          */
@@ -50,14 +50,14 @@ public class Story implements DatabaseModel {
 
         /**
          * A defect
-         *
+         * <p>
          * This is something that is broken that needs fixing
          */
         DEFECT,
 
         /**
          * Stuff
-         *
+         * <p>
          * This is everything that needs to be done that is not either functionality for the end user or a bugfix
          */
         STUFF;

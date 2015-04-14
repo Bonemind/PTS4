@@ -1,7 +1,5 @@
 package com.proftaak.pts4.database;
 
-import flexjson.JSON;
-
 /**
  * Created by Michon on 13-4-2015.
  */

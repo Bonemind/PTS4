@@ -13,7 +13,6 @@ import com.proftaak.pts4.database.tables.User;
 import org.glassfish.grizzly.http.util.HttpStatus;
 
 import javax.persistence.PersistenceException;
-import java.util.Map;
 
 /**
  * @author Michon

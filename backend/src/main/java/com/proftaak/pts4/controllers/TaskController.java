@@ -1,20 +1,16 @@
 package com.proftaak.pts4.controllers;
 
 import com.avaje.ebean.Ebean;
-import com.avaje.ebeaninternal.server.lib.util.Str;
 import com.proftaak.pts4.core.rest.HTTPException;
 import com.proftaak.pts4.core.rest.Payload;
 import com.proftaak.pts4.core.rest.RequestData;
 import com.proftaak.pts4.core.rest.ScopeRole;
 import com.proftaak.pts4.core.rest.annotations.*;
 import com.proftaak.pts4.database.EbeanEx;
-import org.glassfish.grizzly.http.util.HttpStatus;
 import com.proftaak.pts4.database.tables.*;
+import org.glassfish.grizzly.http.util.HttpStatus;
 
-import java.util.*;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Map;
 import java.util.HashSet;
 
 /**

@@ -1,7 +1,6 @@
 package com.proftaak.pts4.core.rest;
 
 import java.util.HashMap;
-import java.util.Objects;
 
 /**
  * @author Michon

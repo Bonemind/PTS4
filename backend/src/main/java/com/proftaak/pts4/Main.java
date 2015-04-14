@@ -2,9 +2,7 @@ package com.proftaak.pts4;
 
 import com.proftaak.pts4.core.rest.Router;
 import com.proftaak.pts4.database.DBUtils;
-import org.glassfish.grizzly.http.server.*;
-
-import java.net.InetSocketAddress;
+import org.glassfish.grizzly.http.server.HttpServer;
 
 /**
  * Created by Michon on 2-3-2015

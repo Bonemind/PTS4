@@ -8,11 +8,8 @@ import com.proftaak.pts4.core.rest.ScopeRole;
 import com.proftaak.pts4.core.rest.annotations.*;
 import com.proftaak.pts4.database.EbeanEx;
 import com.proftaak.pts4.database.tables.*;
-import org.glassfish.grizzly.http.util.HttpStatus;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Map;
 import java.util.HashSet;
 
 /**

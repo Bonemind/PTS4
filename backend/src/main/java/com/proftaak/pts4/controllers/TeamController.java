@@ -7,13 +7,15 @@ import com.proftaak.pts4.core.rest.RequestData;
 import com.proftaak.pts4.core.rest.ScopeRole;
 import com.proftaak.pts4.core.rest.annotations.*;
 import com.proftaak.pts4.database.EbeanEx;
-import com.proftaak.pts4.database.tables.*;
+import com.proftaak.pts4.database.tables.Project;
+import com.proftaak.pts4.database.tables.Story;
+import com.proftaak.pts4.database.tables.Team;
+import com.proftaak.pts4.database.tables.User;
 import org.glassfish.grizzly.http.util.HttpStatus;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Map;
 
 /**
  * @author Michon

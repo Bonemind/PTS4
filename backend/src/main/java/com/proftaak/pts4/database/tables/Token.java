@@ -1,11 +1,8 @@
 package com.proftaak.pts4.database.tables;
 
-import com.proftaak.pts4.core.flexjson.ToPKTransformer;
 import com.proftaak.pts4.database.DatabaseModel;
-import flexjson.JSON;
 
 import javax.persistence.*;
-import java.io.Serializable;
 import java.util.Date;
 import java.util.UUID;
 

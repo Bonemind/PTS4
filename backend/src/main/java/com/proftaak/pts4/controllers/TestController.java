@@ -8,11 +8,9 @@ import com.proftaak.pts4.core.rest.ScopeRole;
 import com.proftaak.pts4.core.rest.annotations.*;
 import com.proftaak.pts4.database.EbeanEx;
 import com.proftaak.pts4.database.tables.*;
-import org.glassfish.grizzly.http.util.HttpStatus;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.TreeSet;
 
 /**
  * Created by stijn on 7/4/2015.
@@ -82,9 +80,9 @@ public class TestController {
 
         // Create the new test
         Test test = new Test(
-                story,
-                requestData.getPayload().getString("name"),
-                requestData.getPayload().getString("description")
+            story,
+            requestData.getPayload().getString("name"),
+            requestData.getPayload().getString("description")
         );
         Ebean.save(test);
 
