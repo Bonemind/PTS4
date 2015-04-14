@@ -1,4 +1,4 @@
-package com.proftaak.pts4.core.rest;
+package com.proftaak.pts4.rest;
 
 import com.avaje.ebean.Ebean;
 import com.proftaak.pts4.database.tables.Token;

@@ -1,11 +1,11 @@
 package com.proftaak.pts4.controllers;
 
 import com.avaje.ebean.Ebean;
-import com.proftaak.pts4.core.rest.HTTPException;
-import com.proftaak.pts4.core.rest.Payload;
-import com.proftaak.pts4.core.rest.RequestData;
-import com.proftaak.pts4.core.rest.ScopeRole;
-import com.proftaak.pts4.core.rest.annotations.*;
+import com.proftaak.pts4.rest.HTTPException;
+import com.proftaak.pts4.rest.Payload;
+import com.proftaak.pts4.rest.RequestData;
+import com.proftaak.pts4.rest.ScopeRole;
+import com.proftaak.pts4.rest.annotations.*;
 import com.proftaak.pts4.database.EbeanEx;
 import com.proftaak.pts4.database.tables.*;
 

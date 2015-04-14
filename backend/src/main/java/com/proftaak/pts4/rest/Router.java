@@ -1,8 +1,8 @@
-package com.proftaak.pts4.core.rest;
+package com.proftaak.pts4.rest;
 
-import com.proftaak.pts4.core.rest.annotations.PreRequest;
-import com.proftaak.pts4.core.rest.annotations.RequireAuth;
-import com.proftaak.pts4.core.rest.annotations.RequireFields;
+import com.proftaak.pts4.rest.annotations.PreRequest;
+import com.proftaak.pts4.rest.annotations.RequireAuth;
+import com.proftaak.pts4.rest.annotations.RequireFields;
 import org.glassfish.grizzly.http.server.HttpHandler;
 import org.glassfish.grizzly.http.server.Request;
 import org.glassfish.grizzly.http.server.Response;
@@ -32,10 +32,10 @@ public class Router extends HttpHandler {
 
     private class Route {
         public final Pattern pattern;
-        public final com.proftaak.pts4.core.rest.annotations.Route route;
+        public final com.proftaak.pts4.rest.annotations.Route route;
         public final Method method;
 
-        Route(Pattern pattern, com.proftaak.pts4.core.rest.annotations.Route route, Method method) {
+        Route(Pattern pattern, com.proftaak.pts4.rest.annotations.Route route, Method method) {
             this.pattern = pattern;
             this.route = route;
             this.method = method;
@@ -53,24 +53,24 @@ public class Router extends HttpHandler {
 
         // Get the option route.
         Method optionsMethod = null;
-        com.proftaak.pts4.core.rest.annotations.Route optionsRoute = null;
+        com.proftaak.pts4.rest.annotations.Route optionsRoute = null;
         try {
             optionsMethod = this.getClass().getDeclaredMethod("handleOptions", RequestData.class);
-            optionsRoute = optionsMethod.getAnnotation(com.proftaak.pts4.core.rest.annotations.Route.class);
+            optionsRoute = optionsMethod.getAnnotation(com.proftaak.pts4.rest.annotations.Route.class);
         } catch (NoSuchMethodException e) {
             e.printStackTrace();
         }
 
         // Perform routing
         Reflections reflections = new Reflections(Router.CONTROLLER_PACKAGE, new MethodAnnotationsScanner());
-        for (Method method : reflections.getMethodsAnnotatedWith(com.proftaak.pts4.core.rest.annotations.Route.class)) {
+        for (Method method : reflections.getMethodsAnnotatedWith(com.proftaak.pts4.rest.annotations.Route.class)) {
             // Check whether the method is static
             if (!Modifier.isStatic(method.getModifiers())) {
                 throw new AnnotationTypeMismatchException(method, "@Route can only be used on static methods");
             }
 
             // Get the annotation
-            com.proftaak.pts4.core.rest.annotations.Route route = method.getAnnotation(com.proftaak.pts4.core.rest.annotations.Route.class);
+            com.proftaak.pts4.rest.annotations.Route route = method.getAnnotation(com.proftaak.pts4.rest.annotations.Route.class);
 
             // Determine the route
             List<String> path = new ArrayList<>();
@@ -305,7 +305,7 @@ public class Router extends HttpHandler {
     /**
      * Handle OPTIONS requests.
      */
-    @com.proftaak.pts4.core.rest.annotations.Route(method = com.proftaak.pts4.core.rest.annotations.Route.Method.OPTIONS)
+    @com.proftaak.pts4.rest.annotations.Route(method = com.proftaak.pts4.rest.annotations.Route.Method.OPTIONS)
     private static Object handleOptions(RequestData requestData) {
         return null;
     }

@@ -1,12 +1,12 @@
 package com.proftaak.pts4.controllers;
 
 import com.avaje.ebean.Ebean;
-import com.proftaak.pts4.core.rest.HTTPException;
-import com.proftaak.pts4.core.rest.RequestData;
-import com.proftaak.pts4.core.rest.annotations.Controller;
-import com.proftaak.pts4.core.rest.annotations.RequireAuth;
-import com.proftaak.pts4.core.rest.annotations.RequireFields;
-import com.proftaak.pts4.core.rest.annotations.Route;
+import com.proftaak.pts4.rest.HTTPException;
+import com.proftaak.pts4.rest.RequestData;
+import com.proftaak.pts4.rest.annotations.Controller;
+import com.proftaak.pts4.rest.annotations.RequireAuth;
+import com.proftaak.pts4.rest.annotations.RequireFields;
+import com.proftaak.pts4.rest.annotations.Route;
 import com.proftaak.pts4.database.EbeanEx;
 import com.proftaak.pts4.database.tables.Token;
 import com.proftaak.pts4.database.tables.User;
@@ -19,6 +19,9 @@ import org.glassfish.grizzly.http.util.HttpStatus;
 public class AuthController {
     /**
      * POST /auth/login
+     *
+     * %param email [required] The email address of the user you're trying to authenticate as
+     * %param password [required] The password associated with this account
      */
     @RequireFields(fields = {"email", "password"})
     @Route(method = Route.Method.POST, route = "/auth/login")

@@ -1,4 +1,4 @@
-package com.proftaak.pts4.core.rest;
+package com.proftaak.pts4.rest;
 
 import org.glassfish.grizzly.http.util.HttpStatus;
 

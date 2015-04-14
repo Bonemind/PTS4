@@ -2,7 +2,7 @@ package com.proftaak.pts4.database;
 
 import com.avaje.ebean.Ebean;
 import com.avaje.ebean.Query;
-import com.proftaak.pts4.core.rest.HTTPException;
+import com.proftaak.pts4.rest.HTTPException;
 
 /**
  * Created by Michon on 31-3-2015.

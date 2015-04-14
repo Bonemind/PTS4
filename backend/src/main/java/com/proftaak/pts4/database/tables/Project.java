@@ -1,6 +1,6 @@
 package com.proftaak.pts4.database.tables;
 
-import com.proftaak.pts4.core.flexjson.ToPKTransformer;
+import com.proftaak.pts4.utils.flexjson.ToPKTransformer;
 import com.proftaak.pts4.database.DatabaseModel;
 import flexjson.JSON;
 import org.apache.commons.lang3.StringUtils;

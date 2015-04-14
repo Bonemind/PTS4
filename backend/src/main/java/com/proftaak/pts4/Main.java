@@ -1,6 +1,6 @@
 package com.proftaak.pts4;
 
-import com.proftaak.pts4.core.rest.Router;
+import com.proftaak.pts4.rest.Router;
 import com.proftaak.pts4.database.DBUtils;
 import org.glassfish.grizzly.http.server.HttpServer;
 

@@ -1,4 +1,4 @@
-package com.proftaak.pts4.core;
+package com.proftaak.pts4.utils;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;

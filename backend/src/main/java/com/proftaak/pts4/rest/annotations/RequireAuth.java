@@ -1,4 +1,6 @@
-package com.proftaak.pts4.core.rest.annotations;
+package com.proftaak.pts4.rest.annotations;
+
+import com.proftaak.pts4.rest.ScopeRole;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -12,9 +14,9 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
-public @interface RequireFields {
+public @interface RequireAuth {
     /**
-     * The required fields.
+     * The allowed role
      */
-    String[] fields() default {};
+    ScopeRole role() default ScopeRole.USER;
 }
