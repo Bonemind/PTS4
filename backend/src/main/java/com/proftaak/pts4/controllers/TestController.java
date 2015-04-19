@@ -108,11 +108,7 @@ public class TestController {
             test.setDescription(payload.getString("description"));
         }
         if (payload.containsKey("accepted")) {
-            boolean accepted = payload.getBoolean("accepted");
-            if (accepted && !test.isAccepted()) {
-                requestData.requireScopeRole(ScopeRole.PRODUCT_OWNER);
-            }
-            test.setAccepted(accepted);
+            test.setAccepted(payload.getBoolean("accepted"));
         }
 
         // Save the changes
