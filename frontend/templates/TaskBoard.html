@@ -1,0 +1,73 @@
+
+<div class="row">
+    <div class="col-xs-2">
+	<div class="form-inline">
+	    <label for="iterationSelect">Sprint:</label>
+	    <select class="form-control" ng-model="selectediteration" ng-options="item as item.name for item in iterations" ng-change="updateIteration(selectediteration)"></select>
+	    <button class="btn btn-primary" ng-click="showModal(undefined)">New story</button>
+	</div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-xs-3">
+	<h1>Story</h1>
+    </div>
+    <div class="col-xs-3">
+	<h1>Defined</h1>
+    </div>
+    <div class="col-xs-3">
+	<h1>In progress</h1>
+    </div>
+    <div class="col-xs-3">
+	<h1>Completed</h1>
+    </div>
+</div>
+
+
+<div class="row" ng-repeat="story in stories | orderBy: '-priority' ">
+    <div class="col-xs-3">
+	<a href="#/story/{{story.id}}/tasks">{{ story.name }}</a>
+	<span class="label pull-right" ng-class="(story.type==='DEFECT') ? 'label-danger' : 'label-primary'"><pts-type type="story.type"></pts-type></span>
+    </div>
+    <div class="col-xs-3">
+	<div class="panel panel-default" ng-repeat="task in story.tasks | filter: {status: 'DEFINED'}">
+	    <div class="panel-heading">
+		{{ task.name }}
+	    </div>
+	    <div class="panel-body">
+		<span ng-show="task.owner">
+		    Owner: <team-member userid="task.owner" teammembers="teammembers"></team-member>
+		</span>
+		<button ng-show="task.owner == null" class="btn btn-primary" ng-click="claimTask(task)">Claim</button>
+	    </div>
+	</div>
+
+    </div>
+    <div class="col-xs-3">
+	<div class="panel panel-default" ng-repeat="task in story.tasks | filter: {status: 'IN_PROGRESS'}">
+	    <div class="panel-heading">
+		{{ task.name }}
+	    </div>
+	    <div class="panel-body">
+		<span ng-show="task.owner">
+		    Owner: <team-member userid="task.owner" teammembers="teammembers"></team-member>
+		</span>
+		<button ng-show="task.owner == null" class="btn btn-primary" ng-click="claimTask(task)">Claim</button>
+	    </div>
+	</div>
+    </div>
+    <div class="col-xs-3">
+	<div class="panel panel-default" ng-repeat="task in story.tasks | filter: {status: 'COMPLETED'}">
+	    <div class="panel-heading">
+		{{ task.name }}
+	    </div>
+	    <div class="panel-body">
+		<span ng-show="task.owner">
+		    Owner: <team-member userid="task.owner" teammembers="teammembers"></team-member>
+		</span>
+		<button ng-show="task.owner" class="btn btn-primary" ng-click="claimTask(task)">Claim</button>
+	    </div>
+	</div>
+    </div>
+    <hr />
+</div>
