@@ -6,15 +6,13 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Use this when you want to only allow access to a route when the user is logged in
- *
- * @author Michon
+ * Created by Michon on 22-4-2015.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
-public @interface RequireFields {
+public @interface Fields {
     /**
-     * The required fields.
+     * The fields
      */
-    String[] fields() default {};
+    Field[] value();
 }

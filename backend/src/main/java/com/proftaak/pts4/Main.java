@@ -1,7 +1,7 @@
 package com.proftaak.pts4;
 
-import com.proftaak.pts4.rest.Router;
 import com.proftaak.pts4.database.DBUtils;
+import com.proftaak.pts4.rest.SwitchBoard;
 import org.glassfish.grizzly.http.server.HttpServer;
 
 /**
@@ -18,9 +18,9 @@ public class Main {
         // Create the server
         HttpServer server = HttpServer.createSimpleServer("/", Main.PORT);
 
-        // Create the router.
-        Router router = new Router();
-        server.getServerConfiguration().addHttpHandler(router, "/");
+        // Create the switchboard
+        SwitchBoard switchBoard = new SwitchBoard();
+        server.getServerConfiguration().addHttpHandler(switchBoard, "/");
 
         // Run the server
         try {
