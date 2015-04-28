@@ -1,0 +1,29 @@
+
+<div class="row">
+	<button class="btn btn-primary" ng-click="showModal(undefined)">
+		New team
+	</button>
+</div>
+<div class="row">
+	<table class="table table-striped">
+		<thead>
+			<th>Name</th>
+			<th>Scrum Master</th>
+			<th>&nbsp;</th>
+		</thead>
+		<tbody>
+			<tr ng-repeat="team in teams">
+				<td>{{ team.name }}</td>
+				<td>{{ team.scrumMaster.email }}</td>
+				<td>
+					<a class="glyphicon glyphicon-calendar" href="#/teams/{{ team.id }}/iterations"></a>
+					<a class="glyphicon glyphicon-list-alt" href="#/teams/{{ team.id }}/backlog"></a>
+					<a class="glyphicon glyphicon-ok" href="#/teams/{{ team.id }}/taskboard"></a>
+					<a class="glyphicon glyphicon-folder-open" href="#/teams/{{ team.id }}/projects"></a>
+					<a class="glyphicon glyphicon-user" href="#/teams/{{ team.id }}/users"></a>
+					<a class="glyphicon glyphicon-pencil" ng-click="showModal(team)"></a>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+</div>

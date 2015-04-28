@@ -1,0 +1,25 @@
+<div class="row">
+	<h2>Team: {{ team.name }}</h2>
+	<h4>Scrum Master: {{ team.scrumMaster.email }}</h4>
+</div>
+<div class="row">
+	<button class="btn btn-primary" ng-click="showModal(undefined)">
+		Add member
+	</button>
+</div>
+<div class="row">
+	<table class="table table-striped">
+		<thead>
+			<th>Email</th>
+			<th>&nbsp;</th>
+		</thead>
+		<tbody>
+			<tr ng-repeat="user in users">
+				<td>{{ user.email }}</td>
+				<td>
+					<a class="glyphicon glyphicon-remove" ng-really-message="Are you sure?" ng-really-click="deleteUser(user)"></a>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+</div>
