@@ -1,75 +1,73 @@
 package com.proftaak.pts4.database.tables;
 
-import com.j256.ormlite.dao.Dao;
-import com.j256.ormlite.dao.DaoManager;
-import com.j256.ormlite.dao.ForeignCollection;
-import com.j256.ormlite.field.DataType;
-import com.j256.ormlite.field.DatabaseField;
-import com.j256.ormlite.field.ForeignCollectionField;
-import com.j256.ormlite.table.DatabaseTable;
-import com.proftaak.pts4.core.gson.GsonExclude;
-import com.proftaak.pts4.core.restlet.HTTPException;
-import com.proftaak.pts4.database.DBTable;
-import com.proftaak.pts4.database.DBUtils;
+import com.proftaak.pts4.database.DatabaseModel;
+import flexjson.JSON;
 import org.mindrot.jbcrypt.BCrypt;
 
-import java.io.FileNotFoundException;
-import java.sql.SQLException;
-import java.util.Arrays;
+import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Michon
  */
-@DatabaseTable(tableName = "users")
-public class User extends DBTable {
-
+@Entity
+@Table(name = "users")
+public class User implements DatabaseModel {
     public static final String FIELD_ID = "id";
     public static final String FIELD_EMAIL = "email";
     public static final String FIELD_PASSWORD = "password";
-    public static final String FIELD_ROLE = "role";
-
-    public static enum UserRole {
-        DEVELOPER,
-        PRODUCT_OWNER;
-
-        public void require(UserRole... roles) throws HTTPException {
-            if (!Arrays.asList(roles).contains(this)) {
-                throw HTTPException.ERROR_FORBIDDEN;
-            }
-        }
-    }
+    public static final String TABLE_JOIN_TEAM = Team.TABLE_JOIN_USER;
 
     /**
      * The database id of this user
      */
-    @DatabaseField(generatedId = true, columnName = FIELD_ID)
+    @Id
+    @Column(name = FIELD_ID)
     private int id;
 
     /**
      * The email address of this user
      */
-    @DatabaseField(canBeNull = false, unique = true, columnName = FIELD_EMAIL)
+    @Column(name = FIELD_EMAIL, nullable = false, unique = true)
     private String email;
 
     /**
      * The password of this user
      */
-    @GsonExclude
-    @DatabaseField(canBeNull = false, columnName = FIELD_PASSWORD)
+    @JSON(include = false)
+    @Column(name = FIELD_PASSWORD, nullable = false)
     private String password;
 
     /**
-     * The role of this user
+     * The tokens of this user
      */
-    @DatabaseField(canBeNull = false, dataType = DataType.ENUM_STRING, columnName = FIELD_ROLE)
-    private UserRole role;
+    @JSON(include = false)
+    @OneToMany(cascade = CascadeType.ALL)
+    private List<Token> tokens = new ArrayList<>();
 
     /**
-     * The tokens this user has
+     * The teams to which this user belongs
      */
-    @GsonExclude
-    @ForeignCollectionField(eager = false)
-    private ForeignCollection<Token> tokens;
+    @ManyToMany(cascade = CascadeType.ALL)
+    @JoinTable(name = TABLE_JOIN_TEAM)
+    private List<Team> teams = new ArrayList<>();
+
+    /**
+     * The teams of which this user is the scrum master
+     */
+    @JSON(include = false)
+    @OneToMany
+    @JoinColumn(name = Team.FIELD_SCRUM_MASTER)
+    private List<Team> ownedTeams = new ArrayList<>();
+
+    /**
+     * The projects of which this user is the product owner
+     */
+    @JSON(include = false)
+    @OneToMany
+    @JoinColumn(name = Project.FIELD_PRODUCT_OWNER)
+    private List<Project> ownedProjects = new ArrayList<>();
 
     /**
      * ORM-Lite no-arg constructor
@@ -78,12 +76,16 @@ public class User extends DBTable {
     }
 
     /**
-     * Create a new user.
+     * Create a new user
      */
-    public User(String email, String password, UserRole role) {
+    public User(String email, String password) {
         this.setEmail(email);
         this.setPassword(password);
-        this.setRole(role);
+    }
+
+    @Override
+    public Object getPK() {
+        return this.getId();
     }
 
     public int getId() {
@@ -91,7 +93,7 @@ public class User extends DBTable {
     }
 
     public String getEmail() {
-        return email;
+        return this.email;
     }
 
     public void setEmail(String email) {
@@ -112,31 +114,25 @@ public class User extends DBTable {
      * Compares the plaintext password passed to it with the hashed stored version
      *
      * @param pass The plaintext password
-     * @return True if they are the same, false otherwise
+     * @return this.True if they are the same, false otherwise
      */
     public boolean checkPassword(String pass) {
         return BCrypt.checkpw(pass, this.password);
     }
 
-    public UserRole getRole() {
-        return role;
+    public List<Token> getTokens() {
+        return this.tokens;
     }
 
-    public void setRole(UserRole role) {
-        this.role = role;
+    public List<Team> getTeams() {
+        return this.teams;
     }
 
-    @Override
-    public int hashCode() {
-        return Integer.hashCode(this.getId());
+    public List<Team> getOwnedTeams() {
+        return this.ownedTeams;
     }
 
-    /**
-     * Get the DAO for this table
-     *
-     * @return The DAO for this table
-     */
-    public static Dao<User, Integer> getDao() throws FileNotFoundException, SQLException {
-        return DaoManager.createDao(DBUtils.getConnectionSource(), User.class);
+    public List<Project> getOwnedProjects() {
+        return this.ownedProjects;
     }
 }

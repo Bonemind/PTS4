@@ -1,50 +1,45 @@
 package com.proftaak.pts4.database.tables;
 
-import com.j256.ormlite.dao.Dao;
-import com.j256.ormlite.dao.DaoManager;
-import com.j256.ormlite.field.DataType;
-import com.j256.ormlite.field.DatabaseField;
-import com.j256.ormlite.table.DatabaseTable;
-import com.proftaak.pts4.database.DBTable;
-import com.proftaak.pts4.database.DBUtils;
+import com.proftaak.pts4.database.DatabaseModel;
 
-import java.io.FileNotFoundException;
-import java.sql.SQLException;
+import javax.persistence.*;
 import java.util.Date;
 import java.util.UUID;
 
 /**
  * @author Michon
  */
-@DatabaseTable(tableName = "tokens")
-public class Token extends DBTable {
-
+@Entity
+@Table(name = "tokens")
+public class Token implements DatabaseModel {
     public static final String FIELD_TOKEN = "token";
-    public static final String FIELD_USER = "user";
-    public static final String FIELD_DATE_CREATED = "dateCreated";
+    public static final String FIELD_USER = "user_id";
+    public static final String FIELD_DATE_CREATION = "date_creation";
 
     /**
-     * The time a token stays valid, in milliseconds.
+     * The time a token stays valid, in milliseconds
      */
     public static final int TIME_TO_LIVE = 1000 * 60 * 60 * 24;
 
     /**
      * The token
      */
-    @DatabaseField(id = true, columnName = FIELD_TOKEN)
+    @Id
+    @Column(name = FIELD_TOKEN)
     private String token;
 
     /**
      * The user
      */
-    @DatabaseField(foreign = true, foreignAutoRefresh = true, columnName = FIELD_USER)
+    @ManyToOne(optional = false)
+    @JoinColumn(name = FIELD_USER)
     private User user;
 
     /**
      * Date of creation of the token, used for TTL
      */
-    @DatabaseField(dataType = DataType.DATE, columnName = FIELD_DATE_CREATED)
-    private Date creationDate;
+    @Column(name = FIELD_DATE_CREATION, nullable = false)
+    private Date dateCreation;
 
     /**
      * ORM-Lite no-arg constructor
@@ -53,14 +48,14 @@ public class Token extends DBTable {
     }
 
     /**
-     * Create a new token.
+     * Create a new token
      *
      * @param user The user to whom the token belongs
      */
     public Token(User user) {
         this.token = UUID.randomUUID().toString();
         this.user = user;
-        this.creationDate = new Date();
+        this.dateCreation = new Date();
     }
 
     public Token(User user, String token) {
@@ -68,36 +63,31 @@ public class Token extends DBTable {
         this.token = token;
     }
 
+    @Override
+    public Object getPK() {
+        return this.getToken();
+    }
+
     public String getToken() {
-        return token;
+        return this.token;
     }
 
     public User getUser() {
-        return user;
+        return this.user;
+    }
+
+    public Date getDateCreation() {
+        return this.dateCreation;
     }
 
     /**
      * Check whether the token is still valid
      *
-     * @return True if the token is still valid, False otherwise
+     * @return this.True if the token is still valid, False otherwise
      */
     public boolean isValid() {
-        long tokenEndTimestamp = this.creationDate.getTime() + Token.TIME_TO_LIVE;
+        long tokenEndTimestamp = this.dateCreation.getTime() + Token.TIME_TO_LIVE;
         long currentTimestamp = new Date().getTime();
         return currentTimestamp < tokenEndTimestamp;
-    }
-
-    @Override
-    public int hashCode() {
-        return this.getToken().hashCode();
-    }
-
-    /**
-     * Get the DAO for this table
-     *
-     * @return The DAO for this table
-     */
-    public static Dao<Token, String> getDao() throws FileNotFoundException, SQLException {
-        return DaoManager.createDao(DBUtils.getConnectionSource(), Token.class);
     }
 }

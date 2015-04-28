@@ -1,109 +1,158 @@
 package com.proftaak.pts4.controllers;
 
-import com.proftaak.pts4.core.restlet.BaseController;
-import com.proftaak.pts4.core.restlet.HTTPException;
-import com.proftaak.pts4.core.restlet.annotations.CRUDController;
-import com.proftaak.pts4.core.restlet.annotations.RequireAuth;
-import com.proftaak.pts4.core.restlet.annotations.ValidateScopeObject;
-import com.proftaak.pts4.database.tables.Story;
-import com.proftaak.pts4.database.tables.Task;
-import org.restlet.data.Status;
+import com.avaje.ebean.Ebean;
+import com.proftaak.pts4.database.EbeanEx;
+import com.proftaak.pts4.database.tables.*;
+import com.proftaak.pts4.rest.*;
+import com.proftaak.pts4.rest.annotations.Controller;
+import com.proftaak.pts4.rest.annotations.PreRequest;
+import com.proftaak.pts4.rest.annotations.RequireAuth;
+import com.proftaak.pts4.rest.annotations.Route;
+import org.glassfish.grizzly.http.util.HttpStatus;
 
-import java.util.Map;
+import java.util.Collection;
+import java.util.HashSet;
 
 /**
  * @author Michon
  */
-@CRUDController(table = Task.class, parent = StoryController.class)
-public class TaskController extends BaseController {
+@Controller
+public class TaskController {
     /**
-     * Validate a scope object.
+     * Determine the role(s) the logged in user has within the task, if any
      */
-    @ValidateScopeObject(Task.class)
-    public static boolean validateTaskInStory(RequestData requestData, Task task) throws Exception {
-        Story story = requestData.getScopeObject(Story.class);
-        return story.getId() == task.getStory().getId();
-    }
+    @PreRequest
+    public static void determineScopeRoles(RequestData requestData) throws Exception {
+        Task task = EbeanEx.find(Task.class, requestData.getParameter("id"));
+        if (task != null) {
+            StoryController.determineScopeRoles(requestData, task.getStory());
+        }
 
-    /**
-     * GET /story/1/task or /story/1/task/1
-     */
-    @RequireAuth
-    public Object getHandler(RequestData requestData) throws Exception {
-        if (requestData.getUrlParams().get("taskId") == null) {
-            Story story = requestData.getScopeObject(Story.class);
-            return Task.getDao().queryBuilder().where().eq(Task.FIELD_STORY, story).query();
-        } else {
-            return requestData.getScopeObject(Task.class);
+        if (requestData.getPayload() != null && requestData.getPayload().containsKey("story")) {
+            Story story = EbeanEx.find(Story.class, requestData.getPayload().get("story"));
+            StoryController.determineScopeRoles(requestData, story);
         }
     }
 
     /**
-     * POST /story/1/task
+     * GET /task/1
      */
-    @RequireAuth
-    public Object postHandler(RequestData requestData) throws Exception {
-        // Get the user story.
-        Story story = requestData.getScopeObject(Story.class);
-
-        // Create the new task.
-        Task task;
-        try {
-            task = new Task(
-                    story,
-                    (String) requestData.getPayload().get("name"),
-                    (String) requestData.getPayload().get("description"),
-                    Task.Status.valueOf(requestData.getPayload().getOrDefault("status", Task.Status.DEFINED.toString()).toString())
-            );
-            Task.getDao().create(task);
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw HTTPException.ERROR_BAD_REQUEST;
+    @RequireAuth(role = ScopeRole.TEAM_MEMBER)
+    @Route(method = HTTPMethod.GET_ONE)
+    public static Task getOneHandler(RequestData requestData) throws Exception {
+        Task task = EbeanEx.find(Task.class, requestData.getParameter("id"));
+        if (task == null) {
+            throw HTTPException.ERROR_NOT_FOUND;
         }
-
-        // Return the created task.
         return task;
     }
 
     /**
-     * PUT /story/1/task/1
+     * GET /task/
      */
     @RequireAuth
-    public Object putHandler(RequestData requestData) throws Exception {
-        // Get the user task.
-        Task task = requestData.getScopeObject(Task.class);
-        Map<String, Object> payload = requestData.getPayload();
+    @Route(method = HTTPMethod.GET)
+    public static Collection<Task> getAllHandler(RequestData requestData) throws Exception {
+        Collection<Task> tasks = new HashSet<>();
+        User user = requestData.getUser();
+        for (Team team : user.getTeams()) {
+            for (Project project : team.getProjects()) {
+                for (Story story : project.getStories()) {
+                    tasks.addAll(story.getTasks());
+                }
+            }
+        }
+        for (Project project : user.getOwnedProjects()) {
+            for (Story story : project.getStories()) {
+                tasks.addAll(story.getTasks());
+            }
+        }
+        return tasks;
+    }
 
-        // Change the task.
+    /**
+     * POST /task
+     */
+    @RequireAuth(role = ScopeRole.TEAM_MEMBER)
+    //@RequireFields(fields = {"story", "name"})
+    @Route(method = HTTPMethod.POST)
+    public static Task postHandler(RequestData requestData) throws Exception {
+        Story story = EbeanEx.require(EbeanEx.find(Story.class, requestData.getPayload().get("story")));
+
+        // Get the new owner
+        User assignedOwner = EbeanEx.find(User.class, requestData.getPayload().get("owner"));
+        if (assignedOwner != null && !story.getProject().getTeam().getUsers().contains(assignedOwner)) {
+            throw new HTTPException("User not part of team", HttpStatus.BAD_REQUEST_400);
+        }
+
+        // Create the new task
+        Task task = new Task(
+            story,
+            assignedOwner,
+            requestData.getPayload().getString("name"),
+            requestData.getPayload().getString("description"),
+            requestData.getPayload().getDouble("estimate", 0.0),
+            Task.Status.valueOf(requestData.getPayload().getOrDefault("status", Task.Status.DEFINED.toString()).toString())
+        );
+        Ebean.save(task);
+
+        // Return the created task
+        return task;
+    }
+
+    /**
+     * PUT /task/1
+     */
+    @RequireAuth(role = ScopeRole.TEAM_MEMBER)
+    @Route(method = HTTPMethod.PUT)
+    public static Task putHandler(RequestData requestData) throws Exception {
+        // Get the user task
+        Task task = EbeanEx.require(EbeanEx.find(Task.class, requestData.getParameter("id")));
+
+        // Change the task
+        Payload payload = requestData.getPayload();
         if (payload.containsKey("name")) {
-            task.setName((String) payload.get("name"));
+            task.setName(payload.getString("name"));
         }
         if (payload.containsKey("description")) {
-            task.setDescription((String) payload.get("description"));
+            task.setDescription(payload.getString("description"));
+        }
+        if (payload.containsKey("estimate")) {
+            task.setEstimate(payload.getDouble("estimate"));
+        }
+        if (payload.containsKey("todo")) {
+            task.setTodo(payload.getDouble("todo"));
         }
         if (payload.containsKey("status")) {
             task.setStatus(Task.Status.valueOf(payload.getOrDefault("status", Task.Status.DEFINED.toString()).toString()));
         }
+        if (payload.containsKey("owner")) {
+            User assignedOwner = EbeanEx.find(User.class, requestData.getPayload().get("owner"));
 
-        // Save the changes.
-        Task.getDao().update(task);
+            if (assignedOwner != null && !task.getStory().getProject().getTeam().getUsers().contains(assignedOwner)) {
+                throw new HTTPException("User not part of team", HttpStatus.BAD_REQUEST_400);
+            }
 
-        // Return the changed task.
+            task.setOwner(assignedOwner);
+        }
+
+        // Save the changes
+        Ebean.save(task);
+
+        // Return the changed task
         return task;
     }
 
     /**
-     * DELETE /story/1/task/1
+     * DELETE /task/1
      */
-    @RequireAuth
-    public Object deleteHandler(RequestData requestData) throws Exception {
-        // Try to get the task.
-        Task task = requestData.getScopeObject(Task.class);
+    @RequireAuth(role = ScopeRole.TEAM_MEMBER)
+    @Route(method = HTTPMethod.DELETE)
+    public static void deleteHandler(RequestData requestData) throws Exception {
+        // Get the task
+        Task task = EbeanEx.require(EbeanEx.find(Task.class, requestData.getParameter("id")));
 
-        // Delete the task.
-        Task.getDao().delete(task);
-
-        // Return nothing.
-        return null;
+        // Delete the task
+        Ebean.delete(task);
     }
 }

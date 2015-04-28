@@ -1,62 +1,56 @@
 package com.proftaak.pts4.database;
 
-import com.j256.ormlite.dao.Dao;
-import com.j256.ormlite.jdbc.JdbcPooledConnectionSource;
-import com.j256.ormlite.support.ConnectionSource;
-import com.j256.ormlite.table.DatabaseTable;
-import com.j256.ormlite.table.TableUtils;
-import com.proftaak.pts4.core.PropertiesUtils;
-import com.proftaak.pts4.database.tables.Story;
-import com.proftaak.pts4.database.tables.Task;
-import com.proftaak.pts4.database.tables.Token;
-import com.proftaak.pts4.database.tables.User;
-import org.reflections.Reflections;
+import com.avaje.ebean.Ebean;
+import com.avaje.ebean.EbeanServerFactory;
+import com.avaje.ebean.config.DataSourceConfig;
+import com.avaje.ebean.config.ServerConfig;
+import com.proftaak.pts4.database.tables.*;
+import com.proftaak.pts4.utils.PropertiesUtils;
+import javassist.NotFoundException;
 
 import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.sql.SQLException;
+import java.lang.reflect.Field;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Properties;
 
 public class DBUtils {
     /**
-     * The name of the package holding the tables.
+     * The name of the package holding the tables
      */
-    private static final String TABLES_PACKAGE = "com.proftaak.pts4.database.tables";
+    private static final String TABLE_PACKAGE = "com.proftaak.pts4.database.tables";
 
-    /**
-     * The connection source.
-     */
-    private static JdbcPooledConnectionSource connSource;
-
-    /**
-     * Creates an open pooled JDBC connection source
-     *
-     * @return a pooled connection source
-     * @throws java.sql.SQLException Thrown if anything went wrong while connecting to the database
-     */
-    public static ConnectionSource getConnectionSource() throws SQLException, FileNotFoundException {
-        if (connSource == null || !connSource.isOpen()) {
-            Properties p = PropertiesUtils.getProperties();
-            connSource = new JdbcPooledConnectionSource(p.getProperty("mysql.url"), p.getProperty("mysql.username"), p.getProperty("mysql.password"));
-        }
-        return connSource;
+    public static void init() throws FileNotFoundException, NotFoundException {
+        initEbeanServer();
+        createTestData();
     }
 
     /**
-     * Recreates all tables, dropping any existing ones in the process
-     *
-     * @throws java.sql.SQLException  Thrown when connecting to the database fails
-     * @throws ClassNotFoundException Thrown when we try to load a class that somehow doesn't exist
-     * @throws java.io.IOException
+     * Initialize the ebean server
      */
-    @SuppressWarnings("unchecked")
-    public static void recreateAllTables() throws SQLException, ClassNotFoundException, IOException {
-        ConnectionSource connSource = DBUtils.getConnectionSource();
-        Reflections r = new Reflections(TABLES_PACKAGE);
-        for (Class<?> tableClass : r.getTypesAnnotatedWith(DatabaseTable.class)) {
-            TableUtils.dropTable(connSource, tableClass, true);
-            TableUtils.createTable(connSource, tableClass);
-        }
+    public static void initEbeanServer() throws FileNotFoundException {
+        ServerConfig config = new ServerConfig();
+        config.setName("main");
+
+        // Read config
+        Properties p = PropertiesUtils.getProperties();
+        DataSourceConfig dbConfig = new DataSourceConfig();
+        dbConfig.setDriver(p.getProperty("database.driver"));
+        dbConfig.setUrl(p.getProperty("database.url"));
+        dbConfig.setUsername(p.getProperty("database.username"));
+        dbConfig.setPassword(p.getProperty("database.password"));
+        config.setDataSourceConfig(dbConfig);
+
+        // Set DDL options..
+        config.setDdlGenerate(true);
+        config.setDdlRun(true);
+
+        // Register the server as the default server
+        config.setDefaultServer(true);
+        config.setRegister(true);
+
+        // Create the instance
+        EbeanServerFactory.create(config);
     }
 
     /**
@@ -64,37 +58,76 @@ public class DBUtils {
      *
      * @throws java.sql.SQLException
      */
-    public static void createTestData() throws SQLException, FileNotFoundException {
-        Dao<User, Integer> userDao = User.getDao();
-        Dao<Token, String> tokenDao = Token.getDao();
-        Dao<Story, Integer> storyDao = Story.getDao();
-        Dao<Task, Integer> taskDao = Task.getDao();
+    public static void createTestData() throws FileNotFoundException {
+        User u1 = new User("test", "test");
+        Ebean.save(u1);
+        User u2 = new User("dev", "dev");
+        Ebean.save(u2);
+        User u3 = new User("po", "po");
+        Ebean.save(u3);
 
-        User u = new User("test", "test", User.UserRole.PRODUCT_OWNER);
-        userDao.create(u);
+        Token tk1 = new Token(u1, "test");
+        Ebean.save(tk1);
+        Token tk2 = new Token(u2, "dev");
+        Ebean.save(tk2);
+        Token tk3 = new Token(u3, "po");
+        Ebean.save(tk3);
 
-        User u2 = new User("dev", "dev", User.UserRole.DEVELOPER);
-        userDao.create(u2);
+        Team tm = new Team("A-team", u1);
+        tm.getUsers().add(u2);
+        Ebean.save(tm);
 
+        Iteration it = new Iteration(tm, LocalDate.now().minusWeeks(1), LocalDate.now().plusWeeks(1), "Sprint 1", null);
+        Ebean.save(it);
 
-        User u3 = new User("productowner", "productowner", User.UserRole.PRODUCT_OWNER);
-        userDao.create(u3);
+        Project p = new Project(tm, u3, "PTS4", "Proftaak S4");
+        Ebean.save(p);
 
-        Token t = new Token(u, "test");
-        tokenDao.create(t);
+        Field completedOnField = null;
+        try {
+            completedOnField = Story.class.getDeclaredField("completedOn");
+            completedOnField.setAccessible(true);
+        } catch (NoSuchFieldException ignored) {
+        }
 
-        Story us1 = new Story("Foo");
-        storyDao.create(us1);
-        Story us2 = new Story("Lorem", "Lorem Ipsum Dolor Sit Amet", Story.Status.IN_PROGRESS);
-        storyDao.create(us2);
+        Story us1 = new Story(p, null, Story.Type.DEFECT, "Foo", null, Story.Status.DEFINED, 0, 3);
+        Ebean.save(us1);
+        Story us2 = new Story(p, it, Story.Type.USER_STORY, "Lorem", "Lorem Ipsum Dolor Sit Amet", Story.Status.IN_PROGRESS, 1, 4);
+        Ebean.save(us2);
+        Story us3 = new Story(p, it, Story.Type.USER_STORY, "Bar", null, Story.Status.DONE, 0, 3);
+        Ebean.save(us3);
+        try {
+            completedOnField.set(us3, LocalDateTime.now().minusDays(6).minusHours(4));
+        } catch (IllegalAccessException ignored) {
+        }
+        Story us4 = new Story(p, it, Story.Type.USER_STORY, "Foo Bar", null, Story.Status.DONE, 1, 4);
+        try {
+            completedOnField.set(us4, LocalDateTime.now().minusDays(4).minusHours(1));
+        } catch (IllegalAccessException ignored) {
+        }
+        Ebean.save(us4);
+        Story us5 = new Story(p, it, Story.Type.USER_STORY, "Stuff", null, Story.Status.DONE, 1, 6);
+        try {
+            completedOnField.set(us5, LocalDateTime.now().minusDays(1).minusHours(5));
+        } catch (IllegalAccessException ignored) {
+        }
+        Ebean.save(us5);
 
-        Task t11 = new Task(us1, "Frontend");
-        taskDao.create(t11);
-        Task t12 = new Task(us1, "Backend", "Do backend stuff");
-        taskDao.create(t12);
-        Task t21 = new Task(us2, "Frontend");
-        taskDao.create(t21);
-        Task t22 = new Task(us2, "Backend", null, Task.Status.DONE);
-        taskDao.create(t22);
+        Task t11 = new Task(us1, null, "Frontend", null, 2, Task.Status.DEFINED);
+        Ebean.save(t11);
+        Task t12 = new Task(us1, u1, "Backend", "Do backend stuff", 3.5, Task.Status.IN_PROGRESS);
+        Ebean.save(t12);
+        Task t21 = new Task(us2, null, "Frontend", null, 1, Task.Status.DEFINED);
+        Ebean.save(t21);
+        Task t22 = new Task(us2, null, "Backend", null, 1, Task.Status.DONE);
+        Ebean.save(t22);
+
+        Test test1 = new Test(us1, "us1Test", "test some stuff");
+        Ebean.save(test1);
+        Test test2 = new Test(us1, "us1Test1", "test some stuff");
+        test2.setAccepted(true);
+        Ebean.save(test2);
+        Test test3 = new Test(us2, "us2Test", "test some stuff");
+        Ebean.save(test3);
     }
 }

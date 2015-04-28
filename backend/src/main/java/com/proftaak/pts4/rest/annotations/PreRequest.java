@@ -1,4 +1,4 @@
-package com.proftaak.pts4.core.restlet.annotations;
+package com.proftaak.pts4.rest.annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -6,13 +6,11 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Created by Michon on 12-3-2015.
+ * Use this for methods that need to be called before every request in the controller, and it's child controllers
+ *
+ * @author Michon
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
-public @interface ValidateScopeObject {
-    /**
-     * The class that this is a validation method for.
-     */
-    Class value();
+public @interface PreRequest {
 }

@@ -1,29 +1,18 @@
 package com.proftaak.pts4.database.tables;
 
-import com.j256.ormlite.dao.Dao;
-import com.j256.ormlite.dao.DaoManager;
-import com.j256.ormlite.field.DataType;
-import com.j256.ormlite.field.DatabaseField;
-import com.j256.ormlite.table.DatabaseTable;
-import com.proftaak.pts4.core.gson.GsonExclude;
-import com.proftaak.pts4.database.DBTable;
-import com.proftaak.pts4.database.DBUtils;
+import com.proftaak.pts4.database.DatabaseModel;
+import com.proftaak.pts4.utils.flexjson.ToPKTransformer;
+import flexjson.JSON;
+import org.apache.commons.lang3.StringUtils;
 
-import java.io.FileNotFoundException;
-import java.sql.SQLException;
+import javax.persistence.*;
 
 /**
  * @author Michon
  */
-@DatabaseTable(tableName = "tasks")
-public class Task extends DBTable {
-
-    public static final String FIELD_ID = "id";
-    public static final String FIELD_NAME = "name";
-    public static final String FIELD_DESCRIPTION = "description";
-    public static final String FIELD_STATUS = "status";
-    public static final String FIELD_STORY = "story";
-
+@Entity
+@Table(name = "tasks")
+public class Task implements DatabaseModel {
     public enum Status {
         /**
          * Task is defined
@@ -41,36 +30,68 @@ public class Task extends DBTable {
         DONE
     }
 
+    public static final String FIELD_ID = "id";
+    public static final String FIELD_NAME = "name";
+    public static final String FIELD_DESCRIPTION = "description";
+    public static final String FIELD_STATUS = "status";
+    public static final String FIELD_ESTIMATE = "estimate";
+    public static final String FIELD_TODO = "todo";
+    public static final String FIELD_STORY = "story_id";
+    public static final String FIELD_OWNER = "owner";
+
     /**
      * The database id of this task
      */
-    @DatabaseField(generatedId = true, columnName = FIELD_ID)
+    @Id
+    @Column(name = FIELD_ID)
     private int id;
 
     /**
      * The name of this task
      */
-    @DatabaseField(canBeNull = false, columnName = FIELD_NAME)
+    @Column(name = FIELD_NAME, nullable = false)
     private String name;
 
     /**
      * The description of this task
      */
-    @DatabaseField(columnName = FIELD_DESCRIPTION)
+    @Column(name = FIELD_DESCRIPTION)
     private String description;
 
     /**
      * The status of this task
      */
-    @DatabaseField(canBeNull = false, dataType = DataType.ENUM_STRING, columnName = FIELD_STATUS)
+    @Column(name = FIELD_STATUS, nullable = false)
+    @Enumerated(EnumType.STRING)
     private Status status;
 
     /**
-     * The user story of this task.
+     * The time estimate of this task
      */
-    @GsonExclude
-    @DatabaseField(foreign = true, foreignAutoRefresh = true, columnName = FIELD_STORY)
+    @Column(name = FIELD_ESTIMATE, nullable = false)
+    private double estimate = 0;
+
+    /**
+     * The remaining time estimate of this task.
+     */
+    @Column(name = FIELD_TODO, nullable = false)
+    private double todo = 0;
+
+    /**
+     * The user story of this task
+     */
+    @JSON(transformer = ToPKTransformer.class)
+    @ManyToOne(optional = false)
+    @JoinColumn(name = FIELD_STORY)
     private Story story;
+
+    /**
+     * The user who owns this task
+     */
+    @JSON(transformer = ToPKTransformer.class)
+    @ManyToOne(optional = true)
+    @JoinColumn(name = FIELD_OWNER)
+    private User owner;
 
     /**
      * ORM-Lite no-arg constructor
@@ -78,19 +99,19 @@ public class Task extends DBTable {
     public Task() {
     }
 
-    public Task(Story story, String name) {
-        this(story, name, null);
-    }
-
-    public Task(Story story, String name, String description) {
-        this(story, name, description, Status.DEFINED);
-    }
-
-    public Task(Story story, String name, String description, Status status) {
+    public Task(Story story, User owner, String name, String description, double estimate, Status status) {
         this.story = story;
         this.setName(name);
         this.setDescription(description);
+        this.setEstimate(estimate);
+        this.setTodo(estimate);
         this.setStatus(status);
+        this.setOwner(owner);
+    }
+
+    @Override
+    public Object getPK() {
+        return this.getId();
     }
 
     public int getId() {
@@ -98,7 +119,7 @@ public class Task extends DBTable {
     }
 
     public String getName() {
-        return name;
+        return this.name;
     }
 
     public void setName(String name) {
@@ -106,15 +127,31 @@ public class Task extends DBTable {
     }
 
     public String getDescription() {
-        return description;
+        return this.description;
     }
 
     public void setDescription(String description) {
-        this.description = description;
+        this.description = StringUtils.trimToNull(description);
+    }
+
+    public double getEstimate() {
+        return this.estimate;
+    }
+
+    public void setEstimate(double estimate) {
+        this.estimate = estimate;
+    }
+
+    public double getTodo() {
+        return this.todo;
+    }
+
+    public void setTodo(double todo) {
+        this.todo = todo;
     }
 
     public Status getStatus() {
-        return status;
+        return this.status;
     }
 
     public void setStatus(Status status) {
@@ -122,20 +159,14 @@ public class Task extends DBTable {
     }
 
     public Story getStory() {
-        return story;
+        return this.story;
     }
 
-    @Override
-    public int hashCode() {
-        return Integer.hashCode(this.getId());
+    public void setOwner(User owner) {
+        this.owner = owner;
     }
 
-    /**
-     * Get the DAO for this table
-     *
-     * @return The DAO for this table
-     */
-    public static Dao<Task, Integer> getDao() throws FileNotFoundException, SQLException {
-        return DaoManager.createDao(DBUtils.getConnectionSource(), Task.class);
+    public User getOwner() {
+        return this.owner;
     }
 }

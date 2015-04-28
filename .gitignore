@@ -153,3 +153,4 @@ node_modules/
 ###
 
 user.properties
+*.sql
