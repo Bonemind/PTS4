@@ -3,8 +3,11 @@
 	<p> Description: {{ story.description || "-" }}</p>
 </div>
 <div class="row">
-	<button class="btn btn-primary" ng-click="showModal(undefined)">
+	<button class="btn btn-primary" ng-click="showTaskModal(undefined)">
 		New task
+	</button>
+	<button class="btn btn-primary" ng-click="showTestModal(undefined)">
+		New test
 	</button>
 </div>
 <div class="row">
@@ -18,7 +21,26 @@
 			<tr ng-repeat="task in tasks">
 				<td>{{ task.name }}</td>
 				<td><pts-status status="task.status"></pts-status></td>
-				<td><a class="glyphicon glyphicon-pencil" ng-click="showModal(task)"></a></td>
+				<td><a class="glyphicon glyphicon-pencil" ng-click="showTaskModal(task)"></a></td>
+			</tr>
+		</tbody>
+	</table>
+</div>
+
+<div class="row">
+	<table class="table table-striped">
+		<thead>
+			<th>Test</th>
+			<th>Description</th>
+			<th>Accepted</th>
+			<th>Actions</th>
+		</thead>
+		<tbody>
+			<tr ng-repeat="test in tests">
+			    	<td>{{ test.name }}</td>
+			    	<td>{{ test.description }}</td>
+				<td><span class="glyphicon" ng-class="{'glyphicon-ok': test.accepted, 'glyphicon-remove': !test.accepted}"></span></td>
+				<td><a class="glyphicon glyphicon-pencil" ng-click="showTestModal(test)"></a></td>
 			</tr>
 		</tbody>
 	</table>
