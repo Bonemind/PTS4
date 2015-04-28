@@ -41,6 +41,49 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <extensions>true</extensions>
+                <version>2.10.3</version>
+                <executions>
+                    <execution>
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>aggregate</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <doclet>com.proftaak.pts4.swagger.BuildSwaggerDoclet</doclet>
+                    <docletPath>${project.build.outputDirectory}</docletPath>
+                    <useStandardDocletOptions>false</useStandardDocletOptions>
+                    <reportOutputDirectory>${project.build.outputDirectory}</reportOutputDirectory>
+                    <destDir>swagger</destDir>
+                    <docletArtifacts>
+                        <docletArtifact>
+                            <groupId>org.apache.commons</groupId>
+                            <artifactId>commons-lang3</artifactId>
+                            <version>3.3.2</version>
+                        </docletArtifact>
+                        <docletArtifact>
+                            <groupId>net.sf.flexjson</groupId>
+                            <artifactId>flexjson</artifactId>
+                            <version>3.3</version>
+                        </docletArtifact>
+                        <docletArtifact>
+                            <groupId>org.avaje.ebeanorm</groupId>
+                            <artifactId>avaje-ebeanorm</artifactId>
+                            <version>4.5.5</version>
+                        </docletArtifact>
+                        <docletArtifact>
+                            <groupId>org.reflections</groupId>
+                            <artifactId>reflections</artifactId>
+                            <version>0.9.9</version>
+                        </docletArtifact>
+                    </docletArtifacts>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 
@@ -89,6 +132,13 @@
             <groupId>org.glassfish.grizzly</groupId>
             <artifactId>grizzly-http-server</artifactId>
             <version>2.3.19</version>
+        </dependency>
+        <dependency>
+            <groupId>sun.jdk</groupId>
+            <artifactId>tools</artifactId>
+            <version>1.5.0</version>
+            <scope>system</scope>
+            <systemPath>${java.home}/../lib/tools.jar</systemPath>
         </dependency>
     </dependencies>
 </project>
