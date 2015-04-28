@@ -1,5 +1,7 @@
 package com.proftaak.pts4.rest;
 
+import com.proftaak.pts4.rest.annotations.Field;
+import com.proftaak.pts4.rest.annotations.Fields;
 import com.proftaak.pts4.rest.annotations.PreRequest;
 import com.proftaak.pts4.rest.annotations.RequireAuth;
 import org.apache.commons.lang3.StringUtils;
@@ -243,15 +245,15 @@ public class SwitchBoard extends HttpHandler {
      * @param requestData The data for the current request
      */
     private void handleAnnotations(Method method, RequestData requestData) throws HTTPException {
-        // The require fields annotation
-        /*RequireFields fieldsAnnotation = method.getAnnotation(RequireFields.class);
+        // The fields annotation
+        Fields fieldsAnnotation = method.getAnnotation(Fields.class);
         if (fieldsAnnotation != null) {
-            for (String field : fieldsAnnotation.fields()) {
-                if (requestData.getPayload().getOrDefault(field, null) == null) {
-                    throw new HTTPException("Missing required parameter: " + field, HttpStatus.BAD_REQUEST_400);
+            for (Field field : fieldsAnnotation.value()) {
+                if (requestData.getPayload().getOrDefault(field.name(), null) == null) {
+                    throw new HTTPException("Missing required parameter: " + field.name(), HttpStatus.BAD_REQUEST_400);
                 }
             }
-        }*/
+        }
 
         // The require auth annotation
         RequireAuth authAnnotation = method.getAnnotation(RequireAuth.class);

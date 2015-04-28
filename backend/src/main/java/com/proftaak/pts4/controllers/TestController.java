@@ -4,10 +4,7 @@ import com.avaje.ebean.Ebean;
 import com.proftaak.pts4.database.EbeanEx;
 import com.proftaak.pts4.database.tables.*;
 import com.proftaak.pts4.rest.*;
-import com.proftaak.pts4.rest.annotations.Controller;
-import com.proftaak.pts4.rest.annotations.PreRequest;
-import com.proftaak.pts4.rest.annotations.RequireAuth;
-import com.proftaak.pts4.rest.annotations.Route;
+import com.proftaak.pts4.rest.annotations.*;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -51,7 +48,7 @@ public class TestController {
      */
     @RequireAuth
     @Route(method = HTTPMethod.GET)
-    public static Collection<Test> getAllHandler(RequestData requestData) throws Exception {
+    public static Test[] getAllHandler(RequestData requestData) throws Exception {
         Collection<Test> tests = new HashSet<>();
         User user = requestData.getUser();
         for (Team team : user.getTeams()) {
@@ -72,6 +69,8 @@ public class TestController {
     /**
      * POST /test
      */
+    @Field(name = "name", required = true, description = "The name of the new test")
+    @Field(name = "description", description = "The description of the new test")
     @RequireAuth(role = ScopeRole.TEAM_MEMBER)
     //@RequireFields(fields = {"story", "name"})
     @Route(method = HTTPMethod.POST)
@@ -93,6 +92,9 @@ public class TestController {
     /**
      * PUT /test/1
      */
+    @Field(name = "name", required = true, description = "The new name of the test")
+    @Field(name = "description", description = "The new description of the test")
+    @Field(name = "accepted", description = "The new accepted state of the test")
     @RequireAuth(role = ScopeRole.TEAM_MEMBER)
     @Route(method = HTTPMethod.PUT)
     public static Test putHandler(RequestData requestData) throws Exception {

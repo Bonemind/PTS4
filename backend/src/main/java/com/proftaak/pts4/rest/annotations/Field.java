@@ -25,4 +25,9 @@ public @interface Field {
      * The description of the field
      */
     String description();
+
+    /**
+     * The type of the field
+     */
+    Class type() default String.class;
 }

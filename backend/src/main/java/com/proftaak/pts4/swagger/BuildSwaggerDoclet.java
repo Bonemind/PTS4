@@ -2,6 +2,8 @@ package com.proftaak.pts4.swagger;
 
 import com.proftaak.pts4.database.DatabaseModel;
 import com.proftaak.pts4.rest.Router;
+import com.proftaak.pts4.rest.annotations.Field;
+import com.proftaak.pts4.rest.annotations.Fields;
 import com.proftaak.pts4.rest.annotations.RequireAuth;
 import com.sun.javadoc.*;
 import flexjson.JSONSerializer;
@@ -45,6 +47,24 @@ public class BuildSwaggerDoclet extends Doclet {
         put(LocalDate.class, new ImmutablePair<>("string", "date"));
         put(LocalDateTime.class, new ImmutablePair<>("string", "date-time"));
     }};
+
+    public static void setType(Map<String, Object> base, Class type) {
+        if (Collection.class.isAssignableFrom(type)) {
+            base.put("type", "array");
+            base = subMap(base, "items");
+            type = (Class<?>) ((ParameterizedType) method.getGenericReturnType()).getActualTypeArguments()[0];
+        }
+        if (DatabaseModel.class.isAssignableFrom(type)) {
+            base.put("$ref", "#/definitions/" + type.getSimpleName());
+        } else if (TYPE_MAP.containsKey(type)) {
+            base.put("type", TYPE_MAP.get(type).getLeft());
+        } else if (type != Object.class) {
+            throw new RuntimeException(String.format(
+                "Unknown return type %s for method %s in class %s",
+                type.getName(), method.getName(), method.getDeclaringClass().getName()
+            ));
+        }
+    }
 
     public static boolean start(RootDoc root) {
         Reflections reflections = new Reflections();
@@ -183,6 +203,26 @@ public class BuildSwaggerDoclet extends Doclet {
                 methodMap.put("description", parts[1].replaceAll("\n\n", "\n").replaceAll("\n ", "\n").trim());
             }
 
+            // Add the parameters
+            Fields fields = method.getAnnotation(Fields.class);
+            if (fields != null && fields.value().length > 0) {
+                Collection<Map<String, Object>> parameters = new ArrayList<>();
+                methodMap.put("parameters", parameters);
+                for (Field field : fields.value()) {
+                    Map<String, Object> parameter = new LinkedHashMap<>();
+                    parameters.add(parameter);
+                    parameter.put("name", field.name());
+                    parameter.put("description", field.description());
+                    parameter.put("required", field.required());
+                    parameter.put("in", "body");
+                    Pair<String, String> typeInfo = TYPE_MAP.getOrDefault(field.type(), TYPE_MAP.get(String.class));
+                    parameter.put("type", typeInfo.getLeft());
+                    if (typeInfo.getRight() != null) {
+                        parameter.put("format", typeInfo.getRight());
+                    }
+                }
+            }
+
             // Map for the responses.
             Map<String, Object> responses = subMap(methodMap, "responses");
             Map<String, Object> response;
@@ -210,21 +250,6 @@ public class BuildSwaggerDoclet extends Doclet {
 
                 // Get the return type
                 schema = subMap(response, "schema");
-                if (Collection.class.isAssignableFrom(returnType)) {
-                    schema.put("type", "array");
-                    schema = subMap(schema, "items");
-                    returnType = (Class<?>) ((ParameterizedType) method.getGenericReturnType()).getActualTypeArguments()[0];
-                }
-                if (DatabaseModel.class.isAssignableFrom(returnType)) {
-                    schema.put("$ref", "#/definitions/" + returnType.getSimpleName());
-                } else if (TYPE_MAP.containsKey(returnType)) {
-                    schema.put("type", TYPE_MAP.get(returnType).getLeft());
-                } else if (returnType != Object.class) {
-                    throw new RuntimeException(String.format(
-                        "Unknown return type %s for method %s in class %s",
-                        returnType.getName(), method.getName(), method.getDeclaringClass().getName()
-                    ));
-                }
             }
 
             // Set the error response

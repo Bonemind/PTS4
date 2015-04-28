@@ -4,10 +4,7 @@ import com.avaje.ebean.Ebean;
 import com.proftaak.pts4.database.EbeanEx;
 import com.proftaak.pts4.database.tables.*;
 import com.proftaak.pts4.rest.*;
-import com.proftaak.pts4.rest.annotations.Controller;
-import com.proftaak.pts4.rest.annotations.PreRequest;
-import com.proftaak.pts4.rest.annotations.RequireAuth;
-import com.proftaak.pts4.rest.annotations.Route;
+import com.proftaak.pts4.rest.annotations.*;
 import org.glassfish.grizzly.http.util.HttpStatus;
 
 import java.util.Collection;
@@ -52,7 +49,7 @@ public class TaskController {
      */
     @RequireAuth
     @Route(method = HTTPMethod.GET)
-    public static Collection<Task> getAllHandler(RequestData requestData) throws Exception {
+    public static Task[] getAllHandler(RequestData requestData) throws Exception {
         Collection<Task> tasks = new HashSet<>();
         User user = requestData.getUser();
         for (Team team : user.getTeams()) {
@@ -73,8 +70,13 @@ public class TaskController {
     /**
      * POST /task
      */
+    @Field(name = "story", required = true, description = "The id of the story that the new task belongs to", type = Story.class)
+    @Field(name = "owner", description = "The id of the user that is the owner of the new task", type = User.class)
+    @Field(name = "name", required = true, description = "The name of the new task")
+    @Field(name = "description", description = "The description of the new task")
+    @Field(name = "estimate", description = "The time estimate (in hours) of the new task", type = Double.class)
+    @Field(name = "status", description = "The status of the new task", type = Task.Status.class)
     @RequireAuth(role = ScopeRole.TEAM_MEMBER)
-    //@RequireFields(fields = {"story", "name"})
     @Route(method = HTTPMethod.POST)
     public static Task postHandler(RequestData requestData) throws Exception {
         Story story = EbeanEx.require(EbeanEx.find(Story.class, requestData.getPayload().get("story")));
@@ -103,6 +105,12 @@ public class TaskController {
     /**
      * PUT /task/1
      */
+    @Field(name = "owner", description = "The id of the user that is the new owner of the task", type = User.class)
+    @Field(name = "name", description = "The new name of the task")
+    @Field(name = "description", description = "The new description of the task")
+    @Field(name = "estimate", description = "The new time estimate (in hours) of the task", type = Double.class)
+    @Field(name = "todo", description = "The new time todo (in hours) of the task", type = Double.class)
+    @Field(name = "status", description = "The new status of the task", type = Task.Status.class)
     @RequireAuth(role = ScopeRole.TEAM_MEMBER)
     @Route(method = HTTPMethod.PUT)
     public static Task putHandler(RequestData requestData) throws Exception {

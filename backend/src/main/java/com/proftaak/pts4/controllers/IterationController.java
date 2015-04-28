@@ -7,10 +7,7 @@ import com.proftaak.pts4.database.tables.Story;
 import com.proftaak.pts4.database.tables.Team;
 import com.proftaak.pts4.database.tables.User;
 import com.proftaak.pts4.rest.*;
-import com.proftaak.pts4.rest.annotations.Controller;
-import com.proftaak.pts4.rest.annotations.PreRequest;
-import com.proftaak.pts4.rest.annotations.RequireAuth;
-import com.proftaak.pts4.rest.annotations.Route;
+import com.proftaak.pts4.rest.annotations.*;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -58,7 +55,7 @@ public class IterationController {
      */
     @RequireAuth
     @Route(method = HTTPMethod.GET)
-    public static Collection<Iteration> getAllHandler(RequestData requestData) throws Exception {
+    public static Iteration[] getAllHandler(RequestData requestData) throws Exception {
         Collection<Iteration> iterations = new ArrayList<>();
         User user = requestData.getUser();
         for (Team team : user.getTeams()) {
@@ -70,8 +67,12 @@ public class IterationController {
     /**
      * POST /iteration
      */
+    @Field(name = "team", required = true, description = "The id of the team the new iteration belongs to", type = Team.class)
+    @Field(name = "start", description = "The start date of the new iteration", type = LocalDate.class)
+    @Field(name = "end", description = "The end date of the new iteration", type = LocalDate.class)
+    @Field(name = "name", required = true, description = "The name of the new iteration")
+    @Field(name = "description", description = "The description of the new iteration")
     @RequireAuth(role = ScopeRole.TEAM_MEMBER)
-    //@RequireFields(fields = {"team", "name"})
     @Route(method = HTTPMethod.POST)
     public static Iteration postHandler(RequestData requestData) throws Exception {
         // Create the new iteration
@@ -91,6 +92,10 @@ public class IterationController {
     /**
      * PUT /iteration/1
      */
+    @Field(name = "start", description = "The new start date of the iteration", type = LocalDate.class)
+    @Field(name = "end", description = "The new end date of the iteration", type = LocalDate.class)
+    @Field(name = "name", description = "The new name of the iteration")
+    @Field(name = "description", description = "The new description of the iteration")
     @RequireAuth(role = ScopeRole.TEAM_MEMBER)
     @Route(method = HTTPMethod.PUT)
     public static Iteration putHandler(RequestData requestData) throws Exception {
@@ -137,7 +142,7 @@ public class IterationController {
      */
     @RequireAuth(role = ScopeRole.TEAM_MEMBER)
     @Route(method = HTTPMethod.GET, path = "/iteration/{id}/story")
-    public static Collection<Story> getStoryHandler(RequestData requestData) throws Exception {
+    public static Story[] getStoryHandler(RequestData requestData) throws Exception {
         // Get the iteration
         Iteration iteration = EbeanEx.require(EbeanEx.find(Iteration.class, requestData.getParameter("id")));
 

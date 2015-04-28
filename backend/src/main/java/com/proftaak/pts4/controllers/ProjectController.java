@@ -7,10 +7,7 @@ import com.proftaak.pts4.database.tables.Story;
 import com.proftaak.pts4.database.tables.Team;
 import com.proftaak.pts4.database.tables.User;
 import com.proftaak.pts4.rest.*;
-import com.proftaak.pts4.rest.annotations.Controller;
-import com.proftaak.pts4.rest.annotations.PreRequest;
-import com.proftaak.pts4.rest.annotations.RequireAuth;
-import com.proftaak.pts4.rest.annotations.Route;
+import com.proftaak.pts4.rest.annotations.*;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -67,7 +64,7 @@ public class ProjectController {
      */
     @RequireAuth
     @Route(method = HTTPMethod.GET)
-    public static Collection<Project> getAllHandler(RequestData requestData) throws Exception {
+    public static Project[] getAllHandler(RequestData requestData) throws Exception {
         Collection<Project> projects = new HashSet<>();
         User user = requestData.getUser();
         for (Team team : user.getTeams()) {
@@ -80,8 +77,11 @@ public class ProjectController {
     /**
      * POST /project
      */
+    @Field(name = "team", required = true, description = "The id of the team the new project belongs to", type = Team.class)
+    @Field(name = "productOwner", required = true, description = "The email of the user that will be the product owner of the new project", type = User.class)
+    @Field(name = "name", required = true, description = "The name of the new project")
+    @Field(name = "description", description = "The description of the new project")
     @RequireAuth(role = ScopeRole.SCRUM_MASTER)
-    //@RequireFields(fields = {"team", "productOwner", "name"})
     @Route(method = HTTPMethod.POST)
     public static Project postHandler(RequestData requestData) throws Exception {
         // Create the new project
@@ -100,6 +100,9 @@ public class ProjectController {
     /**
      * PUT /project/1
      */
+    @Field(name = "productOwner", required = true, description = "The email of the new user that will be the product owner of the project", type = User.class)
+    @Field(name = "name", required = true, description = "The new name of the project")
+    @Field(name = "description", description = "The new description of the project")
     @RequireAuth(role = ScopeRole.SCRUM_MASTER_OR_PRODUCT_OWNER)
     @Route(method = HTTPMethod.PUT)
     public static Project putHandler(RequestData requestData) throws Exception {
@@ -143,7 +146,7 @@ public class ProjectController {
      */
     @RequireAuth(role = ScopeRole.TEAM_MEMBER)
     @Route(method = HTTPMethod.GET, path = "/project/{id}/story")
-    public static Collection<Story> getStoryHandler(RequestData requestData) throws Exception {
+    public static Story[] getStoryHandler(RequestData requestData) throws Exception {
         // Get the project
         Project project = EbeanEx.require(EbeanEx.find(Project.class, requestData.getParameter("id")));
 
