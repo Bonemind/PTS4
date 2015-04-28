@@ -14,7 +14,10 @@
 	<script src="bower_components/underscore/underscore.js"></script>
 	<script src="bower_components/restangular/dist/restangular.js"></script>
 	<script src="bower_components/angular-modal-service/dst/angular-modal-service.js"></script>
+	<script src="bower_components/Chart.js/Chart.min.js"></script>
+	<script src="bower_components/angular-chart.js/dist/angular-chart.js"></script>
 	<link rel="stylesheet" href="bower_components/angular-loading-bar/build/loading-bar.css">
+	<link rel="stylesheet" href="bower_components/angular-chart.js/dist/angular-chart.css">
 	<script type="text/javascript" src="bower_components/angular-bootstrap-show-errors/src/showErrors.min.js"></script>
 	<script src="js/app.js"></script>
 	<script src="js/controllers.js"></script>
@@ -31,19 +34,17 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a class="navbar-brand" href="#">Start Bootstrap</a>
+                <a class="navbar-brand" href="#/">PTS</a>
             </div>
             <!-- Collect the nav links, forms, and other content for toggling -->
             <div class="collapse navbar-collapse" id="navbar">
                 <ul class="nav navbar-nav">
                     <li>
-                        <a href="#/">Home</a>
-                    </li>
-                    <li>
-                        <a href="#/stories">Stories</a>
+                        <a href="#/teams">Teams</a>
                     </li>
                 </ul>
 		<ul class="nav navbar-nav navbar-right" ng-controller="LoginMenuController">
+			<li ng-hide="loggedIn"><a href="#/register">Register</a></li>
 			<li ng-hide="loggedIn"><a href="#/login">Login</a></li>
 			<li ng-show="loggedIn" class="dropdown">
 				<a class="dropdown toggle" data-toggle="dropdown" role="button" aria-expanded="false">{{ $root.user.email }} <span class="caret"></span></a>
@@ -62,7 +63,7 @@
     <div class="container">
 	    <div mc-messages></div>
     </div>
-    <div class="container">
+    <div class="container-fluid">
 	    <div ng-view></div>
 
             </div>
