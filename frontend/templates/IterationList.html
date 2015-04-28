@@ -1,0 +1,25 @@
+<div class="row">
+	<button class="btn btn-primary" ng-click="showModal(undefined)">
+		New iteration
+	</button>
+</div>
+<div class="row">
+	<table class="table table-striped">
+		<thead>
+			<th>Iteration</th>
+			<th>Start date</th>
+			<th>End date</th>
+			<th>&nbsp;</th>
+		</thead>
+		<tbody>
+			<tr ng-repeat="iteration in iterations">
+				<td>{{ iteration.name }}</td>
+				<td>{{ iteration.start }}</td>
+				<td>{{ iteration.end }}</td>
+				<td>
+					<a class="glyphicon glyphicon-pencil" ng-click="showModal(iteration)"></a>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+</div>

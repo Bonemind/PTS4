@@ -1,0 +1,96 @@
+<div class="row">
+    <div class="col-xs-4">
+	<div class="form-inline">
+	    <label for="iterationSelect">Sprint:</label>
+	    <select class="form-control" ng-model="selectediteration" ng-options="item as item.name for item in iterations" ng-change="updateIteration(selectediteration)"></select>
+	    <label for="iterationSelect">Project:</label>
+	    <select class="form-control" ng-model="selectedproject" ng-options="item as item.name for item in projects" ng-change="updateProject(selectedproject)"></select>
+	    <button class="btn btn-primary" ng-click="showModal(undefined)">New story</button>
+	</div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-xs-3">
+	<h1>Defined</h1>
+	<div class="panel panel-default" ng-repeat="story in stories | filter: {status: 'DEFINED'} | orderBy: '-priority'">
+	    <div class="panel-heading">
+		<a href="#/story/{{story.id}}/tasks">{{ story.name }}</a>
+		<span class="label pull-right" ng-class="(story.type==='DEFECT') ? 'label-danger' : 'label-primary'"><pts-type type="story.type"></pts-type></span>
+	    </div>
+	    <div class="panel-body">
+		<div class="row">
+		    {{ story.description }}
+		</div>
+		<div class="row">
+		    <div class="pull-right">
+			<button class="btn btn-primary" ng-click="showModal(story)">Edit</button>
+		    </div>
+		</div>
+	    </div>
+
+	</div>
+    </div>
+    <div class="col-xs-3">
+	<h1>In progress</h1>
+	<div class="panel panel-default" ng-repeat="story in stories | filter: {status: 'IN_PROGRESS'} | orderBy: '-priority'">
+	    <div class="panel-heading">
+		<a href="#/story/{{story.id}}/tasks">{{ story.name }}</a>
+		<span class="label pull-right" ng-class="(story.type==='DEFECT') ? 'label-danger' : 'label-primary'"><pts-type type="story.type"></pts-type></span>
+	    </div>
+	    <div class="panel-body">
+		<div class="row">
+		    {{ story.description }}
+		</div>
+		<div class="row">
+		    <div class="pull-right">
+			<button class="btn btn-primary" ng-click="showModal(story)">Edit</button>
+		    </div>
+		</div>
+	    </div>
+	</div>
+    </div>
+    <div class="col-xs-3">
+	<h1>Done</h1>
+	<div class="panel panel-default" ng-repeat="story in stories | filter: {status: 'DONE'} | orderBy: '-priority'">
+	    <div class="panel-heading">
+		<a href="#/story/{{story.id}}/tasks">{{ story.name }}</a>
+		<span class="label pull-right" ng-class="(story.type==='DEFECT') ? 'label-danger' : 'label-primary'"><pts-type type="story.type"></pts-type></span>
+	    </div>
+	    <div class="panel-body">
+		<div class="row">
+		    {{ story.description }}
+		</div>
+		<div class="row">
+		    <div class="pull-right">
+			<button class="btn btn-primary" ng-click="showModal(story)">Edit</button>
+		    </div>
+		</div>
+	    </div>
+	</div>
+    </div>
+    <div class="col-xs-3">
+	<h1>Accepted</h1>
+	<div class="panel panel-default" ng-repeat="story in stories | filter: {status: 'ACCEPTED'}">
+	    <div class="panel-heading">
+		<a href="#/story/{{story.id}}/tasks">{{ story.name }}</a>
+		<span class="label pull-right" ng-class="(story.type==='DEFECT') ? 'label-danger' : 'label-primary'"><pts-type type="story.type"></pts-type></span>
+	    </div>
+	    <div class="panel-body">
+		<div class="row">
+		    {{ story.description }}
+		</div>
+		<div class="row">
+		    <div class="pull-right">
+			<button class="btn btn-primary" ng-click="showModal(story)">Edit</button>
+		    </div>
+		</div>
+	    </div>
+	</div>
+    </div>
+</div>
+
+<div class="row" ng-hide="selectediteration.id == undefined">
+<div class="col-xs-6">
+    <canvas id="line" options="{ bezierCurve: false }" class="chart chart-line" series="series" data="data" labels="labels" legend="true"></canvas>
+</div>
+</div>
