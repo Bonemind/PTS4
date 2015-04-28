@@ -4,8 +4,8 @@ import com.avaje.ebean.Ebean;
 import com.avaje.ebean.EbeanServerFactory;
 import com.avaje.ebean.config.DataSourceConfig;
 import com.avaje.ebean.config.ServerConfig;
-import com.proftaak.pts4.utils.PropertiesUtils;
 import com.proftaak.pts4.database.tables.*;
+import com.proftaak.pts4.utils.PropertiesUtils;
 import javassist.NotFoundException;
 
 import java.io.FileNotFoundException;

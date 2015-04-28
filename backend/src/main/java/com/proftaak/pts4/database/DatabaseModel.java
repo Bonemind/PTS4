@@ -1,7 +1,5 @@
 package com.proftaak.pts4.database;
 
-import java.util.Map;
-
 /**
  * Created by Michon on 13-4-2015.
  */
