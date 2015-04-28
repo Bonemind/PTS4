@@ -1,13 +1,13 @@
 package com.proftaak.pts4.controllers;
 
 import com.avaje.ebean.Ebean;
-import com.proftaak.pts4.rest.HTTPException;
-import com.proftaak.pts4.rest.Payload;
-import com.proftaak.pts4.rest.RequestData;
-import com.proftaak.pts4.rest.ScopeRole;
-import com.proftaak.pts4.rest.annotations.*;
 import com.proftaak.pts4.database.EbeanEx;
 import com.proftaak.pts4.database.tables.*;
+import com.proftaak.pts4.rest.*;
+import com.proftaak.pts4.rest.annotations.Controller;
+import com.proftaak.pts4.rest.annotations.PreRequest;
+import com.proftaak.pts4.rest.annotations.RequireAuth;
+import com.proftaak.pts4.rest.annotations.Route;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -37,8 +37,8 @@ public class TestController {
      * GET /test/1
      */
     @RequireAuth(role = ScopeRole.TEAM_MEMBER)
-    @Route(method = Route.Method.GET_ONE)
-    public static Object getOneHandler(RequestData requestData) throws Exception {
+    @Route(method = HTTPMethod.GET_ONE)
+    public static Test getOneHandler(RequestData requestData) throws Exception {
         Test test = EbeanEx.find(Test.class, requestData.getParameter("id"));
         if (test == null) {
             throw HTTPException.ERROR_NOT_FOUND;
@@ -50,8 +50,8 @@ public class TestController {
      * GET /test
      */
     @RequireAuth
-    @Route(method = Route.Method.GET)
-    public static Object getAllHandler(RequestData requestData) throws Exception {
+    @Route(method = HTTPMethod.GET)
+    public static Collection<Test> getAllHandler(RequestData requestData) throws Exception {
         Collection<Test> tests = new HashSet<>();
         User user = requestData.getUser();
         for (Team team : user.getTeams()) {
@@ -73,9 +73,9 @@ public class TestController {
      * POST /test
      */
     @RequireAuth(role = ScopeRole.TEAM_MEMBER)
-    @RequireFields(fields = {"story", "name"})
-    @Route(method = Route.Method.POST)
-    public static Object postHandler(RequestData requestData) throws Exception {
+    //@RequireFields(fields = {"story", "name"})
+    @Route(method = HTTPMethod.POST)
+    public static Test postHandler(RequestData requestData) throws Exception {
         Story story = EbeanEx.require(EbeanEx.find(Story.class, requestData.getPayload().get("story")));
 
         // Create the new test
@@ -94,8 +94,8 @@ public class TestController {
      * PUT /test/1
      */
     @RequireAuth(role = ScopeRole.TEAM_MEMBER)
-    @Route(method = Route.Method.PUT)
-    public static Object putHandler(RequestData requestData) throws Exception {
+    @Route(method = HTTPMethod.PUT)
+    public static Test putHandler(RequestData requestData) throws Exception {
         // Get the test
         Test test = EbeanEx.require(EbeanEx.find(Test.class, requestData.getParameter("id")));
 
@@ -122,15 +122,12 @@ public class TestController {
      * DELETE /test/1
      */
     @RequireAuth(role = ScopeRole.TEAM_MEMBER)
-    @Route(method = Route.Method.DELETE)
-    public static Object deleteHandler(RequestData requestData) throws Exception {
+    @Route(method = HTTPMethod.DELETE)
+    public static void deleteHandler(RequestData requestData) throws Exception {
         // Get the test
         Test test = EbeanEx.require(EbeanEx.find(Test.class, requestData.getParameter("id")));
 
         // Delete the test
         Ebean.delete(test);
-
-        // Return nothing
-        return null;
     }
 }

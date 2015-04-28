@@ -1,15 +1,16 @@
 package com.proftaak.pts4.controllers;
 
 import com.avaje.ebean.Ebean;
-import com.proftaak.pts4.rest.HTTPException;
-import com.proftaak.pts4.rest.Payload;
-import com.proftaak.pts4.rest.RequestData;
-import com.proftaak.pts4.rest.ScopeRole;
-import com.proftaak.pts4.rest.annotations.*;
 import com.proftaak.pts4.database.EbeanEx;
 import com.proftaak.pts4.database.tables.Project;
+import com.proftaak.pts4.database.tables.Story;
 import com.proftaak.pts4.database.tables.Team;
 import com.proftaak.pts4.database.tables.User;
+import com.proftaak.pts4.rest.*;
+import com.proftaak.pts4.rest.annotations.Controller;
+import com.proftaak.pts4.rest.annotations.PreRequest;
+import com.proftaak.pts4.rest.annotations.RequireAuth;
+import com.proftaak.pts4.rest.annotations.Route;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -52,8 +53,8 @@ public class ProjectController {
      * GET /project/1
      */
     @RequireAuth(role = ScopeRole.TEAM_MEMBER)
-    @Route(method = Route.Method.GET_ONE)
-    public static Object getOneHandler(RequestData requestData) throws Exception {
+    @Route(method = HTTPMethod.GET_ONE)
+    public static Project getOneHandler(RequestData requestData) throws Exception {
         Project project = EbeanEx.find(Project.class, requestData.getParameter("id"));
         if (project == null) {
             throw HTTPException.ERROR_NOT_FOUND;
@@ -65,8 +66,8 @@ public class ProjectController {
      * GET /project
      */
     @RequireAuth
-    @Route(method = Route.Method.GET)
-    public static Object getAllHandler(RequestData requestData) throws Exception {
+    @Route(method = HTTPMethod.GET)
+    public static Collection<Project> getAllHandler(RequestData requestData) throws Exception {
         Collection<Project> projects = new HashSet<>();
         User user = requestData.getUser();
         for (Team team : user.getTeams()) {
@@ -80,9 +81,9 @@ public class ProjectController {
      * POST /project
      */
     @RequireAuth(role = ScopeRole.SCRUM_MASTER)
-    @RequireFields(fields = {"team", "productOwner", "name"})
-    @Route(method = Route.Method.POST)
-    public static Object postHandler(RequestData requestData) throws Exception {
+    //@RequireFields(fields = {"team", "productOwner", "name"})
+    @Route(method = HTTPMethod.POST)
+    public static Project postHandler(RequestData requestData) throws Exception {
         // Create the new project
         Project project = new Project(
             EbeanEx.require(EbeanEx.find(Team.class, requestData.getPayload().get("team"))),
@@ -100,8 +101,8 @@ public class ProjectController {
      * PUT /project/1
      */
     @RequireAuth(role = ScopeRole.SCRUM_MASTER_OR_PRODUCT_OWNER)
-    @Route(method = Route.Method.PUT)
-    public static Object putHandler(RequestData requestData) throws Exception {
+    @Route(method = HTTPMethod.PUT)
+    public static Project putHandler(RequestData requestData) throws Exception {
         // Get the project
         Project project = EbeanEx.require(EbeanEx.find(Project.class, requestData.getParameter("id")));
 
@@ -128,24 +129,21 @@ public class ProjectController {
      * DELETE /project/1
      */
     @RequireAuth(role = ScopeRole.SCRUM_MASTER_OR_PRODUCT_OWNER)
-    @Route(method = Route.Method.DELETE)
-    public static Object deleteHandler(RequestData requestData) throws Exception {
+    @Route(method = HTTPMethod.DELETE)
+    public static void deleteHandler(RequestData requestData) throws Exception {
         // Get the project
         Project project = EbeanEx.require(EbeanEx.find(Project.class, requestData.getParameter("id")));
 
         // Delete the project
         Ebean.delete(project);
-
-        // Return nothing
-        return null;
     }
 
     /**
      * GET /project/1/story
      */
     @RequireAuth(role = ScopeRole.TEAM_MEMBER)
-    @Route(method = Route.Method.GET, route = "/project/{id}/story")
-    public static Object getStoryHandler(RequestData requestData) throws Exception {
+    @Route(method = HTTPMethod.GET, path = "/project/{id}/story")
+    public static Collection<Story> getStoryHandler(RequestData requestData) throws Exception {
         // Get the project
         Project project = EbeanEx.require(EbeanEx.find(Project.class, requestData.getParameter("id")));
 

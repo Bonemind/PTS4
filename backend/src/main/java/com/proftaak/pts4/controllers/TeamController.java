@@ -1,16 +1,13 @@
 package com.proftaak.pts4.controllers;
 
 import com.avaje.ebean.Ebean;
-import com.proftaak.pts4.rest.HTTPException;
-import com.proftaak.pts4.rest.Payload;
-import com.proftaak.pts4.rest.RequestData;
-import com.proftaak.pts4.rest.ScopeRole;
-import com.proftaak.pts4.rest.annotations.*;
 import com.proftaak.pts4.database.EbeanEx;
-import com.proftaak.pts4.database.tables.Project;
-import com.proftaak.pts4.database.tables.Story;
-import com.proftaak.pts4.database.tables.Team;
-import com.proftaak.pts4.database.tables.User;
+import com.proftaak.pts4.database.tables.*;
+import com.proftaak.pts4.rest.*;
+import com.proftaak.pts4.rest.annotations.Controller;
+import com.proftaak.pts4.rest.annotations.PreRequest;
+import com.proftaak.pts4.rest.annotations.RequireAuth;
+import com.proftaak.pts4.rest.annotations.Route;
 import org.glassfish.grizzly.http.util.HttpStatus;
 
 import java.util.ArrayList;
@@ -58,8 +55,8 @@ public class TeamController {
      * GET /team/1
      */
     @RequireAuth(role = ScopeRole.TEAM_MEMBER)
-    @Route(method = Route.Method.GET_ONE)
-    public static Object getHandler(RequestData requestData) throws Exception {
+    @Route(method = HTTPMethod.GET_ONE)
+    public static Team getOneHandler(RequestData requestData) throws Exception {
         Team team = EbeanEx.find(Team.class, requestData.getParameter("id"));
         if (team == null) {
             throw HTTPException.ERROR_NOT_FOUND;
@@ -71,8 +68,8 @@ public class TeamController {
      * GET /team
      */
     @RequireAuth
-    @Route(method = Route.Method.GET)
-    public static Object getAllHandler(RequestData requestData) throws Exception {
+    @Route(method = HTTPMethod.GET)
+    public static Collection<Team> getAllHandler(RequestData requestData) throws Exception {
         User user = requestData.getUser();
         // TODO: remove the being a part of a team if you're product owner of one of their projects
         Collection<Team> teams = new HashSet<>();
@@ -87,9 +84,9 @@ public class TeamController {
      * POST /team
      */
     @RequireAuth
-    @RequireFields(fields = {"name"})
-    @Route(method = Route.Method.POST)
-    public static Object postHandler(RequestData requestData) throws Exception {
+    //@RequireFields(fields = {"name"})
+    @Route(method = HTTPMethod.POST)
+    public static Team postHandler(RequestData requestData) throws Exception {
         // Create the new team
         Team team = new Team(
             requestData.getPayload().getString("name"),
@@ -105,8 +102,8 @@ public class TeamController {
      * PUT /team/1
      */
     @RequireAuth(role = ScopeRole.SCRUM_MASTER)
-    @Route(method = Route.Method.PUT)
-    public static Object putHandler(RequestData requestData) throws Exception {
+    @Route(method = HTTPMethod.PUT)
+    public static Team putHandler(RequestData requestData) throws Exception {
         // Get the team
         Team team = EbeanEx.require(EbeanEx.find(Team.class, requestData.getParameter("id")));
 
@@ -127,24 +124,21 @@ public class TeamController {
      * DELETE /team/1
      */
     @RequireAuth(role = ScopeRole.SCRUM_MASTER)
-    @Route(method = Route.Method.DELETE)
-    public static Object deleteHandler(RequestData requestData) throws Exception {
+    @Route(method = HTTPMethod.DELETE)
+    public static void deleteHandler(RequestData requestData) throws Exception {
         // Get the team
         Team team = EbeanEx.require(EbeanEx.find(Team.class, requestData.getParameter("id")));
 
         // Delete the team
         Ebean.delete(team);
-
-        // Return nothing
-        return null;
     }
 
     /**
      * GET /team/1/project
      */
     @RequireAuth(role = ScopeRole.TEAM_MEMBER)
-    @Route(method = Route.Method.GET, route = "/team/{id}/project")
-    public static Object getProjectHandler(RequestData requestData) throws Exception {
+    @Route(method = HTTPMethod.GET, path = "/team/{id}/project")
+    public static Collection<Project> getProjectHandler(RequestData requestData) throws Exception {
         // Get the team
         Team team = EbeanEx.require(EbeanEx.find(Team.class, requestData.getParameter("id")));
 
@@ -156,8 +150,8 @@ public class TeamController {
      * GET /team/1/user
      */
     @RequireAuth(role = ScopeRole.TEAM_MEMBER)
-    @Route(method = Route.Method.GET, route = "/team/{id}/user")
-    public static Object getUserHandler(RequestData requestData) throws Exception {
+    @Route(method = HTTPMethod.GET, path = "/team/{id}/user")
+    public static Collection<User> getUserHandler(RequestData requestData) throws Exception {
         // Get the team
         Team team = EbeanEx.require(EbeanEx.find(Team.class, requestData.getParameter("id")));
 
@@ -169,8 +163,8 @@ public class TeamController {
      * POST /team/1/user
      */
     @RequireAuth(role = ScopeRole.SCRUM_MASTER)
-    @Route(method = Route.Method.POST, route = "/team/{id}/user")
-    public static Object postMemberHandler(RequestData requestData) throws Exception {
+    @Route(method = HTTPMethod.POST, path = "/team/{id}/user")
+    public static Collection<User> postMemberHandler(RequestData requestData) throws Exception {
         // Get the team
         Team team = EbeanEx.require(EbeanEx.find(Team.class, requestData.getParameter("id")));
 
@@ -191,8 +185,8 @@ public class TeamController {
      * DELETE /team/1/user/1
      */
     @RequireAuth(role = ScopeRole.SCRUM_MASTER)
-    @Route(method = Route.Method.DELETE, route = "/team/{id}/user/{userId}")
-    public static Object deleteMemberHandler(RequestData requestData) throws Exception {
+    @Route(method = HTTPMethod.DELETE, path = "/team/{id}/user/{userId}")
+    public static Collection<User> deleteMemberHandler(RequestData requestData) throws Exception {
         // Get the team
         Team team = EbeanEx.require(EbeanEx.find(Team.class, requestData.getParameter("id")));
 
@@ -216,8 +210,8 @@ public class TeamController {
      * GET /team/1/story
      */
     @RequireAuth(role = ScopeRole.TEAM_MEMBER)
-    @Route(method = Route.Method.GET, route = "/team/{id}/story")
-    public static Object getStoryHandler(RequestData requestData) throws Exception {
+    @Route(method = HTTPMethod.GET, path = "/team/{id}/story")
+    public static Collection<Story> getStoryHandler(RequestData requestData) throws Exception {
         // Get the team
         Team team = EbeanEx.require(EbeanEx.find(Team.class, requestData.getParameter("id")));
 
@@ -233,8 +227,8 @@ public class TeamController {
      * GET /team/1/iteration
      */
     @RequireAuth(role = ScopeRole.TEAM_MEMBER)
-    @Route(method = Route.Method.GET, route = "/team/{id}/iteration")
-    public static Object getIterationHandler(RequestData requestData) throws Exception {
+    @Route(method = HTTPMethod.GET, path = "/team/{id}/iteration")
+    public static Collection<Iteration> getIterationHandler(RequestData requestData) throws Exception {
         // Get the team
         Team team = EbeanEx.require(EbeanEx.find(Team.class, requestData.getParameter("id")));
 

@@ -1,15 +1,16 @@
 package com.proftaak.pts4.controllers;
 
 import com.avaje.ebean.Ebean;
-import com.proftaak.pts4.rest.HTTPException;
-import com.proftaak.pts4.rest.RequestData;
-import com.proftaak.pts4.rest.annotations.Controller;
-import com.proftaak.pts4.rest.annotations.RequireAuth;
-import com.proftaak.pts4.rest.annotations.RequireFields;
-import com.proftaak.pts4.rest.annotations.Route;
 import com.proftaak.pts4.database.EbeanEx;
 import com.proftaak.pts4.database.tables.Token;
 import com.proftaak.pts4.database.tables.User;
+import com.proftaak.pts4.rest.HTTPException;
+import com.proftaak.pts4.rest.HTTPMethod;
+import com.proftaak.pts4.rest.RequestData;
+import com.proftaak.pts4.rest.annotations.Controller;
+import com.proftaak.pts4.rest.annotations.Field;
+import com.proftaak.pts4.rest.annotations.RequireAuth;
+import com.proftaak.pts4.rest.annotations.Route;
 import org.glassfish.grizzly.http.util.HttpStatus;
 
 /**
@@ -18,14 +19,14 @@ import org.glassfish.grizzly.http.util.HttpStatus;
 @Controller
 public class AuthController {
     /**
-     * POST /auth/login
+     * Login to the application, creating a new token that can be used to authenticate yourself with future requests
      *
-     * %param email [required] The email address of the user you're trying to authenticate as
-     * %param password [required] The password associated with this account
+     * @return A new token that you can use to authenticate yourself
      */
-    @RequireFields(fields = {"email", "password"})
-    @Route(method = Route.Method.POST, route = "/auth/login")
-    public static Object loginHandler(RequestData requestData) throws Exception {
+    @Field(name = "email", required = true, description = "The email address of the user you're trying to authenticate as")
+    @Field(name = "password", required = true, description = "The password of the user you're trying to authenticate as")
+    @Route(method = HTTPMethod.POST, path = "/auth/login")
+    public static Token loginHandler(RequestData requestData) throws Exception {
         // Check the login details
         User user = EbeanEx.find(User.class, User.FIELD_EMAIL, requestData.getPayload().get("email"));
         if (user == null || !user.checkPassword(requestData.getPayload().getString("password"))) {
@@ -41,15 +42,12 @@ public class AuthController {
     }
 
     /**
-     * POST /auth/logout
+     * Logout from the application, invalidating your current token so that it cannot be used anymore
      */
     @RequireAuth
-    @Route(method = Route.Method.POST, route = "/auth/logout")
-    public static Object logoutHandler(RequestData requestData) throws Exception {
+    @Route(method = HTTPMethod.POST, path = "/auth/logout")
+    public static void logoutHandler(RequestData requestData) throws Exception {
         // Remove the token
         Ebean.delete(requestData.getToken());
-
-        // Return nothing
-        return null;
     }
 }

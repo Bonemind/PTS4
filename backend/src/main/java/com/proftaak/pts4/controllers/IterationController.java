@@ -1,15 +1,16 @@
 package com.proftaak.pts4.controllers;
 
 import com.avaje.ebean.Ebean;
-import com.proftaak.pts4.rest.HTTPException;
-import com.proftaak.pts4.rest.Payload;
-import com.proftaak.pts4.rest.RequestData;
-import com.proftaak.pts4.rest.ScopeRole;
-import com.proftaak.pts4.rest.annotations.*;
 import com.proftaak.pts4.database.EbeanEx;
 import com.proftaak.pts4.database.tables.Iteration;
+import com.proftaak.pts4.database.tables.Story;
 import com.proftaak.pts4.database.tables.Team;
 import com.proftaak.pts4.database.tables.User;
+import com.proftaak.pts4.rest.*;
+import com.proftaak.pts4.rest.annotations.Controller;
+import com.proftaak.pts4.rest.annotations.PreRequest;
+import com.proftaak.pts4.rest.annotations.RequireAuth;
+import com.proftaak.pts4.rest.annotations.Route;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -43,8 +44,8 @@ public class IterationController {
      * GET /iteration/1
      */
     @RequireAuth
-    @Route(method = Route.Method.GET_ONE)
-    public static Object getOneHandler(RequestData requestData) throws Exception {
+    @Route(method = HTTPMethod.GET_ONE)
+    public static Iteration getOneHandler(RequestData requestData) throws Exception {
         Iteration iteration = EbeanEx.find(Iteration.class, requestData.getParameter("id"));
         if (iteration == null) {
             throw HTTPException.ERROR_NOT_FOUND;
@@ -56,8 +57,8 @@ public class IterationController {
      * GET /iteration
      */
     @RequireAuth
-    @Route(method = Route.Method.GET)
-    public static Object getAllHandler(RequestData requestData) throws Exception {
+    @Route(method = HTTPMethod.GET)
+    public static Collection<Iteration> getAllHandler(RequestData requestData) throws Exception {
         Collection<Iteration> iterations = new ArrayList<>();
         User user = requestData.getUser();
         for (Team team : user.getTeams()) {
@@ -70,9 +71,9 @@ public class IterationController {
      * POST /iteration
      */
     @RequireAuth(role = ScopeRole.TEAM_MEMBER)
-    @RequireFields(fields = {"team", "name"})
-    @Route(method = Route.Method.POST)
-    public static Object postHandler(RequestData requestData) throws Exception {
+    //@RequireFields(fields = {"team", "name"})
+    @Route(method = HTTPMethod.POST)
+    public static Iteration postHandler(RequestData requestData) throws Exception {
         // Create the new iteration
         Iteration iteration = new Iteration(
             EbeanEx.require(EbeanEx.find(Team.class, requestData.getPayload().get("team"))),
@@ -91,8 +92,8 @@ public class IterationController {
      * PUT /iteration/1
      */
     @RequireAuth(role = ScopeRole.TEAM_MEMBER)
-    @Route(method = Route.Method.PUT)
-    public static Object putHandler(RequestData requestData) throws Exception {
+    @Route(method = HTTPMethod.PUT)
+    public static Iteration putHandler(RequestData requestData) throws Exception {
         // Get the iteration
         Iteration iteration = EbeanEx.require(EbeanEx.find(Iteration.class, requestData.getParameter("id")));
 
@@ -122,24 +123,21 @@ public class IterationController {
      * DELETE /iteration/1
      */
     @RequireAuth(role = ScopeRole.TEAM_MEMBER)
-    @Route(method = Route.Method.DELETE)
-    public static Object deleteHandler(RequestData requestData) throws Exception {
+    @Route(method = HTTPMethod.DELETE)
+    public static void deleteHandler(RequestData requestData) throws Exception {
         // Get the iteration
         Iteration iteration = EbeanEx.require(EbeanEx.find(Iteration.class, requestData.getParameter("id")));
 
         // Delete the iteration
         Ebean.delete(iteration);
-
-        // Return nothing
-        return null;
     }
 
     /**
      * GET /iteration/1/story
      */
     @RequireAuth(role = ScopeRole.TEAM_MEMBER)
-    @Route(method = Route.Method.GET, route = "/iteration/{id}/story")
-    public static Object getStoryHandler(RequestData requestData) throws Exception {
+    @Route(method = HTTPMethod.GET, path = "/iteration/{id}/story")
+    public static Collection<Story> getStoryHandler(RequestData requestData) throws Exception {
         // Get the iteration
         Iteration iteration = EbeanEx.require(EbeanEx.find(Iteration.class, requestData.getParameter("id")));
 

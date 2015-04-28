@@ -1,15 +1,15 @@
 package com.proftaak.pts4.controllers;
 
 import com.avaje.ebean.Ebean;
+import com.proftaak.pts4.database.EbeanEx;
+import com.proftaak.pts4.database.tables.User;
 import com.proftaak.pts4.rest.HTTPException;
+import com.proftaak.pts4.rest.HTTPMethod;
 import com.proftaak.pts4.rest.Payload;
 import com.proftaak.pts4.rest.RequestData;
 import com.proftaak.pts4.rest.annotations.Controller;
 import com.proftaak.pts4.rest.annotations.RequireAuth;
-import com.proftaak.pts4.rest.annotations.RequireFields;
 import com.proftaak.pts4.rest.annotations.Route;
-import com.proftaak.pts4.database.EbeanEx;
-import com.proftaak.pts4.database.tables.User;
 import org.glassfish.grizzly.http.util.HttpStatus;
 
 import javax.persistence.PersistenceException;
@@ -23,8 +23,8 @@ public class UserController {
      * PUT /user/1
      */
     @RequireAuth
-    @Route(method = Route.Method.GET_ONE)
-    public static Object getOneHandler(RequestData requestData) throws Exception {
+    @Route(method = HTTPMethod.GET_ONE)
+    public static User getOneHandler(RequestData requestData) throws Exception {
         // Get the user
         User user = EbeanEx.find(User.class, requestData.getParameter("id"));
 
@@ -40,9 +40,9 @@ public class UserController {
     /**
      * POST /user
      */
-    @RequireFields(fields = {"email", "password"})
-    @Route(method = Route.Method.POST)
-    public static Object postHandler(RequestData requestData) throws Exception {
+    //@RequireFields(fields = {"email", "password"})
+    @Route(method = HTTPMethod.POST)
+    public static User postHandler(RequestData requestData) throws Exception {
         // Create the new user
         User user = new User(
             requestData.getPayload().get("email").toString(),
@@ -62,8 +62,8 @@ public class UserController {
      * PUT /user/1
      */
     @RequireAuth
-    @Route(method = Route.Method.PUT)
-    public static Object putHandler(RequestData requestData) throws Exception {
+    @Route(method = HTTPMethod.PUT)
+    public static User putHandler(RequestData requestData) throws Exception {
         // Get the user
         User user = EbeanEx.require(EbeanEx.find(User.class, requestData.getParameter("id")));
 
@@ -89,8 +89,8 @@ public class UserController {
      * DELETE /user/1
      */
     @RequireAuth
-    @Route(method = Route.Method.DELETE)
-    public static Object deleteHandler(RequestData requestData) throws Exception {
+    @Route(method = HTTPMethod.DELETE)
+    public static void deleteHandler(RequestData requestData) throws Exception {
         // Get the user
         User user = EbeanEx.require(EbeanEx.find(User.class, requestData.getParameter("id")));
 
@@ -111,8 +111,5 @@ public class UserController {
 
         // Delete the user
         Ebean.delete(user);
-
-        // Return nothing
-        return null;
     }
 }

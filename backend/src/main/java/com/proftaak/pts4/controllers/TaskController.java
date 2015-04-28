@@ -1,13 +1,13 @@
 package com.proftaak.pts4.controllers;
 
 import com.avaje.ebean.Ebean;
-import com.proftaak.pts4.rest.HTTPException;
-import com.proftaak.pts4.rest.Payload;
-import com.proftaak.pts4.rest.RequestData;
-import com.proftaak.pts4.rest.ScopeRole;
-import com.proftaak.pts4.rest.annotations.*;
 import com.proftaak.pts4.database.EbeanEx;
 import com.proftaak.pts4.database.tables.*;
+import com.proftaak.pts4.rest.*;
+import com.proftaak.pts4.rest.annotations.Controller;
+import com.proftaak.pts4.rest.annotations.PreRequest;
+import com.proftaak.pts4.rest.annotations.RequireAuth;
+import com.proftaak.pts4.rest.annotations.Route;
 import org.glassfish.grizzly.http.util.HttpStatus;
 
 import java.util.Collection;
@@ -38,8 +38,8 @@ public class TaskController {
      * GET /task/1
      */
     @RequireAuth(role = ScopeRole.TEAM_MEMBER)
-    @Route(method = Route.Method.GET_ONE)
-    public static Object getOneHandler(RequestData requestData) throws Exception {
+    @Route(method = HTTPMethod.GET_ONE)
+    public static Task getOneHandler(RequestData requestData) throws Exception {
         Task task = EbeanEx.find(Task.class, requestData.getParameter("id"));
         if (task == null) {
             throw HTTPException.ERROR_NOT_FOUND;
@@ -48,11 +48,11 @@ public class TaskController {
     }
 
     /**
-     * GET /task
+     * GET /task/
      */
     @RequireAuth
-    @Route(method = Route.Method.GET)
-    public static Object getAllHandler(RequestData requestData) throws Exception {
+    @Route(method = HTTPMethod.GET)
+    public static Collection<Task> getAllHandler(RequestData requestData) throws Exception {
         Collection<Task> tasks = new HashSet<>();
         User user = requestData.getUser();
         for (Team team : user.getTeams()) {
@@ -74,9 +74,9 @@ public class TaskController {
      * POST /task
      */
     @RequireAuth(role = ScopeRole.TEAM_MEMBER)
-    @RequireFields(fields = {"story", "name"})
-    @Route(method = Route.Method.POST)
-    public static Object postHandler(RequestData requestData) throws Exception {
+    //@RequireFields(fields = {"story", "name"})
+    @Route(method = HTTPMethod.POST)
+    public static Task postHandler(RequestData requestData) throws Exception {
         Story story = EbeanEx.require(EbeanEx.find(Story.class, requestData.getPayload().get("story")));
 
         // Get the new owner
@@ -104,8 +104,8 @@ public class TaskController {
      * PUT /task/1
      */
     @RequireAuth(role = ScopeRole.TEAM_MEMBER)
-    @Route(method = Route.Method.PUT)
-    public static Object putHandler(RequestData requestData) throws Exception {
+    @Route(method = HTTPMethod.PUT)
+    public static Task putHandler(RequestData requestData) throws Exception {
         // Get the user task
         Task task = EbeanEx.require(EbeanEx.find(Task.class, requestData.getParameter("id")));
 
@@ -147,15 +147,12 @@ public class TaskController {
      * DELETE /task/1
      */
     @RequireAuth(role = ScopeRole.TEAM_MEMBER)
-    @Route(method = Route.Method.DELETE)
-    public static Object deleteHandler(RequestData requestData) throws Exception {
+    @Route(method = HTTPMethod.DELETE)
+    public static void deleteHandler(RequestData requestData) throws Exception {
         // Get the task
         Task task = EbeanEx.require(EbeanEx.find(Task.class, requestData.getParameter("id")));
 
         // Delete the task
         Ebean.delete(task);
-
-        // Return nothing
-        return null;
     }
 }

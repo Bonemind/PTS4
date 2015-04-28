@@ -1,13 +1,13 @@
 package com.proftaak.pts4.controllers;
 
 import com.avaje.ebean.Ebean;
-import com.proftaak.pts4.rest.HTTPException;
-import com.proftaak.pts4.rest.Payload;
-import com.proftaak.pts4.rest.RequestData;
-import com.proftaak.pts4.rest.ScopeRole;
-import com.proftaak.pts4.rest.annotations.*;
 import com.proftaak.pts4.database.EbeanEx;
 import com.proftaak.pts4.database.tables.*;
+import com.proftaak.pts4.rest.*;
+import com.proftaak.pts4.rest.annotations.Controller;
+import com.proftaak.pts4.rest.annotations.PreRequest;
+import com.proftaak.pts4.rest.annotations.RequireAuth;
+import com.proftaak.pts4.rest.annotations.Route;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -44,8 +44,8 @@ public class StoryController {
      * GET /story/1
      */
     @RequireAuth(role = ScopeRole.TEAM_MEMBER)
-    @Route(method = Route.Method.GET_ONE)
-    public static Object getOneHandler(RequestData requestData) throws Exception {
+    @Route(method = HTTPMethod.GET_ONE)
+    public static Story getOneHandler(RequestData requestData) throws Exception {
         Story story = EbeanEx.find(Story.class, requestData.getParameter("id"));
         if (story == null) {
             throw HTTPException.ERROR_NOT_FOUND;
@@ -57,8 +57,8 @@ public class StoryController {
      * GET /story
      */
     @RequireAuth
-    @Route(method = Route.Method.GET)
-    public static Object getAllHandler(RequestData requestData) throws Exception {
+    @Route(method = HTTPMethod.GET)
+    public static Collection<Story> getAllHandler(RequestData requestData) throws Exception {
         Collection<Story> stories = new HashSet<>();
         User user = requestData.getUser();
         for (Team team : user.getTeams()) {
@@ -76,9 +76,9 @@ public class StoryController {
      * POST /story
      */
     @RequireAuth(role = ScopeRole.TEAM_MEMBER)
-    @RequireFields(fields = {"project", "name"})
-    @Route(method = Route.Method.POST)
-    public static Object postHandler(RequestData requestData) throws Exception {
+    //@RequireFields(fields = {"project", "name"})
+    @Route(method = HTTPMethod.POST)
+    public static Story postHandler(RequestData requestData) throws Exception {
         // Determine the story status
         Story.Status status = Story.Status.valueOf(requestData.getPayload().getOrDefault("status", Story.Status.DEFINED.toString()).toString());
         if (status == Story.Status.ACCEPTED) {
@@ -106,8 +106,8 @@ public class StoryController {
      * PUT /story/1
      */
     @RequireAuth(role = ScopeRole.TEAM_MEMBER)
-    @Route(method = Route.Method.PUT)
-    public static Object putHandler(RequestData requestData) throws Exception {
+    @Route(method = HTTPMethod.PUT)
+    public static Story putHandler(RequestData requestData) throws Exception {
         // Get the user story
         Story story = EbeanEx.require(EbeanEx.find(Story.class, requestData.getParameter("id")));
 
@@ -151,24 +151,21 @@ public class StoryController {
      * DELETE /story/1
      */
     @RequireAuth(role = ScopeRole.TEAM_MEMBER)
-    @Route(method = Route.Method.DELETE)
-    public static Object deleteHandler(RequestData requestData) throws Exception {
+    @Route(method = HTTPMethod.DELETE)
+    public static void deleteHandler(RequestData requestData) throws Exception {
         // Get the user story
         Story story = EbeanEx.require(EbeanEx.find(Story.class, requestData.getParameter("id")));
 
         // Delete the user story
         Ebean.delete(story);
-
-        // Return nothing
-        return null;
     }
 
     /**
      * GET /story/1/task
      */
     @RequireAuth(role = ScopeRole.TEAM_MEMBER)
-    @Route(method = Route.Method.GET, route = "/story/{id}/task")
-    public static Object getTask(RequestData requestData) throws Exception {
+    @Route(method = HTTPMethod.GET, path = "/story/{id}/task")
+    public static Collection<Task> getTask(RequestData requestData) throws Exception {
         // Get the story
         Story story = EbeanEx.require(EbeanEx.find(Story.class, requestData.getParameter("id")));
 
@@ -180,8 +177,8 @@ public class StoryController {
      * GET /story/1/test
      */
     @RequireAuth(role = ScopeRole.TEAM_MEMBER)
-    @Route(method = Route.Method.GET, route = "/story/{id}/test")
-    public static Object getTest(RequestData requestData) throws Exception {
+    @Route(method = HTTPMethod.GET, path = "/story/{id}/test")
+    public static Collection<Test> getTest(RequestData requestData) throws Exception {
         // Get the story
         Story story = EbeanEx.require(EbeanEx.find(Story.class, requestData.getParameter("id")));
 
