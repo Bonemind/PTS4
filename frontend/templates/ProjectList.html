@@ -1,0 +1,23 @@
+<div class="row">
+	<button class="btn btn-primary" ng-click="showModal(undefined)">
+	 	New project
+	</button>
+</div>
+<div class="row">
+	<table class="table table-striped">
+		<thead>
+			<th>Project</th>
+			<th>Description</th>
+			<th>Actions</th>
+		</thead>
+		<tbody>
+			<tr ng-repeat="project in projects">
+				<td>{{ project.name }}</td>
+				<td>{{ project.description }}</td>
+				<td>
+					<a class="glyphicon glyphicon-pencil" ng-click="showModal(project)"></a>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+</div>
