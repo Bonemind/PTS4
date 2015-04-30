@@ -4,6 +4,7 @@ import com.proftaak.pts4.rest.annotations.Field;
 import com.proftaak.pts4.rest.annotations.Fields;
 import com.proftaak.pts4.rest.annotations.PreRequest;
 import com.proftaak.pts4.rest.annotations.RequireAuth;
+import flexjson.JSONSerializer;
 import org.apache.commons.lang3.StringUtils;
 import org.glassfish.grizzly.http.server.HttpHandler;
 import org.glassfish.grizzly.http.server.Request;
@@ -18,8 +19,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -28,9 +28,14 @@ import java.util.regex.Pattern;
  */
 public class SwitchBoard extends HttpHandler {
     /**
+     * Precompiled patterns
+     */
+    private Map<String, Pattern> patterns = new HashMap<>();
+
+    /**
      * The routes this switchboard handles
      */
-    public Map<Pattern, Map<HTTPMethod, Router.Route>> routes = new HashMap<>();
+    private Map<Pattern, Map<HTTPMethod, Router.Route>> routes = new HashMap<>();
 
     public SwitchBoard() {
         // Get the option route.
@@ -43,23 +48,20 @@ public class SwitchBoard extends HttpHandler {
             e.printStackTrace();
         }
 
-        // Cached the patterns
-        Map<String, Pattern> patterns = new HashMap<>();
-
         // Perform routing
         Router router = new Router();
         for (Router.Route route : router.getRoutes()) {
             // Compile the path
-            if (!patterns.containsKey(route.pattern)) {
-                patterns.put(route.pattern, compilePattern(route.pattern));
+            if (!this.patterns.containsKey(route.pattern)) {
+                this.patterns.put(route.pattern, compilePattern(route.pattern));
             }
-            Pattern pattern = patterns.get(route.pattern);
+            Pattern pattern = this.patterns.get(route.pattern);
 
             // Store the route
-            if (!routes.containsKey(pattern)) {
-                routes.put(pattern, new HashMap<>());
+            if (!this.routes.containsKey(pattern)) {
+                this.routes.put(pattern, new HashMap<>());
             }
-            Map<HTTPMethod, Router.Route> routesForPattern = routes.get(pattern);
+            Map<HTTPMethod, Router.Route> routesForPattern = this.routes.get(pattern);
             if (routesForPattern.containsKey(route.annotation.method())) {
                 throw new KeyAlreadyExistsException("There already is a route with that path and method");
             }
@@ -107,7 +109,7 @@ public class SwitchBoard extends HttpHandler {
                 // Matching route, see if we have a handler for this method
                 for (Map.Entry<HTTPMethod, Router.Route> methodEntry : routeEntry.getValue().entrySet()) {
                     if (getMethod(methodEntry.getKey()) == request.getMethod()) {
-                        this.handleRequest(request, response, matcher, methodEntry.getValue().handler);
+                        this.handleRequest(request, response, matcher, methodEntry.getValue());
                         return;
                     }
                 }
@@ -121,6 +123,9 @@ public class SwitchBoard extends HttpHandler {
         this.handleError(response, HTTPException.ERROR_NOT_FOUND);
     }
 
+    /**
+     * Convert a HTTPMethod to an org.glassfish.grizzly.http.Method
+     */
     private org.glassfish.grizzly.http.Method getMethod(HTTPMethod method) {
         switch (method) {
             case GET:
@@ -135,7 +140,7 @@ public class SwitchBoard extends HttpHandler {
             case OPTIONS:
                 return org.glassfish.grizzly.http.Method.OPTIONS;
             default:
-                return null;
+                return org.glassfish.grizzly.http.Method.CUSTOM("UNKNOWN");
         }
     }
 
@@ -145,41 +150,32 @@ public class SwitchBoard extends HttpHandler {
      * @param request  The request
      * @param response The response
      * @param matcher  The matcher for the current route
-     * @param method   The handler for the current route
+     * @param route    The current route
      */
-    private void handleRequest(Request request, Response response, Matcher matcher, Method method) {
+    private void handleRequest(Request request, Response response, Matcher matcher, Router.Route route) {
         // Set the CORS headers
         response.addHeader("Access-Control-Allow-Origin", "*");
-        response.addHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-        response.addHeader("Access-Control-Allow-Headers", "Content-Type,X-TOKEN");
-
-        // Build the request
-        RequestData requestData;
-        try {
-            requestData = RequestData.buildRequest(request, matcher);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-            return;
+        Collection<String> methods = new TreeSet<>();
+        for (HTTPMethod method : this.routes.getOrDefault(this.patterns.get(route.pattern), new HashMap<>()).keySet()) {
+            methods.add(getMethod(method).getMethodString());
         }
+        response.addHeader("Access-Control-Allow-Methods", StringUtils.join(methods, ","));
+        response.addHeader("Access-Control-Allow-Headers", "Content-Type,X-TOKEN");
 
         Object responseObject = null;
         try {
-            // Require payload data for some methods.
-            if (requestData.getPayload() == null &&
-                (request.getMethod() == org.glassfish.grizzly.http.Method.POST ||
-                    request.getMethod() == org.glassfish.grizzly.http.Method.PUT)) {
-                throw new HTTPException("This method requires a payload");
-            }
+            // Build the request
+            RequestData requestData = RequestData.buildRequest(request, matcher);
 
             // Call the pre-request methods
-            this.handlePrerequests(method, requestData);
+            this.handlePrerequests(route.handler, requestData);
 
             // Handle the annotations for the current route
-            this.handleAnnotations(method, requestData);
+            this.handleAnnotations(route.handler, requestData);
 
             // Call the handling method
             try {
-                responseObject = method.invoke(null, requestData);
+                responseObject = route.handler.invoke(null, requestData);
             } catch (InvocationTargetException e) {
                 throw e.getCause();
             }
@@ -190,7 +186,17 @@ public class SwitchBoard extends HttpHandler {
         // Serialize the response object, if any
         String responseBody = null;
         if (responseObject != null) {
-            responseBody = requestData.jsonSerializer.serialize(responseObject);
+            // Create a new JSON serializer.
+            JSONSerializer jsonSerializer = new JSONSerializer();
+
+            // Exclude the class properties, as these are completely irrelevant for the frontend.
+            jsonSerializer.exclude("*.class");
+
+            // Exclude the PK property, ad this is already included under it's primary name.
+            jsonSerializer.exclude("*.PK");
+
+            // Serialize the response
+            responseBody = jsonSerializer.serialize(responseObject);
         }
 
         // Build the response
@@ -245,21 +251,36 @@ public class SwitchBoard extends HttpHandler {
      * @param requestData The data for the current request
      */
     private void handleAnnotations(Method method, RequestData requestData) throws HTTPException {
-        // The fields annotation
+        // The (so far) unknown fields that are present in the payload
+        Set<String> unknownKeys = new TreeSet<>();
+        if (requestData.getPayload() != null) {
+            unknownKeys.addAll(requestData.getPayload().keySet());
+        }
+
+        // The field annotations
         Fields fieldsAnnotation = method.getAnnotation(Fields.class);
         if (fieldsAnnotation != null) {
             for (Field field : fieldsAnnotation.value()) {
-                if (requestData.getPayload().getOrDefault(field.name(), null) == null) {
+                // If the field is not set, and it is required, error
+                if (requestData.getPayload().getOrDefault(field.name(), null) == null && field.required()) {
                     throw new HTTPException("Missing required parameter: " + field.name(), HttpStatus.BAD_REQUEST_400);
                 }
+
+                // Remove the field from the unknown keys
+                unknownKeys.remove(field.name());
             }
+        }
+
+        // If any items remain in the unknown keys, those are actually unknown, so error
+        if (unknownKeys.size() > 0) {
+            throw new HTTPException("Unknown parameter: " + unknownKeys.toArray()[0], HttpStatus.BAD_REQUEST_400);
         }
 
         // The require auth annotation
         RequireAuth authAnnotation = method.getAnnotation(RequireAuth.class);
         if (authAnnotation != null) {
             // Check whether the user is logged in
-            if (requestData.token == null) {
+            if (requestData.getToken() == null) {
                 throw new HTTPException("You need to pass a valid token to access this route", HttpStatus.UNAUTHORIZED_401);
             }
 
@@ -293,7 +314,6 @@ public class SwitchBoard extends HttpHandler {
      * Handle OPTIONS requests.
      */
     @com.proftaak.pts4.rest.annotations.Route(method = com.proftaak.pts4.rest.HTTPMethod.OPTIONS)
-    private static Object handleOptions(RequestData requestData) {
-        return null;
+    private static void handleOptions(RequestData requestData) {
     }
 }
