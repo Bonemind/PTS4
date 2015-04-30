@@ -48,7 +48,7 @@ public class TestController {
      */
     @RequireAuth
     @Route(method = HTTPMethod.GET)
-    public static Test[] getAllHandler(RequestData requestData) throws Exception {
+    public static Collection<Test> getAllHandler(RequestData requestData) throws Exception {
         Collection<Test> tests = new HashSet<>();
         User user = requestData.getUser();
         for (Team team : user.getTeams()) {

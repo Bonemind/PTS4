@@ -64,7 +64,7 @@ public class ProjectController {
      */
     @RequireAuth
     @Route(method = HTTPMethod.GET)
-    public static Project[] getAllHandler(RequestData requestData) throws Exception {
+    public static Collection<Project> getAllHandler(RequestData requestData) throws Exception {
         Collection<Project> projects = new HashSet<>();
         User user = requestData.getUser();
         for (Team team : user.getTeams()) {
@@ -146,7 +146,7 @@ public class ProjectController {
      */
     @RequireAuth(role = ScopeRole.TEAM_MEMBER)
     @Route(method = HTTPMethod.GET, path = "/project/{id}/story")
-    public static Story[] getStoryHandler(RequestData requestData) throws Exception {
+    public static Collection<Story> getStoryHandler(RequestData requestData) throws Exception {
         // Get the project
         Project project = EbeanEx.require(EbeanEx.find(Project.class, requestData.getParameter("id")));
 

@@ -66,7 +66,7 @@ public class TeamController {
      */
     @RequireAuth
     @Route(method = HTTPMethod.GET)
-    public static Team[] getAllHandler(RequestData requestData) throws Exception {
+    public static Collection<Team> getAllHandler(RequestData requestData) throws Exception {
         User user = requestData.getUser();
         // TODO: remove the being a part of a team if you're product owner of one of their projects
         Collection<Team> teams = new HashSet<>();
@@ -136,7 +136,7 @@ public class TeamController {
      */
     @RequireAuth(role = ScopeRole.TEAM_MEMBER)
     @Route(method = HTTPMethod.GET, path = "/team/{id}/project")
-    public static Project[] getProjectHandler(RequestData requestData) throws Exception {
+    public static Collection<Project> getProjectHandler(RequestData requestData) throws Exception {
         // Get the team
         Team team = EbeanEx.require(EbeanEx.find(Team.class, requestData.getParameter("id")));
 
@@ -149,7 +149,7 @@ public class TeamController {
      */
     @RequireAuth(role = ScopeRole.TEAM_MEMBER)
     @Route(method = HTTPMethod.GET, path = "/team/{id}/user")
-    public static User[] getUserHandler(RequestData requestData) throws Exception {
+    public static Collection<User> getUserHandler(RequestData requestData) throws Exception {
         // Get the team
         Team team = EbeanEx.require(EbeanEx.find(Team.class, requestData.getParameter("id")));
 
@@ -204,7 +204,7 @@ public class TeamController {
      */
     @RequireAuth(role = ScopeRole.TEAM_MEMBER)
     @Route(method = HTTPMethod.GET, path = "/team/{id}/story")
-    public static Story[] getStoryHandler(RequestData requestData) throws Exception {
+    public static Collection<Story> getStoryHandler(RequestData requestData) throws Exception {
         // Get the team
         Team team = EbeanEx.require(EbeanEx.find(Team.class, requestData.getParameter("id")));
 
@@ -221,7 +221,7 @@ public class TeamController {
      */
     @RequireAuth(role = ScopeRole.TEAM_MEMBER)
     @Route(method = HTTPMethod.GET, path = "/team/{id}/iteration")
-    public static Iteration[] getIterationHandler(RequestData requestData) throws Exception {
+    public static Collection<Iteration> getIterationHandler(RequestData requestData) throws Exception {
         // Get the team
         Team team = EbeanEx.require(EbeanEx.find(Team.class, requestData.getParameter("id")));
 

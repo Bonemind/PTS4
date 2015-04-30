@@ -55,7 +55,7 @@ public class IterationController {
      */
     @RequireAuth
     @Route(method = HTTPMethod.GET)
-    public static Iteration[] getAllHandler(RequestData requestData) throws Exception {
+    public static Collection<Iteration> getAllHandler(RequestData requestData) throws Exception {
         Collection<Iteration> iterations = new ArrayList<>();
         User user = requestData.getUser();
         for (Team team : user.getTeams()) {
@@ -142,7 +142,7 @@ public class IterationController {
      */
     @RequireAuth(role = ScopeRole.TEAM_MEMBER)
     @Route(method = HTTPMethod.GET, path = "/iteration/{id}/story")
-    public static Story[] getStoryHandler(RequestData requestData) throws Exception {
+    public static Collection<Story> getStoryHandler(RequestData requestData) throws Exception {
         // Get the iteration
         Iteration iteration = EbeanEx.require(EbeanEx.find(Iteration.class, requestData.getParameter("id")));
 

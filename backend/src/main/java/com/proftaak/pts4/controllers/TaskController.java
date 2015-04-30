@@ -49,7 +49,7 @@ public class TaskController {
      */
     @RequireAuth
     @Route(method = HTTPMethod.GET)
-    public static Task[] getAllHandler(RequestData requestData) throws Exception {
+    public static Collection<Task> getAllHandler(RequestData requestData) throws Exception {
         Collection<Task> tasks = new HashSet<>();
         User user = requestData.getUser();
         for (Team team : user.getTeams()) {

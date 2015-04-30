@@ -55,7 +55,7 @@ public class StoryController {
      */
     @RequireAuth
     @Route(method = HTTPMethod.GET)
-    public static Story[] getAllHandler(RequestData requestData) throws Exception {
+    public static Collection<Story> getAllHandler(RequestData requestData) throws Exception {
         Collection<Story> stories = new HashSet<>();
         User user = requestData.getUser();
         for (Team team : user.getTeams()) {
@@ -174,7 +174,7 @@ public class StoryController {
      */
     @RequireAuth(role = ScopeRole.TEAM_MEMBER)
     @Route(method = HTTPMethod.GET, path = "/story/{id}/task")
-    public static Task[] getTask(RequestData requestData) throws Exception {
+    public static Collection<Task> getTask(RequestData requestData) throws Exception {
         // Get the story
         Story story = EbeanEx.require(EbeanEx.find(Story.class, requestData.getParameter("id")));
 
@@ -187,7 +187,7 @@ public class StoryController {
      */
     @RequireAuth(role = ScopeRole.TEAM_MEMBER)
     @Route(method = HTTPMethod.GET, path = "/story/{id}/test")
-    public static Test[] getTest(RequestData requestData) throws Exception {
+    public static Collection<Test> getTest(RequestData requestData) throws Exception {
         // Get the story
         Story story = EbeanEx.require(EbeanEx.find(Story.class, requestData.getParameter("id")));
 
