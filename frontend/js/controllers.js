@@ -259,6 +259,8 @@ PTSAppControllers.controller("LoginController", ["$rootScope", "$scope", "$http"
  					.then(function(data) {
 					 	$rootScope.token = data.token;
 					 	$rootScope.user = data.user;
+					 	localStorage.setItem("token", data.token);
+					 	localStorage.setItem("user", JSON.stringify(data.user));
 					 	$location.path("/");
 					}, function(err) {
 						var status = err.status;
@@ -284,9 +286,10 @@ PTSAppControllers.controller("LoginMenuController", ["$rootScope", "$scope", "Re
 			$scope.logout = function() {
 			 	Restangular.all("auth").all("logout").post({})
  					.then(function() {
-			 	
 					     $rootScope.user = undefined;
 					     $rootScope.token = undefined;
+					     localStorage.removeItem("token");
+					     localStorage.removeItem("user");
 					});
 			}
 		}]);

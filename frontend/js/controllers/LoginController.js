@@ -9,6 +9,8 @@ PTSAppControllers.controller("LoginController", ["$rootScope", "$scope", "$http"
  					.then(function(data) {
 					 	$rootScope.token = data.token;
 					 	$rootScope.user = data.user;
+					 	localStorage.setItem("token", data.token);
+					 	localStorage.setItem("user", JSON.stringify(data.user));
 					 	$location.path("/");
 					}, function(err) {
 						var status = err.status;

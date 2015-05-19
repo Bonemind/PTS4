@@ -20,6 +20,23 @@ var PTSApp = angular.module("PTSApp", [
 	 		{type: "USER_STORY", text: "Story"},
 	 		{type: "DEFECT", text: "Defect"},
 		]
+
+	 	//Load the token and user from the localstorage if available
+	 	var token = localStorage.getItem("token");
+	 	var user = localStorage.getItem("user");
+	 	try {
+			user = JSON.parse(user);
+			if (token && user) {
+				$rootScope.token = token;
+				$rootScope.user = user;
+			}
+		} catch (err) {
+			console.log("Localstorage data corrupt, removing");
+			localStorage.removeItem("user");
+			localStorage.removeItem("token");
+		}
+
+		//Set the token if available
 		$injector.get("$http").defaults.transformRequest = function(data, headersGetter) {
 			if ($rootScope.token !== undefined) {
 				headersGetter()["X-Token"] = $rootScope.token;
