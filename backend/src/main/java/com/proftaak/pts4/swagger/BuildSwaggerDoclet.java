@@ -125,10 +125,10 @@ public class BuildSwaggerDoclet extends Doclet {
         Collection<Object> securityStatement = Collections.singletonList(security);
         data.put("security", securityStatement);
 
-        // Definitions
+        // Model definitions
         Map<String, Object> definitions = subMap(data, "definitions");
 
-        // Create the error definition
+        // Create the error model definition
         Map<String, Object> definition = subMap(definitions, "Error");
         Map<String, Object> properties = subMap(definition, "properties");
         Map<String, Object> fieldData = subMap(properties, "error");
@@ -199,6 +199,11 @@ public class BuildSwaggerDoclet extends Doclet {
         // Paths
         Map<String, Object> paths = subMap(data, "paths");
 
+        // Create the error response definition
+        Map<String, Object> errorResponse = subMap(data, "responses", "GeneralError");
+        errorResponse.put("description", "Something has gone wrong. Usually, this will be your fault. See the returned message for more details of your failure");
+        subMap(errorResponse, "schema").put("$ref", "#/definitions/Error");
+
         // Create a path definition for each route
         Router router = new Router();
         for (Router.Route route : router.getRoutes()) {
@@ -268,7 +273,6 @@ public class BuildSwaggerDoclet extends Doclet {
             // Map for the responses.
             Map<String, Object> responses = subMap(methodMap, "responses");
             Map<String, Object> response;
-            Map<String, Object> schema;
 
             // Set the default response.
             Class<?> returnType = method.getReturnType();
@@ -304,11 +308,8 @@ public class BuildSwaggerDoclet extends Doclet {
                 }
             }
 
-            // Set the error response
-            response = subMap(responses, "default");
-            response.put("description", "Something has gone wrong. Usually, this will be your fault. See the returned message for more details of your failure");
-            schema = subMap(response, "schema");
-            schema.put("$ref", "#/definitions/Error");
+            // Set the error response.
+            subMap(responses, "default").put("$ref", "#/responses/GeneralError");
         }
 
         // Write to file
