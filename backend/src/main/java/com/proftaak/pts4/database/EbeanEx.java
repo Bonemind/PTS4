@@ -55,15 +55,6 @@ public class EbeanEx {
     }
 
     /**
-     * Find all objects of a class
-     * <p>
-     * Will always return a set. If no object was found, an empty set is returned
-     */
-    public static <T> Set<T> findAll(Class<T> cls){
-        return Ebean.find(cls).findSet();
-    }
-
-    /**
      * If the argument obj is null, throw HTTPException.ERROR_OBJECT_NOT_FOUND. Else, simply return the object.
      */
     public static <T> T require(T obj) throws HTTPException {

@@ -6,6 +6,7 @@ import com.proftaak.pts4.database.tables.User;
 import flexjson.JSONDeserializer;
 import flexjson.JSONSerializer;
 import org.glassfish.grizzly.http.server.Request;
+import org.glassfish.grizzly.http.util.HttpStatus;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -24,46 +25,32 @@ public class RequestData {
     /**
      * The matcher of the url match
      */
-    protected Matcher matcher;
+    private Matcher matcher;
 
     /**
      * The payload that has been sent from the client
      */
-    protected Payload payload;
+    private Payload payload;
 
     /**
      * The currently logged in user, if any
      */
-    protected User user;
+    private User user;
 
     /**
      * The currently used token, if any
      */
-    protected Token token;
+    private Token token;
+
+    /**
+     * The request
+     */
+    private Request request;
 
     /**
      * The roles the current user has within the current scope.
      */
     private Collection<ScopeRole> roles = new HashSet<>();
-
-    /**
-     * The JSONSerializer that will be used to serialize the returned object
-     */
-    protected JSONSerializer jsonSerializer;
-
-    /**
-     * Constructs a new RequestData.
-     */
-    protected RequestData() {
-        // Create a new JSON serializer.
-        this.jsonSerializer = new JSONSerializer();
-
-        // Exclude the class properties, as these are completely irrelevant for the frontend.
-        this.jsonSerializer.exclude("*.class");
-
-        // Exclude the PK property, ad this is already included under it's primary name.
-        this.jsonSerializer.exclude("*.PK");
-    }
 
     public Payload getPayload() {
         return this.payload;
@@ -80,6 +67,10 @@ public class RequestData {
 
     public Token getToken() {
         return this.token;
+    }
+
+    public Request getRequest() {
+        return this.request;
     }
 
     public void addScopeRole(ScopeRole role) {
@@ -107,8 +98,11 @@ public class RequestData {
      * @param matcher The matcher for the current route
      * @return The RequestData object for this request
      */
-    protected static RequestData buildRequest(Request request, Matcher matcher) throws FileNotFoundException {
+    protected static RequestData buildRequest(Request request, Matcher matcher) throws HTTPException {
         RequestData data = new RequestData();
+
+        // Store the request
+        data.request = request;
 
         // Store the matcher
         data.matcher = matcher;
@@ -120,8 +114,8 @@ public class RequestData {
             if (reader.ready()) {
                 data.payload = new Payload((HashMap<String, Object>) deserializer.deserialize(reader.readLine()));
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            throw new HTTPException("Malformed payload", HttpStatus.BAD_REQUEST_400);
         }
 
         // Get the token/user, if any

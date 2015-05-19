@@ -4,10 +4,7 @@ import com.avaje.ebean.Ebean;
 import com.proftaak.pts4.database.EbeanEx;
 import com.proftaak.pts4.database.tables.*;
 import com.proftaak.pts4.rest.*;
-import com.proftaak.pts4.rest.annotations.Controller;
-import com.proftaak.pts4.rest.annotations.PreRequest;
-import com.proftaak.pts4.rest.annotations.RequireAuth;
-import com.proftaak.pts4.rest.annotations.Route;
+import com.proftaak.pts4.rest.annotations.*;
 import org.glassfish.grizzly.http.util.HttpStatus;
 
 import java.util.ArrayList;
@@ -83,8 +80,8 @@ public class TeamController {
     /**
      * POST /team
      */
+    @Field(name = "name", required = true, description = "The name of the new team")
     @RequireAuth
-    //@RequireFields(fields = {"name"})
     @Route(method = HTTPMethod.POST)
     public static Team postHandler(RequestData requestData) throws Exception {
         // Create the new team
@@ -101,6 +98,7 @@ public class TeamController {
     /**
      * PUT /team/1
      */
+    @Field(name = "name", description = "The new name of the team")
     @RequireAuth(role = ScopeRole.SCRUM_MASTER)
     @Route(method = HTTPMethod.PUT)
     public static Team putHandler(RequestData requestData) throws Exception {
@@ -162,9 +160,10 @@ public class TeamController {
     /**
      * POST /team/1/user
      */
+    @Field(name = "email", required = true, description = "The email of the new team member")
     @RequireAuth(role = ScopeRole.SCRUM_MASTER)
     @Route(method = HTTPMethod.POST, path = "/team/{id}/user")
-    public static Collection<User> postMemberHandler(RequestData requestData) throws Exception {
+    public static void postMemberHandler(RequestData requestData) throws Exception {
         // Get the team
         Team team = EbeanEx.require(EbeanEx.find(Team.class, requestData.getParameter("id")));
 
@@ -176,9 +175,6 @@ public class TeamController {
             team.getUsers().add(user);
             Ebean.save(team);
         }
-
-        // Return the users
-        return team.getUsers();
     }
 
     /**
@@ -186,7 +182,7 @@ public class TeamController {
      */
     @RequireAuth(role = ScopeRole.SCRUM_MASTER)
     @Route(method = HTTPMethod.DELETE, path = "/team/{id}/user/{userId}")
-    public static Collection<User> deleteMemberHandler(RequestData requestData) throws Exception {
+    public static void deleteMemberHandler(RequestData requestData) throws Exception {
         // Get the team
         Team team = EbeanEx.require(EbeanEx.find(Team.class, requestData.getParameter("id")));
 
@@ -201,9 +197,6 @@ public class TeamController {
         // Remove the user from the team
         team.getUsers().remove(user);
         Ebean.save(team);
-
-        // Return the users
-        return team.getUsers();
     }
 
     /**

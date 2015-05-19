@@ -4,10 +4,7 @@ import com.avaje.ebean.Ebean;
 import com.proftaak.pts4.database.EbeanEx;
 import com.proftaak.pts4.database.tables.*;
 import com.proftaak.pts4.rest.*;
-import com.proftaak.pts4.rest.annotations.Controller;
-import com.proftaak.pts4.rest.annotations.PreRequest;
-import com.proftaak.pts4.rest.annotations.RequireAuth;
-import com.proftaak.pts4.rest.annotations.Route;
+import com.proftaak.pts4.rest.annotations.*;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -75,8 +72,14 @@ public class StoryController {
     /**
      * POST /story
      */
+    @Field(name = "project", required = true, description = "The id of the project that the new story belongs to", type = Project.class)
+    @Field(name = "iteration", description = "The id of the iteration that the new story belongs to", type = Iteration.class)
+    @Field(name = "type", description = "The type of the new story", type = Story.Type.class)
+    @Field(name = "name", required = true, description = "The name of the new story")
+    @Field(name = "description", description = "The description of the new story")
+    @Field(name = "status", description = "The status of the new story", type = Story.Status.class)
+    @Field(name = "points", description = "The story points of the new story", type = Integer.class)
     @RequireAuth(role = ScopeRole.TEAM_MEMBER)
-    //@RequireFields(fields = {"project", "name"})
     @Route(method = HTTPMethod.POST)
     public static Story postHandler(RequestData requestData) throws Exception {
         // Determine the story status
@@ -105,6 +108,12 @@ public class StoryController {
     /**
      * PUT /story/1
      */
+    @Field(name = "iteration", description = "The id of the new iteration that the story belongs to", type = Iteration.class)
+    @Field(name = "name", description = "The new name of the story")
+    @Field(name = "description", description = "The new description of the story")
+    @Field(name = "status", description = "The new status of the story", type = Story.Status.class)
+    @Field(name = "points", description = "The new story points of the story", type = Integer.class)
+    @Field(name = "priority", description = "The new priority of the story", type = Integer.class)
     @RequireAuth(role = ScopeRole.TEAM_MEMBER)
     @Route(method = HTTPMethod.PUT)
     public static Story putHandler(RequestData requestData) throws Exception {

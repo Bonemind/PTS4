@@ -2,6 +2,8 @@ package com.proftaak.pts4.swagger;
 
 import com.proftaak.pts4.database.DatabaseModel;
 import com.proftaak.pts4.rest.Router;
+import com.proftaak.pts4.rest.annotations.Field;
+import com.proftaak.pts4.rest.annotations.Fields;
 import com.proftaak.pts4.rest.annotations.RequireAuth;
 import com.sun.javadoc.*;
 import flexjson.JSONSerializer;
@@ -14,7 +16,8 @@ import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.lang.reflect.Method;
+import java.lang.reflect.*;
+import java.lang.reflect.Type;
 import java.lang.reflect.ParameterizedType;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -44,7 +47,54 @@ public class BuildSwaggerDoclet extends Doclet {
         put(boolean.class, new ImmutablePair<>("boolean", null));
         put(LocalDate.class, new ImmutablePair<>("string", "date"));
         put(LocalDateTime.class, new ImmutablePair<>("string", "date-time"));
+        put(Date.class, new ImmutablePair<>("string", "date-time"));
     }};
+
+    /**
+     * Process a class of any type into a type definition
+     *
+     * @param type The type
+     * @param overrides The overrides
+     * @return The type info, or null if the type should be ignored
+     */
+    public static Map<String, Object> getTypeInfo(Type type, Map<Class, Class> overrides) throws Exception {
+        Map<String, Object> data = new HashMap<>();
+        if (type instanceof ParameterizedType && Collection.class.isAssignableFrom((Class<?>) ((ParameterizedType) type).getRawType())) {
+            // Collection
+            if (overrides.containsKey(Collection.class)) {
+                return getTypeInfo(Collection.class, overrides);
+            } else {
+                data.put("type", "array");
+                data.put("items", getTypeInfo(((ParameterizedType) type).getActualTypeArguments()[0], overrides));
+            }
+        } else {
+            Class cls = (Class) type;
+            if (overrides.containsKey(cls)) {
+                // Overridden
+                return getTypeInfo(overrides.get(cls), overrides);
+            } else if (TYPE_MAP.containsKey(cls)) {
+                // Known type from TYPE_MAP
+                data.put("type", TYPE_MAP.get(cls).getLeft());
+            } else if (cls.isEnum()) {
+                // Enum
+                data.put("type", "string");
+                data.put("enum", cls.getEnumConstants());
+            } else if (DatabaseModel.class.isAssignableFrom(cls)) {
+                // Datadata model
+                if (overrides.containsKey(DatabaseModel.class)) {
+                    return getTypeInfo(DatabaseModel.class, overrides);
+                } else {
+                    data.put("$ref", "#/definitions/" + cls.getSimpleName());
+                }
+            } else if (cls != Object.class || cls != Void.class) {
+                return null;
+            } else {
+                // Unknown type, error
+                throw new Exception(String.format("Unknown type %s", cls.getName()));
+            }
+        }
+        return data;
+    }
 
     public static boolean start(RootDoc root) {
         Reflections reflections = new Reflections();
@@ -112,14 +162,6 @@ public class BuildSwaggerDoclet extends Doclet {
                     continue;
                 }
 
-                // If the method returns a collection, don't bother as there will be a separate route for this
-                if (method.getReturnType().isAssignableFrom(Collection.class)) {
-                    continue;
-                }
-
-                // Root object for this field.
-                fieldData = subMap(properties, StringUtils.uncapitalize(method.getName().substring(3)));
-
                 // Get the MethodDoc for this method
                 MethodDoc methodDoc = methods.get(method.getName().toUpperCase());
 
@@ -127,11 +169,23 @@ public class BuildSwaggerDoclet extends Doclet {
                 FieldDoc fieldDoc = fields.get(method.getName().toUpperCase().substring(3));
 
                 // Get the type info of the property
-                Pair<String, String> typeInfo = TYPE_MAP.getOrDefault(method.getReturnType(), TYPE_MAP.get(String.class));
-                fieldData.put("type", typeInfo.getLeft());
-                if (typeInfo.getRight() != null) {
-                    fieldData.put("format", typeInfo.getRight());
+                try {
+                    fieldData = getTypeInfo(method.getGenericReturnType(), new HashMap<Class, Class>() {{
+                        put(Collection.class, Void.class);
+                        put(DatabaseModel.class, Integer.class);
+                    }});
+                    if (fieldData == null) {
+                        continue;
+                    }
+                } catch (Exception e) {
+                    throw new RuntimeException(String.format(
+                        "%s from return type of %s in class %s",
+                        e.getMessage(), method.getName(), method.getDeclaringClass().getName()
+                    ), e);
                 }
+
+                // Store the field data into the properties
+                properties.put(StringUtils.uncapitalize(method.getName().substring(3)), fieldData);
 
                 // Get the description of the property
                 if (!StringUtils.isEmpty(methodDoc.commentText())) {
@@ -183,6 +237,34 @@ public class BuildSwaggerDoclet extends Doclet {
                 methodMap.put("description", parts[1].replaceAll("\n\n", "\n").replaceAll("\n ", "\n").trim());
             }
 
+            // Add the parameters
+            Fields fields = method.getAnnotation(Fields.class);
+            if (fields != null && fields.value().length > 0) {
+                Collection<Map<String, Object>> parameters = new ArrayList<>();
+                methodMap.put("parameters", parameters);
+                for (Field field : fields.value()) {
+                    Map<String, Object> parameter = new LinkedHashMap<>();
+                    try {
+                        parameter = getTypeInfo(field.type(), new HashMap<Class, Class>() {{
+                            put(DatabaseModel.class, Integer.class);
+                        }});
+                        if (parameter == null) {
+                            continue;
+                        }
+                    } catch (Exception e) {
+                        throw new RuntimeException(String.format(
+                            "%s from type of field %s on route %s in class %s",
+                            e.getMessage(), field.name(), method.getName(), method.getDeclaringClass().getName()
+                        ));
+                    }
+                    parameters.add(parameter);
+                    parameter.put("name", field.name());
+                    parameter.put("description", field.description());
+                    parameter.put("required", field.required());
+                    parameter.put("in", "body");
+                }
+            }
+
             // Map for the responses.
             Map<String, Object> responses = subMap(methodMap, "responses");
             Map<String, Object> response;
@@ -209,20 +291,15 @@ public class BuildSwaggerDoclet extends Doclet {
                 }
 
                 // Get the return type
-                schema = subMap(response, "schema");
-                if (Collection.class.isAssignableFrom(returnType)) {
-                    schema.put("type", "array");
-                    schema = subMap(schema, "items");
-                    returnType = (Class<?>) ((ParameterizedType) method.getGenericReturnType()).getActualTypeArguments()[0];
-                }
-                if (DatabaseModel.class.isAssignableFrom(returnType)) {
-                    schema.put("$ref", "#/definitions/" + returnType.getSimpleName());
-                } else if (TYPE_MAP.containsKey(returnType)) {
-                    schema.put("type", TYPE_MAP.get(returnType).getLeft());
-                } else if (returnType != Object.class) {
+                try {
+                    Map<String, Object> typeInfo = getTypeInfo(method.getGenericReturnType(), new HashMap<>());
+                    if (typeInfo != null) {
+                        response.put("schema", typeInfo);
+                    }
+                } catch (Exception e) {
                     throw new RuntimeException(String.format(
-                        "Unknown return type %s for method %s in class %s",
-                        returnType.getName(), method.getName(), method.getDeclaringClass().getName()
+                        "%s from return type of route %s in class %s",
+                        e.getMessage(), method.getName(), method.getDeclaringClass().getName()
                     ));
                 }
             }

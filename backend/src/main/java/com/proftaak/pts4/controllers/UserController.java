@@ -11,6 +11,7 @@ import com.proftaak.pts4.rest.HTTPMethod;
 import com.proftaak.pts4.rest.Payload;
 import com.proftaak.pts4.rest.RequestData;
 import com.proftaak.pts4.rest.annotations.Controller;
+import com.proftaak.pts4.rest.annotations.Field;
 import com.proftaak.pts4.rest.annotations.RequireAuth;
 import com.proftaak.pts4.rest.annotations.Route;
 import org.glassfish.grizzly.http.util.HttpStatus;
@@ -37,7 +38,7 @@ public class UserController {
         Collection<String> usernames = new TreeSet<>();
 
         // Get the username of every user
-        for(User user : EbeanEx.findAll(User.class)){
+        for (User user : Ebean.find(User.class).findList()) {
             usernames.add(user.getName());
         }
 
@@ -65,7 +66,9 @@ public class UserController {
     /**
      * POST /user
      */
-    //@RequireFields(fields = {"email", "name", "password"})
+    @Field(name = "email", required = true, description = "The email address of the new user")
+    @Field(name = "name", required = true, description = "The name of the new user")
+    @Field(name = "password", required = true, description = "The password of the new user")
     @Route(method = HTTPMethod.POST)
     public static User postHandler(RequestData requestData) throws Exception {
         // Create the new user
@@ -87,6 +90,7 @@ public class UserController {
     /**
      * PUT /user/1
      */
+    @Field(name = "password", required = true, description = "The new password of the user")
     @RequireAuth
     @Route(method = HTTPMethod.PUT)
     public static User putHandler(RequestData requestData) throws Exception {
