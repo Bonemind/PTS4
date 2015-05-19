@@ -1,0 +1,5 @@
+When running: You can use "grunt serve" to start an http server
+If the tool complaints about dependencies, "npm install", then "bower install"
+To create the js/controllers.js file, run "grunt concat" to merge all files in js/controllers/ into controllers.js
+If you are working on the code, there is a "grunt watch" task that will rerun "grunt concat" every time a change in the js files is detected.
+When running "grunt watch", there is also a livereload server available
