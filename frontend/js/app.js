@@ -55,13 +55,13 @@ PTSApp.config(["RestangularProvider", function(RestangularProvider) {
 PTSApp.config(["$routeProvider",
 	function($routeProvider) {
 		$routeProvider.when("/login", {
-			templateUrl: "templates/login.html",
-			controller: "loginController"
+			templateUrl: "templates/Login.html",
+			controller: "LoginController"
 		}).when("/", {
-			templateUrl: "templates/index.html",
-			controller: "indexContoller"
+			templateUrl: "templates/Index.html",
+			controller: "IndexContoller"
 		}).when("/register", {
-			templateUrl: "templates/register.html",
+			templateUrl: "templates/Register.html",
 			controller: "RegistrationController"
 		}).when("/teams", {
 			templateUrl: "templates/TeamList.html",
@@ -259,3 +259,7 @@ function dateAdd(date, interval, units) {
   }
   return ret;
 }
+
+
+//Controllers module
+var PTSAppControllers = angular.module("PTSAppControllers", []);
