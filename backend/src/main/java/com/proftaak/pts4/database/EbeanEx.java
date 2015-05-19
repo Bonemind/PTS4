@@ -4,6 +4,8 @@ import com.avaje.ebean.Ebean;
 import com.avaje.ebean.Query;
 import com.proftaak.pts4.rest.HTTPException;
 
+import java.util.Set;
+
 /**
  * Created by Michon on 31-3-2015.
  */
@@ -50,6 +52,15 @@ public class EbeanEx {
         } catch (NullPointerException e) {
         }
         return obj;
+    }
+
+    /**
+     * Find all objects of a class
+     * <p>
+     * Will always return a set. If no object was found, an empty set is returned
+     */
+    public static <T> Set<T> findAll(Class<T> cls){
+        return Ebean.find(cls).findSet();
     }
 
     /**

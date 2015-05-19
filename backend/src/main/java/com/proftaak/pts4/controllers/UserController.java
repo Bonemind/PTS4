@@ -2,6 +2,9 @@ package com.proftaak.pts4.controllers;
 
 import com.avaje.ebean.Ebean;
 import com.proftaak.pts4.database.EbeanEx;
+import com.proftaak.pts4.database.tables.Project;
+import com.proftaak.pts4.database.tables.Story;
+import com.proftaak.pts4.database.tables.Team;
 import com.proftaak.pts4.database.tables.User;
 import com.proftaak.pts4.rest.HTTPException;
 import com.proftaak.pts4.rest.HTTPMethod;
@@ -13,14 +16,36 @@ import com.proftaak.pts4.rest.annotations.Route;
 import org.glassfish.grizzly.http.util.HttpStatus;
 
 import javax.persistence.PersistenceException;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.TreeSet;
 
 /**
  * @author Michon
  */
 @Controller
 public class UserController {
+
     /**
-     * PUT /user/1
+     * GET /user
+     * Returns a sorted list of usernames instead of users
+     */
+    @RequireAuth
+    @Route(method = HTTPMethod.GET)
+    public static Collection<String> getAllHandler(RequestData requestData) throws Exception {
+        Collection<String> usernames = new TreeSet<>();
+
+        // Get the username of every user
+        for(User user : EbeanEx.findAll(User.class)){
+            usernames.add(user.getName());
+        }
+
+        return usernames;
+    }
+
+    /**
+     * GET /user/1
      */
     @RequireAuth
     @Route(method = HTTPMethod.GET_ONE)
@@ -40,18 +65,19 @@ public class UserController {
     /**
      * POST /user
      */
-    //@RequireFields(fields = {"email", "password"})
+    //@RequireFields(fields = {"email", "name", "password"})
     @Route(method = HTTPMethod.POST)
     public static User postHandler(RequestData requestData) throws Exception {
         // Create the new user
         User user = new User(
             requestData.getPayload().get("email").toString(),
+            requestData.getPayload().get("name").toString(),
             requestData.getPayload().get("password").toString()
         );
         try {
             Ebean.save(user);
         } catch (PersistenceException e) {
-            throw new HTTPException("That email address is already in use", HttpStatus.CONFLICT_409);
+            throw new HTTPException("That email address or name is already in use", HttpStatus.CONFLICT_409);
         }
 
         // Return the created user
