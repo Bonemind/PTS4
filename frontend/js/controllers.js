@@ -1,341 +1,3 @@
-var PTSAppControllers = angular.module("PTSAppControllers", []);
-
-PTSAppControllers.controller("loginController", ["$rootScope", "$scope", "$http", "messageCenterService", "$location",
-		function($rootScope, $scope, $http, messageCenterService, $location) {
-			$scope.login = function(user) {
-				if (user == undefined || user.email == "" || user.password == "") {
-					messageCenterService.add("warning", "Fill in all fields", {timeout: 8000});
-					return;
-				} 
-				$http.post("http://localhost:8182/auth/login", {"email": user.email, "password": user.password}).
-					success(function(data, status, headers, config) {
-						messageCenterService.add("success", "Logged in", {timeout: 8000, status: messageCenterService.status.next});
-						$rootScope.token = data.token;
-						$rootScope.user = data.user;
-						$location.path("/");
-					}).
-					error(function(data, status, headers, config) {
-						if (status >= 500 && status < 600) {
-							messageCenterService.add("danger", "The server seems to be having trouble, please try again later", {timeout: 8000});
-						} else if (status == 401) {
-							messageCenterService.add("danger", "Invalid username or password", {timeout: 8000});
-						} else {
-							messageCenterService.add("danger", "Something went wrong, try again later", {timeout: 8000});
-						}
-						console.log(status);
-					});
-			};
-	}
-]);
-
-PTSAppControllers.controller("RegistrationController", ["$scope", "Restangular", "messageCenterService", "$location", 
-		function($scope, Restangular, messageCenterService, $location) {
-			$scope.user = {"email": "", "password": "", "passwordconfirm": ""};
-
-			$scope.register = function(user) {
-				if (user.email.trim() == "" || user.password == "") {
-					messageCenterService.add("danger", "Email or password cannot be empty", { timeout: 8000 });
-					return;
-				}
-				if (user.password != user.passwordconfirm) {
-					messageCenterService.add("danger", "Passwords don't match", { timeout: 8000 });
-					return;
-				}
-				model = Restangular.restangularizeElement(null, {email: user.email, password: user.password }, "user");
-				model.save().then(function() {
-					messageCenterService.add("success", "Your account has been created, feel free to login", { timeout: 8000, status: messageCenterService.status.next});
-					$location.path("/login");
-				}, function(error) {
-					if (error.status == 409) {
-						messageCenterService.add("danger", "Email already in use", { timeout: 8000 });
-					}
-				});
-			}
-		}
-	]);
-
-PTSAppControllers.controller("indexContoller", ["$rootScope", "$scope", 
-		function($rootScope, $scope) {
-			$scope.isLoggedIn = function() {
-				return $rootScope.token !== undefined;
-			}
-}]);
-
-PTSAppControllers.controller("TeamListController", ["$scope", "Restangular", "ModalService",
-		function($scope, Restangular, ModalService) {
-			$scope.update = function() {
-				teamList = Restangular.all("team").getList()
-				.then(function(teams) {
-					$scope.teams = teams;
-				});
-			}
-			$scope.showModal = function(model) {
-				if (model === undefined) {
-					model = Restangular.restangularizeElement(null, {name: "" }, "team");
-				} else {
-					model = Restangular.copy(model);
-				}
-				ModalService.showModal({
-					templateUrl: "templates/TeamModal.html",
-					controller: "CRUDController",
-					inputs: {
-						model: model,
-						meta: {
-						}
-					}
-
-				}).then(function(modal) {
-					modal.element.modal();
-					modal.close.then(function(result) {
-						$scope.update();
-					});
-				});
-			}
-			$scope.update();
-		}
-	]);
-
-//CRUD controller
-PTSAppControllers.controller("CRUDController", ["$scope", "Restangular", "messageCenterService", "close", "model", "meta",
-	function($scope, Restangular, messageCenterService, close, model, meta) {
-		$scope.model = model;
-		$scope.meta = meta;
-		$scope.close = function(result) {
-			close(result, 100);
-		}
-		$scope.save = function(result) {
-			console.log(result);
-			result.save().then(function() {
-				messageCenterService.add("success", "Changes saved", {timeout: 7000});
-			}, function() {
-				messageCenterService.add("danger", "Something went wrong, please try again", {timeout: 7000});
-			});
-			close(result, 100);
-		}
-
-		$scope.remove = function(result) {
-			result.remove().then(function() {
-				messageCenterService.add("success", "Changes saved", {timeout: 7000});
-			}, function() {
-				messageCenterService.add("danger", "Something went wrong, please try again", {timeout: 7000});
-			});
-			close(result, 100);
-		}
-
-	}
-]);
-
-
-PTSAppControllers.controller("UserStoryListController", ["$rootScope", "$scope", "Restangular", "ModalService",
-		function($rootScope, $scope, Restangular, ModalService) {
-			$scope.update = function() {
-				Restangular.all("story").getList()
-				.then(function(stories) {
-					$scope.stories = stories;
-					console.log(stories);
-				});
-			}
-
-			$scope.showModal = function(model) {
-				if (model === undefined) {
-					model = Restangular.restangularizeElement(null, {name: "", description: "", status: "DEFINED" }, "story");
-				} else {
-					model = Restangular.copy(model);
-				}
-				
-				var copiedStatus = cleanupStatusList($rootScope.user, $rootScope.StatusList);
-				ModalService.showModal({
-					templateUrl: "templates/userStoryModal.html",
-					controller: "CRUDController",
-					inputs: {
-						model: model,
-						meta: {
-							StatusList: copiedStatus
-						}
-					}
-
-				}).then(function(modal) {
-					modal.element.modal();
-					modal.close.then(function(result) {
-						$scope.update();
-					});
-				});
-			}
-			$scope.update();
-		}]);
-
-
-PTSAppControllers.controller("TaskListController", ["$rootScope", "$scope", "Restangular", "ModalService", "$routeParams",
-		function($rootScope, $scope, Restangular, ModalService, $routeParams) {
-			$scope.update = function() {
-				Restangular.one("story", $routeParams.id).get().then(function (story) {
-					$scope.story = story
-					$scope.story.getList("task")
-					.then(function(tasks) {
-						$scope.tasks = tasks;
-					});
-					$scope.story.getList("test")
-						.then(function(tests) {
-							$scope.tests = tests;
-						});
-					Restangular.one("project", $scope.story.project).get()
-						.then(function(project) {
-							$scope.project = project;
-						});
-				});
-			}
-
-			$scope.showTaskModal = function(model) {
-				if (model === undefined) {
-					model = Restangular.restangularizeElement(null, {name: "", description: "", status: "DEFINED", story: $scope.story.id }, "task");
-				} else {
-					model = Restangular.copy(model);
-					model.parentResource = null;
-				}
-				var copiedStatus = angular.copy($rootScope.StatusList);
-				copiedStatus = _.filter(copiedStatus, function(status) {
-					return status.status !== "ACCEPTED";
-				});
-				ModalService.showModal({
-					templateUrl: "templates/TaskModal.html",
-					controller: "CRUDController",
-					inputs: {
-						model: model,
-						meta: {
-							StatusList: copiedStatus
-						}
-					}
-
-				}).then(function(modal) {
-					modal.element.modal();
-					modal.close.then(function(result) {
-						$scope.update();
-					});
-				});
-			}
-
-			$scope.showTestModal = function(model) {
-				if (model === undefined) {
-					model = Restangular.restangularizeElement(null, {name: "", description: "", accepted: false, story: $scope.story.id }, "test");
-				} else {
-					model = Restangular.copy(model);
-					model.parentResource = null;
-				}
-				ModalService.showModal({
-					templateUrl: "templates/TestModal.html",
-					controller: "CRUDController",
-					inputs: {
-						model: model,
-						meta: {
-							project: $scope.project
-						}
-					}
-
-				}).then(function(modal) {
-					modal.element.modal();
-					modal.close.then(function(result) {
-						$scope.update();
-					});
-				});
-			}
-			$scope.update();
-		}]);
-
-PTSAppControllers.controller("LoginMenuController", ["$rootScope", "$scope",
-		function($rootScope, $scope) {
-			$scope.loggedIn = false;
-			$rootScope.$watch("user", function(newval, oldval) {
-				$scope.loggedIn = newval !== undefined;
-			});
-			$scope.logout = function() {
-				$rootScope.user = undefined;
-				$rootScope.token = undefined;
-			}
-		}]);
-
-PTSAppControllers.controller("ProjectListController", ["$rootScope", "$scope", "Restangular", "ModalService", "$routeParams",
-		function($rootScope, $scope, Restangular, ModalService, $routeParams) {
-			$scope.update = function() {
-				Restangular.one("team", $routeParams.id).get().then(function (team) {
-					$scope.team = team
-					$scope.team.getList("project")
-					.then(function(projects) {
-						$scope.projects = projects;
-					});
-				});
-			}
-
-			$scope.showModal = function(model) {
-				if (model === undefined) {
-					model = Restangular.restangularizeElement(null, {name: "", description: "", team: $scope.team.id}, "project");
-				} else {
-					model = Restangular.copy(model);
-					model.team = $scope.team.id;
-					model.parentResource = null;
-					model.productOwner = model.productOwner.email;
-				}
-				ModalService.showModal({
-					templateUrl: "templates/ProjectModal.html",
-					controller: "CRUDController",
-					inputs: {
-						model: model,
-						meta: {
-						}
-					}
-
-				}).then(function(modal) {
-					modal.element.modal();
-					modal.close.then(function(result) {
-						$scope.update();
-					});
-				});
-			}
-			$scope.update();
-		}]);
-
-
-PTSAppControllers.controller("TeamViewController", ["$rootScope", "$scope", "Restangular", "ModalService", "$routeParams",
-		function($rootScope, $scope, Restangular, ModalService, $routeParams) {
-			$scope.update = function() {
-				Restangular.one("team", $routeParams.id).get().then(function (team) {
-					$scope.team = team;
-					$scope.team.getList("user")
-					.then(function(users) {
-						$scope.users = users;
-					});
-				});
-			}
-
-			$scope.deleteUser = function(user) {
-				user.remove().then(function() {
-					console.log("removed");
-				});
-				$scope.update();
-			}
-
-			$scope.showModal = function(model) {
-				if (model === undefined) {
-					model = Restangular.restangularizeElement($scope.team, {email: ""}, "user");
-				}
-				ModalService.showModal({
-					templateUrl: "templates/UserAddModal.html",
-					controller: "CRUDController",
-					inputs: {
-						model: model,
-						meta: {
-						}
-					}
-
-				}).then(function(modal) {
-					modal.element.modal();
-					modal.close.then(function(result) {
-						$scope.update();
-					});
-				});
-			}
-			$scope.update();
-		}]);
-
 PTSAppControllers.controller("BacklogController", ["$rootScope", "$scope", "Restangular", "ModalService", "$routeParams",
 		function($rootScope, $scope, Restangular, ModalService, $routeParams) {
 			$scope.selectediteration = {"id": undefined, "name": "None"};
@@ -482,7 +144,7 @@ PTSAppControllers.controller("BacklogController", ["$rootScope", "$scope", "Rest
 					
 				}
 				ModalService.showModal({
-					templateUrl: "templates/userStoryModal.html",
+					templateUrl: "templates/UserStoryModal.html",
 					controller: "CRUDController",
 					inputs: {
 						model: model,
@@ -504,6 +166,44 @@ PTSAppControllers.controller("BacklogController", ["$rootScope", "$scope", "Rest
 			}
 			$scope.update();
 		}]);
+
+
+//CRUD controller
+PTSAppControllers.controller("CRUDController", ["$scope", "Restangular", "messageCenterService", "close", "model", "meta",
+	function($scope, Restangular, messageCenterService, close, model, meta) {
+		$scope.model = model;
+		$scope.meta = meta;
+		$scope.close = function(result) {
+			close(result, 100);
+		}
+		$scope.save = function(result) {
+			console.log(result);
+			result.save().then(function() {
+				messageCenterService.add("success", "Changes saved", {timeout: 7000});
+			}, function() {
+				messageCenterService.add("danger", "Something went wrong, please try again", {timeout: 7000});
+			});
+			close(result, 100);
+		}
+
+		$scope.remove = function(result) {
+			result.remove().then(function() {
+				messageCenterService.add("success", "Changes saved", {timeout: 7000});
+			}, function() {
+				messageCenterService.add("danger", "Something went wrong, please try again", {timeout: 7000});
+			});
+			close(result, 100);
+		}
+
+	}
+]);
+
+PTSAppControllers.controller("IndexContoller", ["$rootScope", "$scope", 
+		function($rootScope, $scope) {
+			$scope.isLoggedIn = function() {
+				return $rootScope.token !== undefined;
+			}
+}]);
 
 PTSAppControllers.controller("IterationListController", ["$rootScope", "$scope", "Restangular", "ModalService", "$routeParams",
 		function($rootScope, $scope, Restangular, ModalService, $routeParams) {
@@ -547,3 +247,305 @@ PTSAppControllers.controller("IterationListController", ["$rootScope", "$scope",
 			$scope.update();
 		}]);
 
+
+PTSAppControllers.controller("LoginController", ["$rootScope", "$scope", "$http", "messageCenterService", "$location",
+		function($rootScope, $scope, $http, messageCenterService, $location) {
+			$scope.login = function(user) {
+				if (user == undefined || user.email == "" || user.password == "") {
+					messageCenterService.add("warning", "Fill in all fields", {timeout: 8000});
+					return;
+				} 
+				$http.post("http://localhost:8182/auth/login", {"email": user.email, "password": user.password}).
+					success(function(data, status, headers, config) {
+						messageCenterService.add("success", "Logged in", {timeout: 8000, status: messageCenterService.status.next});
+						$rootScope.token = data.token;
+						$rootScope.user = data.user;
+						$location.path("/");
+					}).
+					error(function(data, status, headers, config) {
+						if (status >= 500 && status < 600) {
+							messageCenterService.add("danger", "The server seems to be having trouble, please try again later", {timeout: 8000});
+						} else if (status == 401) {
+							messageCenterService.add("danger", "Invalid username or password", {timeout: 8000});
+						} else {
+							messageCenterService.add("danger", "Something went wrong, try again later", {timeout: 8000});
+						}
+						console.log(status);
+					});
+			};
+	}
+]);
+
+
+PTSAppControllers.controller("LoginMenuController", ["$rootScope", "$scope",
+		function($rootScope, $scope) {
+			$scope.loggedIn = false;
+			$rootScope.$watch("user", function(newval, oldval) {
+				$scope.loggedIn = newval !== undefined;
+			});
+			$scope.logout = function() {
+				$rootScope.user = undefined;
+				$rootScope.token = undefined;
+			}
+		}]);
+
+PTSAppControllers.controller("ProjectListController", ["$rootScope", "$scope", "Restangular", "ModalService", "$routeParams",
+		function($rootScope, $scope, Restangular, ModalService, $routeParams) {
+			$scope.update = function() {
+				Restangular.one("team", $routeParams.id).get().then(function (team) {
+					$scope.team = team
+					$scope.team.getList("project")
+					.then(function(projects) {
+						$scope.projects = projects;
+					});
+				});
+			}
+
+			$scope.showModal = function(model) {
+				if (model === undefined) {
+					model = Restangular.restangularizeElement(null, {name: "", description: "", team: $scope.team.id}, "project");
+				} else {
+					model = Restangular.copy(model);
+					model.team = $scope.team.id;
+					model.parentResource = null;
+					model.productOwner = model.productOwner.email;
+				}
+				ModalService.showModal({
+					templateUrl: "templates/ProjectModal.html",
+					controller: "CRUDController",
+					inputs: {
+						model: model,
+						meta: {
+						}
+					}
+
+				}).then(function(modal) {
+					modal.element.modal();
+					modal.close.then(function(result) {
+						$scope.update();
+					});
+				});
+			}
+			$scope.update();
+		}]);
+
+
+
+PTSAppControllers.controller("RegistrationController", ["$scope", "Restangular", "messageCenterService", "$location", 
+		function($scope, Restangular, messageCenterService, $location) {
+			$scope.user = {"email": "", "password": "", "passwordconfirm": ""};
+
+			$scope.register = function(user) {
+				if (user.email.trim() == "" || user.password == "") {
+					messageCenterService.add("danger", "Email or password cannot be empty", { timeout: 8000 });
+					return;
+				}
+				if (user.password != user.passwordconfirm) {
+					messageCenterService.add("danger", "Passwords don't match", { timeout: 8000 });
+					return;
+				}
+				model = Restangular.restangularizeElement(null, {email: user.email, password: user.password }, "user");
+				model.save().then(function() {
+					messageCenterService.add("success", "Your account has been created, feel free to login", { timeout: 8000, status: messageCenterService.status.next});
+					$location.path("/login");
+				}, function(error) {
+					if (error.status == 409) {
+						messageCenterService.add("danger", "Email already in use", { timeout: 8000 });
+					}
+				});
+			}
+		}
+	]);
+
+
+PTSAppControllers.controller("TaskListController", ["$rootScope", "$scope", "Restangular", "ModalService", "$routeParams",
+		function($rootScope, $scope, Restangular, ModalService, $routeParams) {
+			$scope.update = function() {
+				Restangular.one("story", $routeParams.id).get().then(function (story) {
+					$scope.story = story
+					$scope.story.getList("task")
+					.then(function(tasks) {
+						$scope.tasks = tasks;
+					});
+					$scope.story.getList("test")
+						.then(function(tests) {
+							$scope.tests = tests;
+						});
+					Restangular.one("project", $scope.story.project).get()
+						.then(function(project) {
+							$scope.project = project;
+						});
+				});
+			}
+
+			$scope.showTaskModal = function(model) {
+				if (model === undefined) {
+					model = Restangular.restangularizeElement(null, {name: "", description: "", status: "DEFINED", story: $scope.story.id }, "task");
+				} else {
+					model = Restangular.copy(model);
+					model.parentResource = null;
+				}
+				var copiedStatus = angular.copy($rootScope.StatusList);
+				copiedStatus = _.filter(copiedStatus, function(status) {
+					return status.status !== "ACCEPTED";
+				});
+				ModalService.showModal({
+					templateUrl: "templates/TaskModal.html",
+					controller: "CRUDController",
+					inputs: {
+						model: model,
+						meta: {
+							StatusList: copiedStatus
+						}
+					}
+
+				}).then(function(modal) {
+					modal.element.modal();
+					modal.close.then(function(result) {
+						$scope.update();
+					});
+				});
+			}
+
+			$scope.showTestModal = function(model) {
+				if (model === undefined) {
+					model = Restangular.restangularizeElement(null, {name: "", description: "", accepted: false, story: $scope.story.id }, "test");
+				} else {
+					model = Restangular.copy(model);
+					model.parentResource = null;
+				}
+				ModalService.showModal({
+					templateUrl: "templates/TestModal.html",
+					controller: "CRUDController",
+					inputs: {
+						model: model,
+						meta: {
+							project: $scope.project
+						}
+					}
+
+				}).then(function(modal) {
+					modal.element.modal();
+					modal.close.then(function(result) {
+						$scope.update();
+					});
+				});
+			}
+			$scope.update();
+		}]);
+
+
+PTSAppControllers.controller("TeamListController", ["$scope", "Restangular", "ModalService",
+		function($scope, Restangular, ModalService) {
+			$scope.update = function() {
+				teamList = Restangular.all("team").getList()
+				.then(function(teams) {
+					$scope.teams = teams;
+				});
+			}
+			$scope.showModal = function(model) {
+				if (model === undefined) {
+					model = Restangular.restangularizeElement(null, {name: "" }, "team");
+				} else {
+					model = Restangular.copy(model);
+				}
+				ModalService.showModal({
+					templateUrl: "templates/TeamModal.html",
+					controller: "CRUDController",
+					inputs: {
+						model: model,
+						meta: {
+						}
+					}
+
+				}).then(function(modal) {
+					modal.element.modal();
+					modal.close.then(function(result) {
+						$scope.update();
+					});
+				});
+			}
+			$scope.update();
+		}
+	]);
+
+PTSAppControllers.controller("TeamViewController", ["$rootScope", "$scope", "Restangular", "ModalService", "$routeParams",
+		function($rootScope, $scope, Restangular, ModalService, $routeParams) {
+			$scope.update = function() {
+				Restangular.one("team", $routeParams.id).get().then(function (team) {
+					$scope.team = team;
+					$scope.team.getList("user")
+					.then(function(users) {
+						$scope.users = users;
+					});
+				});
+			}
+
+			$scope.deleteUser = function(user) {
+				user.remove().then(function() {
+					console.log("removed");
+				});
+				$scope.update();
+			}
+
+			$scope.showModal = function(model) {
+				if (model === undefined) {
+					model = Restangular.restangularizeElement($scope.team, {email: ""}, "user");
+				}
+				ModalService.showModal({
+					templateUrl: "templates/UserAddModal.html",
+					controller: "CRUDController",
+					inputs: {
+						model: model,
+						meta: {
+						}
+					}
+
+				}).then(function(modal) {
+					modal.element.modal();
+					modal.close.then(function(result) {
+						$scope.update();
+					});
+				});
+			}
+			$scope.update();
+		}]);
+
+
+PTSAppControllers.controller("UserStoryListController", ["$rootScope", "$scope", "Restangular", "ModalService",
+		function($rootScope, $scope, Restangular, ModalService) {
+			$scope.update = function() {
+				Restangular.all("story").getList()
+				.then(function(stories) {
+					$scope.stories = stories;
+					console.log(stories);
+				});
+			}
+
+			$scope.showModal = function(model) {
+				if (model === undefined) {
+					model = Restangular.restangularizeElement(null, {name: "", description: "", status: "DEFINED" }, "story");
+				} else {
+					model = Restangular.copy(model);
+				}
+				
+				var copiedStatus = cleanupStatusList($rootScope.user, $rootScope.StatusList);
+				ModalService.showModal({
+					templateUrl: "templates/UserStoryModal.html",
+					controller: "CRUDController",
+					inputs: {
+						model: model,
+						meta: {
+							StatusList: copiedStatus
+						}
+					}
+
+				}).then(function(modal) {
+					modal.element.modal();
+					modal.close.then(function(result) {
+						$scope.update();
+					});
+				});
+			}
+			$scope.update();
+		}]);

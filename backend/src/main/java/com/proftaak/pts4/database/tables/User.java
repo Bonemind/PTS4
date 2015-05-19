@@ -16,6 +16,7 @@ import java.util.List;
 public class User implements DatabaseModel {
     public static final String FIELD_ID = "id";
     public static final String FIELD_EMAIL = "email";
+    public static final String FIELD_NAME = "name";
     public static final String FIELD_PASSWORD = "password";
     public static final String TABLE_JOIN_TEAM = Team.TABLE_JOIN_USER;
 
@@ -31,6 +32,12 @@ public class User implements DatabaseModel {
      */
     @Column(name = FIELD_EMAIL, nullable = false, unique = true)
     private String email;
+
+    /**
+     * The name of this user
+     */
+    @Column(name = FIELD_NAME, nullable = false, unique = true)
+    private String name;
 
     /**
      * The password of this user
@@ -78,7 +85,8 @@ public class User implements DatabaseModel {
     /**
      * Create a new user
      */
-    public User(String email, String password) {
+    public User(String email, String name, String password) {
+        this.setName(name);
         this.setEmail(email);
         this.setPassword(password);
     }
@@ -98,6 +106,14 @@ public class User implements DatabaseModel {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getName() {
+        return this.name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     /**

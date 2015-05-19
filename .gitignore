@@ -154,3 +154,8 @@ node_modules/
 
 user.properties
 *.sql
+
+###
+# Frontend
+###
+frontend/js/controllers.js

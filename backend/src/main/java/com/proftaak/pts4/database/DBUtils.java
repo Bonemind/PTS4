@@ -59,11 +59,11 @@ public class DBUtils {
      * @throws java.sql.SQLException
      */
     public static void createTestData() throws FileNotFoundException {
-        User u1 = new User("test", "test");
+        User u1 = new User("test", "Test Person", "test");
         Ebean.save(u1);
-        User u2 = new User("dev", "dev");
+        User u2 = new User("dev", "Developer name", "dev");
         Ebean.save(u2);
-        User u3 = new User("po", "po");
+        User u3 = new User("po", "Our Product owner", "po");
         Ebean.save(u3);
 
         Token tk1 = new Token(u1, "test");
