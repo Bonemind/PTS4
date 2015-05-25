@@ -179,5 +179,7 @@ public class TaskController {
 
         // Save the task
         Ebean.save(task);
+
+        return task;
     }
 }
