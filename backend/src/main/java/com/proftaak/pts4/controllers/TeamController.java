@@ -81,6 +81,7 @@ public class TeamController {
      * POST /team
      */
     @Field(name = "name", required = true, description = "The name of the new team")
+    @Field(name = "kanbanRules", description = "The kanban rules for the new team", type = KanbanRules.class)
     @RequireAuth
     @Route(method = HTTPMethod.POST)
     public static Team postHandler(RequestData requestData) throws Exception {
@@ -89,6 +90,7 @@ public class TeamController {
             requestData.getPayload().getString("name"),
             requestData.getUser()
         );
+        team.setKanbanRules(requestData.getPayload().getEmbeddable(KanbanRules.class, "kanbanRules"));
         Ebean.save(team);
 
         // Return the created team
@@ -109,6 +111,9 @@ public class TeamController {
         Payload payload = requestData.getPayload();
         if (payload.containsKey("name")) {
             team.setName(payload.getString("name"));
+        }
+        if (payload.containsKey("kanbanRules")) {
+            team.setKanbanRules(payload.getEmbeddable(KanbanRules.class, "kanbanRules"));
         }
 
         // Save the changes

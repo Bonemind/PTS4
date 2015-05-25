@@ -1,6 +1,7 @@
 package com.proftaak.pts4.swagger;
 
 import com.proftaak.pts4.database.DatabaseModel;
+import com.proftaak.pts4.database.tables.KanbanRules;
 import com.proftaak.pts4.json.JSONSerializerFactory;
 import com.proftaak.pts4.rest.Router;
 import com.proftaak.pts4.rest.annotations.Field;
@@ -50,6 +51,7 @@ public class BuildSwaggerDoclet extends Doclet {
         put(LocalDate.class, new ImmutablePair<>("string", "date"));
         put(LocalDateTime.class, new ImmutablePair<>("string", "date-time"));
         put(Date.class, new ImmutablePair<>("string", "date-time"));
+        put(KanbanRules.class, new ImmutablePair<>("temp", "filler"));
     }};
 
     /**

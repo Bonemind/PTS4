@@ -18,7 +18,6 @@ public class Team implements DatabaseModel<Integer> {
     public static final String FIELD_ID = "id";
     public static final String FIELD_NAME = "name";
     public static final String FIELD_SCRUM_MASTER = "scrum_master";
-    public static final String FIELD_USERS = "users";
     public static final String TABLE_JOIN_USER = "teamusers";
 
     /**
@@ -41,6 +40,12 @@ public class Team implements DatabaseModel<Integer> {
     @ManyToOne(optional = false)
     @JoinColumn(name = FIELD_SCRUM_MASTER)
     private User scrumMaster;
+
+    /**
+     * The Kanban rules for this team
+     */
+    @Embedded
+    private KanbanRules kanbanRules;
 
     /**
      * The users of this team
@@ -100,6 +105,14 @@ public class Team implements DatabaseModel<Integer> {
 
     public void setScrumMaster(User scrumMaster) {
         this.scrumMaster = scrumMaster;
+    }
+
+    public KanbanRules getKanbanRules() {
+        return this.kanbanRules;
+    }
+
+    public void setKanbanRules(KanbanRules kanbanRules) {
+        this.kanbanRules = kanbanRules;
     }
 
     public List<User> getUsers() {
