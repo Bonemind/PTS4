@@ -12,9 +12,14 @@ PTSAppControllers.controller("TeamListController", ["$scope", "Restangular", "Mo
 				} else {
 					model = Restangular.copy(model);
 				}
+
+				if (model.kanbanRules) {
+				    model.enableKanban = true;
+				}
+
 				ModalService.showModal({
 					templateUrl: "templates/TeamModal.html",
-					controller: "CRUDController",
+					controller: "TeamCRUDController",
 					inputs: {
 						model: model,
 						meta: {

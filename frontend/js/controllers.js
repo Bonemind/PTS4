@@ -185,19 +185,21 @@ PTSAppControllers.controller("CRUDController", ["$scope", "Restangular", "messag
 			console.log(result);
 			result.save().then(function() {
 				messageCenterService.add("success", "Changes saved", {timeout: 7000});
+				close(result, 100);
 			}, function() {
 				messageCenterService.add("danger", "Something went wrong, please try again", {timeout: 7000});
+				close(result, 100);
 			});
-			close(result, 100);
 		}
 
 		$scope.remove = function(result) {
 			result.remove().then(function() {
 				messageCenterService.add("success", "Changes saved", {timeout: 7000});
+				close(result, 100);
 			}, function() {
 				messageCenterService.add("danger", "Something went wrong, please try again", {timeout: 7000});
+				close(result, 100);
 			});
-			close(result, 100);
 		}
 
 	}
@@ -305,13 +307,12 @@ PTSAppControllers.controller("LoginMenuController", ["$rootScope", "$scope", "Re
 				$scope.loggedIn = newval !== undefined;
 			});
 			$scope.logout = function() {
-			 	Restangular.all("auth").all("logout").post({})
- 					.then(function() {
-					     $rootScope.user = undefined;
-					     $rootScope.token = undefined;
-					     localStorage.removeItem("token");
-					     localStorage.removeItem("user");
-					});
+			 	Restangular.all("auth").all("logout").post({});
+				$rootScope.user = undefined;
+				$rootScope.token = undefined;
+				localStorage.removeItem("token");
+				localStorage.removeItem("user");
+
 			}
 		}]);
 
@@ -485,6 +486,41 @@ PTSAppControllers.controller("TaskListController", ["$rootScope", "$scope", "Res
 		}]);
 
 
+//CRUD controller
+PTSAppControllers.controller("TeamCRUDController", ["$scope", "Restangular", "messageCenterService", "close", "model", "meta",
+	function($scope, Restangular, messageCenterService, close, model, meta) {
+		$scope.model = model;
+		$scope.meta = meta;
+		$scope.close = function(result) {
+			close(result, 100);
+		}
+		$scope.save = function(result) {
+		    	if (!result.enableKanban) {
+			    result.kanbanRules = null;
+			}
+			delete result.enableKanban;
+			result.save().then(function() {
+				messageCenterService.add("success", "Changes saved", {timeout: 7000});
+			    close(result, 100);
+			}, function() {
+				messageCenterService.add("danger", "Something went wrong, please try again", {timeout: 7000});
+			    close(result, 100);
+			});
+		}
+
+		$scope.remove = function(result) {
+			result.remove().then(function() {
+				messageCenterService.add("success", "Changes saved", {timeout: 7000});
+				close(result, 100);
+			}, function() {
+				messageCenterService.add("danger", "Something went wrong, please try again", {timeout: 7000});
+				close(result, 100);
+			});
+		}
+
+	}
+]);
+
 PTSAppControllers.controller("TeamListController", ["$scope", "Restangular", "ModalService",
 		function($scope, Restangular, ModalService) {
 			$scope.update = function() {
@@ -499,9 +535,14 @@ PTSAppControllers.controller("TeamListController", ["$scope", "Restangular", "Mo
 				} else {
 					model = Restangular.copy(model);
 				}
+
+				if (model.kanbanRules) {
+				    model.enableKanban = true;
+				}
+
 				ModalService.showModal({
 					templateUrl: "templates/TeamModal.html",
-					controller: "CRUDController",
+					controller: "TeamCRUDController",
 					inputs: {
 						model: model,
 						meta: {
@@ -546,7 +587,6 @@ PTSAppControllers.controller("TeamViewController", ["$rootScope", "$scope", "Res
 				if (model === undefined) {
 					model = Restangular.restangularizeElement($scope.team, {name: ""}, "user");
 				}
-
 				ModalService.showModal({
 					templateUrl: "templates/UserAddModal.html",
 					controller: "CRUDController",

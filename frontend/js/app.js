@@ -148,6 +148,8 @@ PTSApp.factory("authInterceptor", ["$rootScope", "$q", "$location", "messageCent
 						messageCenterService.add("danger", "Please login first", {timeout: 7000, status: messageCenterService.status.next});
 					}
 					$location.path("/login");
+					localStorage.removeItem("user");
+					localStorage.removeItem("token");
 					return $q.reject(response);
 				}
 				return $q.reject(response);
@@ -197,14 +199,25 @@ angular.module("PTSApp").directive('teamMember', ["$rootScope",
 					teammembers: "=teammembers"
 				},
 				template: "{{ readable }}",
+    				link: function($scope) {
+				    $scope.$watch("userid", function(newVal, oldVal) {
+				    	console.log("aaaa");
+					console.log(newVal);
+					$scope.update(newVal);
+				    });
+				},
 				controller: function($scope, $element, $attrs, $location) {
-					var readable = "None";
-					$scope.teammembers.forEach(function(member) {
-						if (member.id == $scope.userid) {
-							readable = member.email;
+					$scope.readable = "None";
+					$scope.update = function(newId) {
+					    $scope.teammembers.forEach(function(member) {
+					    	console.log(newId);
+						if (member.id == newId) {
+						    $scope.readable = member.email;
 						}
-					});
-					$scope.readable = readable;
+						console.log($scope.readable);
+					    });
+					}
+					$scope.update($scope.userid);
 				}
 			}
 		}]);
