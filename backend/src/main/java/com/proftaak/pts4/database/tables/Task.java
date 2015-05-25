@@ -36,6 +36,7 @@ public class Task implements DatabaseModel<Integer> {
     public static final String FIELD_STATUS = "status";
     public static final String FIELD_ESTIMATE = "estimate";
     public static final String FIELD_TODO = "todo";
+    public static final String FIELD_TIME_SPENT = "time_spent";
     public static final String FIELD_STORY = "story_id";
     public static final String FIELD_OWNER = "owner";
 
@@ -72,10 +73,16 @@ public class Task implements DatabaseModel<Integer> {
     private double estimate = 0;
 
     /**
-     * The remaining time estimate of this task.
+     * The time estimate of this task
      */
     @Column(name = FIELD_TODO, nullable = false)
     private double todo = 0;
+
+    /**
+     * The time spent on this task
+     */
+    @Column(name = FIELD_TIME_SPENT, nullable = false)
+    private double timeSpent = 0;
 
     /**
      * The user story of this task
@@ -148,6 +155,14 @@ public class Task implements DatabaseModel<Integer> {
 
     public void setTodo(double todo) {
         this.todo = todo;
+    }
+
+    public double getTimeSpent() {
+        return this.timeSpent;
+    }
+
+    public void setTimeSpent(double timeSpent) {
+        this.timeSpent = timeSpent;
     }
 
     public Status getStatus() {

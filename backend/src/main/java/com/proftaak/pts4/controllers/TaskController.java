@@ -163,4 +163,21 @@ public class TaskController {
         // Delete the task
         Ebean.delete(task);
     }
+
+    /**
+     * POST /task/1/effort
+     */
+    @Field(name = "effort", required = true, description = "The time spent working on this task", type = Double.class)
+    @RequireAuth(role = ScopeRole.TEAM_MEMBER)
+    @Route(method = HTTPMethod.POST, path = "/task/{id}/effort")
+    public static Task postEffortHandler(RequestData requestData) throws Exception {
+        // Get the task
+        Task task = EbeanEx.require(EbeanEx.find(Task.class, requestData.getParameter("id")));
+
+        // Track the effort
+        task.setTimeSpent(task.getTimeSpent() + requestData.getPayload().getDouble("effort"));
+
+        // Save the task
+        Ebean.save(task);
+    }
 }
