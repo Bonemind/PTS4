@@ -38,15 +38,75 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a class="navbar-brand" href="#/">PTS</a>
+                <a class="navbar-brand" href="#/dashboard">PTS</a>
             </div>
             <!-- Collect the nav links, forms, and other content for toggling -->
-            <div class="collapse navbar-collapse" id="navbar">
-                <ul class="nav navbar-nav">
-                    <li>
-                        <a href="#/teams">Teams</a>
-                    </li>
-                </ul>
+            <div class="collapse navbar-collapse" id="navbar" ng-controller="MainNavController">
+		<ul ng-show="$root.user" class="nav navbar-nav">
+		    <!-- Team select -->
+		    <li class="dropdown">
+			<a class="dropdown toggle" data-toggle="dropdown" role="button" aria-expanded="false">{{ currentTeam.name || "Team" }} <span class="caret"></span></a>
+			<ul class="dropdown-menu" role="menu">
+				<li ng-repeat="team in teams">
+					<a ng-click="teamSelect(team)">{{ team.name }}</a>
+				</li>
+				<li role="presentation" class="divider" ng-show="teams.length > 0"></li>
+				<li>
+					<a href="#/teams">Manage</a>
+				</li>
+			</ul>
+		    </li>
+		    <li class="dropdown" ng-show="currentTeam">
+			<a class="dropdown toggle" data-toggle="dropdown" role="button" aria-expanded="false">Please select <span class="caret"></span></a>
+			<ul class="dropdown-menu" role="menu">
+				<li>
+					<a href="#/teams/{{ currentTeam.id }}/iterations">Sprints</a>
+				</li>
+				<li>
+					<a href="#/teams/{{ currentTeam.id }}/backlog">Backlog</a>
+				</li>
+				<li>
+					<a href="#/teams/{{ currentTeam.id }}/taskboard">Taskboard</a>
+				</li>
+				<li>
+					<a href="#/teams/{{ currentTeam.id }}/projects">Projects</a>
+				</li>
+				<li>
+					<a href="#/teams/{{ currentTeam.id }}/users">Members</a>
+				</li>
+			</ul>
+		    </li>
+
+
+		    <!-- Project select -->
+		    <li class="dropdown">
+			<a class="dropdown toggle" data-toggle="dropdown" role="button" aria-expanded="false">{{ currentProject.name || "Project" }} <span class="caret"></span></a>
+			<ul class="dropdown-menu" role="menu">
+				<li ng-repeat="project in projects">
+					<a ng-click="projectSelect(project)">{{ project.name }}</a>
+				</li>
+				<li role="presentation" class="divider" ng-show="currentTeam && currentTeam.scrumMaster == $root.user.id"></li>
+				<li ng-show="currentTeam && currentTeam.scrumMaster == $root.user.id">
+					<a href="#/teams/{{ currentTeam.id }}/projects">Manage</a>
+				</li>
+			</ul>
+		    </li>
+		    <li class="dropdown" ng-show="currentProject">
+			<a class="dropdown toggle" data-toggle="dropdown" role="button" aria-expanded="false">Please select <span class="caret"></span></a>
+			<ul class="dropdown-menu" role="menu">
+				<li>
+					<a href="#/teams/{{ currentProject.team }}/backlog/{{ currentProject.id }}">Backlog</a>
+				</li>
+				<li>
+					<a href="#/teams/{{ currentProject.team }}/taskboard/{{ currentProject.id }}">Taskboard</a>
+				</li>
+				<li>
+					<a href="#/teams/{{ currentProject.team }}/users">Members</a>
+				</li>
+			</ul>
+		    </li>
+
+		</ul>
 		<ul class="nav navbar-nav navbar-right" ng-controller="LoginMenuController">
 			<li ng-hide="loggedIn"><a href="#/register">Register</a></li>
 			<li ng-hide="loggedIn"><a href="#/login">Login</a></li>

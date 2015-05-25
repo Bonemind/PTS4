@@ -1,7 +1,7 @@
 PTSAppControllers.controller("BacklogController", ["$rootScope", "$scope", "Restangular", "ModalService", "$routeParams",
 		function($rootScope, $scope, Restangular, ModalService, $routeParams) {
-			$scope.selectediteration = {"id": undefined, "name": "None"};
-			$scope.selectedproject = {"id": undefined, "name": "None"};
+			$scope.selectediteration = {id: undefined, name: "None"};
+			$scope.selectedproject = {id: undefined, name: "None"};
 			$scope.update = function() {
 				Restangular.one("team", $routeParams.id).get().then(function (team) {
 					team.all("iteration").getList()
@@ -24,7 +24,15 @@ PTSAppControllers.controller("BacklogController", ["$rootScope", "$scope", "Rest
 					$scope.team.all("project").getList()
 						.then(function(projects) {
 							$scope.projects = projects;
-							$scope.getStoriesForProjects(projects);
+
+							if ($routeParams.projectId) {
+								$scope.selectedproject = _.find(projects, function(project) {
+									return project.id == $routeParams.projectId;
+								});
+								$scope.getStoriesForProjects([ $scope.selectedproject ]);
+							} else {
+								$scope.getStoriesForProjects(projects);
+							}
 					});
 					
 			}
@@ -33,7 +41,6 @@ PTSAppControllers.controller("BacklogController", ["$rootScope", "$scope", "Rest
 			$scope.series = ["Iteration", "Ideal"];
 			$scope.data = [["1", "2"], ["3", "4"]];
 			$scope.showBurndown = function() {
-				console.log("burndown");
 				if ($scope.selectediteration.id === undefined) {
 					return;
 				}
@@ -115,7 +122,6 @@ PTSAppControllers.controller("BacklogController", ["$rootScope", "$scope", "Rest
 							story.tasks = tasks;
 						});
 				});
-				console.log($scope.stories);
 			}
 
 			$scope.claimTask = function(task) {
@@ -134,7 +140,6 @@ PTSAppControllers.controller("BacklogController", ["$rootScope", "$scope", "Rest
 				
 				var copiedStatus = cleanupStatusList($rootScope.user, $rootScope.StatusList);
 				var parentProject = undefined;
-						console.log(model);
 				if (model.project != undefined) {
 					$scope.projects.forEach(function(project) {
 						if (project.id == model.project) {
@@ -277,7 +282,7 @@ PTSAppControllers.controller("LoginController", ["$rootScope", "$scope", "$http"
 					 	$rootScope.user = data.user;
 					 	localStorage.setItem("token", data.token);
 					 	localStorage.setItem("user", JSON.stringify(data.user));
-					 	$location.path("/");
+					 	$location.path("/dashboard");
 					}, function(err) {
 						var status = err.status;
 						if (status >= 500 && status < 600) {
@@ -309,6 +314,30 @@ PTSAppControllers.controller("LoginMenuController", ["$rootScope", "$scope", "Re
 					});
 			}
 		}]);
+
+PTSAppControllers.controller("MainNavController", ["$rootScope", "$scope", "Restangular", 
+	function($rootScope, $scope, Restangular) {
+	    	$scope.currentTeam = undefined;
+	    	$scope.currentProject = undefined;
+	 	$scope.update = function() {
+			Restangular.all("team").getList()
+ 				.then(function(teams) {
+				 	$scope.teams = teams;
+				});
+			Restangular.all("project").getList()
+    				.then(function(projects) {
+				 	$scope.projects = projects;
+				});
+		}
+		$scope.teamSelect = function(team) {
+		    $scope.currentTeam = team;
+		}
+		$scope.projectSelect = function(project) {
+		    $scope.currentProject = project;
+		}
+		$scope.update();
+	}
+]);
 
 PTSAppControllers.controller("ProjectListController", ["$rootScope", "$scope", "Restangular", "ModalService", "$routeParams",
 		function($rootScope, $scope, Restangular, ModalService, $routeParams) {

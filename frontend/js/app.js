@@ -95,6 +95,9 @@ PTSApp.config(["$routeProvider",
 		}).when("/teams/:id/backlog", {
 		 	templateUrl: "templates/Backlog.html",
 		 	controller: "BacklogController"
+		}).when("/teams/:id/backlog/:projectId", {
+		 	templateUrl: "templates/Backlog.html",
+		 	controller: "BacklogController"
 		}).when("/teams/:id/iterations", {
 		 	templateUrl: "templates/IterationList.html",
 			controller: "IterationListController"
@@ -102,6 +105,9 @@ PTSApp.config(["$routeProvider",
 			templateUrl: "templates/TaskList.html",
 			controller: "TaskListController"
 		}).when("/teams/:id/taskboard", {
+		 	templateUrl: "templates/TaskBoard.html",
+			controller: "BacklogController"
+		}).when("/teams/:id/taskboard/:projectId", {
 		 	templateUrl: "templates/TaskBoard.html",
 			controller: "BacklogController"
 		}).when("/dashboard", {
@@ -215,9 +221,7 @@ angular.module("PTSApp").directive('ptsType', ["$rootScope",
 				},
 				template: "{{ readable }}",
 				controller: function($scope, $element, $attrs, $location) {
-				 	console.log($scope.type);
 					var StoryTypes = $rootScope.StoryTypes;
-				 	console.log(StoryTypes);
 					var readable = "None";
 					StoryTypes.forEach(function(type) {
 						if (type.type == $scope.type) {

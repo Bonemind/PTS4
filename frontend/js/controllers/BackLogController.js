@@ -1,7 +1,7 @@
 PTSAppControllers.controller("BacklogController", ["$rootScope", "$scope", "Restangular", "ModalService", "$routeParams",
 		function($rootScope, $scope, Restangular, ModalService, $routeParams) {
-			$scope.selectediteration = {"id": undefined, "name": "None"};
-			$scope.selectedproject = {"id": undefined, "name": "None"};
+			$scope.selectediteration = {id: undefined, name: "None"};
+			$scope.selectedproject = {id: undefined, name: "None"};
 			$scope.update = function() {
 				Restangular.one("team", $routeParams.id).get().then(function (team) {
 					team.all("iteration").getList()
@@ -24,7 +24,15 @@ PTSAppControllers.controller("BacklogController", ["$rootScope", "$scope", "Rest
 					$scope.team.all("project").getList()
 						.then(function(projects) {
 							$scope.projects = projects;
-							$scope.getStoriesForProjects(projects);
+
+							if ($routeParams.projectId) {
+								$scope.selectedproject = _.find(projects, function(project) {
+									return project.id == $routeParams.projectId;
+								});
+								$scope.getStoriesForProjects([ $scope.selectedproject ]);
+							} else {
+								$scope.getStoriesForProjects(projects);
+							}
 					});
 					
 			}
@@ -33,7 +41,6 @@ PTSAppControllers.controller("BacklogController", ["$rootScope", "$scope", "Rest
 			$scope.series = ["Iteration", "Ideal"];
 			$scope.data = [["1", "2"], ["3", "4"]];
 			$scope.showBurndown = function() {
-				console.log("burndown");
 				if ($scope.selectediteration.id === undefined) {
 					return;
 				}
@@ -115,7 +122,6 @@ PTSAppControllers.controller("BacklogController", ["$rootScope", "$scope", "Rest
 							story.tasks = tasks;
 						});
 				});
-				console.log($scope.stories);
 			}
 
 			$scope.claimTask = function(task) {
@@ -134,7 +140,6 @@ PTSAppControllers.controller("BacklogController", ["$rootScope", "$scope", "Rest
 				
 				var copiedStatus = cleanupStatusList($rootScope.user, $rootScope.StatusList);
 				var parentProject = undefined;
-						console.log(model);
 				if (model.project != undefined) {
 					$scope.projects.forEach(function(project) {
 						if (project.id == model.project) {

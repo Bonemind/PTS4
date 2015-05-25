@@ -11,7 +11,7 @@ PTSAppControllers.controller("LoginController", ["$rootScope", "$scope", "$http"
 					 	$rootScope.user = data.user;
 					 	localStorage.setItem("token", data.token);
 					 	localStorage.setItem("user", JSON.stringify(data.user));
-					 	$location.path("/");
+					 	$location.path("/dashboard");
 					}, function(err) {
 						var status = err.status;
 						if (status >= 500 && status < 600) {
