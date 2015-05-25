@@ -89,7 +89,7 @@ public class DBUtils {
         Story us4 = new Story(p, it, Story.Type.USER_STORY, "Foo Bar", null, Story.Status.DONE, 1, 4);
         Story us5 = new Story(p, it, Story.Type.USER_STORY, "Stuff", null, Story.Status.DONE, 1, 6);
         try {
-            ReflectionUtils.setFieldValue(Story.class, "completedOn", us3, LocalDateTime.now().minusDays(6).minusHours(4));
+            ReflectionUtils.setFieldValue(Story.class, "completedOn", us3, LocalDateTime.now().plusDays(2).minusHours(4));
             ReflectionUtils.setFieldValue(Story.class, "completedOn", us4, LocalDateTime.now().minusDays(4).minusHours(1));
             ReflectionUtils.setFieldValue(Story.class, "iterationSetOn", us4, LocalDateTime.now().minusDays(6).minusHours(4));
             ReflectionUtils.setFieldValue(Story.class, "completedOn", us5, LocalDateTime.now().minusDays(1).minusHours(5));
