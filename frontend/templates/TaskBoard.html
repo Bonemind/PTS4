@@ -62,7 +62,7 @@
 		<p ng-show="team.effortTrackingEnabled">Time spent: {{ task.timeSpent }} </p>
 		<span ng-show="task.owner">
 		    Owner: <team-member userid="task.owner" teammembers="teammembers"></team-member>
-		</span>
+		</span><br />
 		<button ng-click="trackEffort(task)" ng-show="task.owner == $root.user.id && team.effortTrackingEnabled" class="btn btn-primary">Track</button>
 		<button ng-show="task.owner == null" class="btn btn-primary" ng-click="claimTask(task)">Claim</button>
 	    </div>
@@ -79,7 +79,7 @@
 		<p ng-show="team.effortTrackingEnabled">Time spent: {{ task.timeSpent }} </p>
 		<span ng-show="task.owner">
 		    Owner: <team-member userid="task.owner" teammembers="teammembers"></team-member>
-		</span>
+		</span><br />
 		<button ng-click="trackEffort(task)" ng-show="task.owner == $root.user.id && team.effortTrackingEnabled" class="btn btn-primary">Track</button>
 		<button ng-show="task.owner" class="btn btn-primary" ng-click="claimTask(task)">Claim</button>
 	    </div>

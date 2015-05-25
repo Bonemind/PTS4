@@ -8,12 +8,14 @@
 		<thead>
 			<th>Project</th>
 			<th>Description</th>
+			<th>Product Owner</th>
 			<th>Actions</th>
 		</thead>
 		<tbody>
 			<tr ng-repeat="project in projects">
 				<td>{{ project.name }}</td>
 				<td>{{ project.description }}</td>
+				<td><team-member userid="project.productOwner" teammembers="teammembers"></team-member></td>
 				<td>
 					<a class="glyphicon glyphicon-pencil" ng-click="showModal(project)"></a>
 				</td>

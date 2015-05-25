@@ -1,11 +1,20 @@
 PTSAppControllers.controller("ProjectListController", ["$rootScope", "$scope", "Restangular", "ModalService", "$routeParams",
 		function($rootScope, $scope, Restangular, ModalService, $routeParams) {
+		    	$scope.teammembers = [];
 			$scope.update = function() {
 				Restangular.one("team", $routeParams.id).get().then(function (team) {
 					$scope.team = team
 					$scope.team.getList("project")
-					.then(function(projects) {
-						$scope.projects = projects;
+						.then(function(projects) {
+							$scope.projects = projects;
+						});
+					$scope.team.getList("user")
+				    		.then(function(members) {
+				    		    	$scope.teammembers = members;
+						});
+					Restangular.all("user").getList()
+					.then(function(users) {
+						$scope.allUsers = users;
 					});
 				});
 			}
@@ -25,6 +34,7 @@ PTSAppControllers.controller("ProjectListController", ["$rootScope", "$scope", "
 					inputs: {
 						model: model,
 						meta: {
+						    allUsers: $scope.allUsers
 						}
 					}
 

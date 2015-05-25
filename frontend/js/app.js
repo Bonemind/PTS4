@@ -192,8 +192,8 @@ angular.module("PTSApp").directive('ptsStatus', ["$rootScope",
 			}
 		}]);
 
-angular.module("PTSApp").directive('teamMember', ["$rootScope", 
-		function($rootScope) {
+angular.module("PTSApp").directive('teamMember', ["$rootScope", "Restangular",
+		function($rootScope, Restangular) {
 
 			return  {
 				restrict: 'AEC',
@@ -219,6 +219,13 @@ angular.module("PTSApp").directive('teamMember', ["$rootScope",
 						    $scope.readable = member.name;
 						}
 					    });
+
+					    if ($scope.readable == "None") {
+						Restangular.one("user", newId).get()
+						    .then(function(user) {
+						    	$scope.readable = user.name;
+						    });
+					    }
 					}
 					$scope.update($scope.userid);
 				}
@@ -228,7 +235,7 @@ angular.module("PTSApp").directive('teamMember', ["$rootScope",
  * Resolves a story type to the human readable variant
  * usage: <pts-type type="sometype"></pts-type>
  */
-angular.module("PTSApp").directive('ptsType', ["$rootScope", 
+angular.module("PTSApp").directive('ptsType', ["$rootScope",
 		function($rootScope) {
 
 			return  {

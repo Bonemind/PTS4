@@ -10,12 +10,14 @@
 <div class="row">
 	<table class="table table-striped">
 		<thead>
+			<th>Name</th>
 			<th>Email</th>
 			<th>&nbsp;</th>
 		</thead>
 		<tbody>
 			<tr ng-repeat="user in users">
 				<td>{{ user.name }}</td>
+				<td>{{ user.email }}</td>
 				<td>
 					<a class="glyphicon glyphicon-remove" ng-really-message="Are you sure?" ng-really-click="deleteUser(user)"></a>
 				</td>
