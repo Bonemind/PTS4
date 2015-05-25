@@ -165,7 +165,8 @@ public class TeamController {
     /**
      * POST /team/1/user
      */
-    @Field(name = "email", required = true, description = "The email of the new team member")
+    @Field(name = "name", description = "The name of the new team member")
+    @Field(name = "email", description = "The email address of the new team member")
     @RequireAuth(role = ScopeRole.SCRUM_MASTER)
     @Route(method = HTTPMethod.POST, path = "/team/{id}/user")
     public static void postMemberHandler(RequestData requestData) throws Exception {
@@ -173,10 +174,22 @@ public class TeamController {
         Team team = EbeanEx.require(EbeanEx.find(Team.class, requestData.getParameter("id")));
 
         // Get the user
-        User user = EbeanEx.require(EbeanEx.find(User.class, User.FIELD_EMAIL, requestData.getPayload().get("email")));
+        Payload payload = requestData.getPayload();
+        User user = null;
+        if (payload.containsKey("name") == payload.containsKey("email")) {
+            throw new HTTPException("Either name or email must be specified, not both, not neither.", HttpStatus.BAD_REQUEST_400);
+        } else if (payload.containsKey("name")) {
+            user = EbeanEx.require(EbeanEx.find(User.class, User.FIELD_NAME, requestData.getPayload().get("name")));
+        } else if (payload.containsKey("email")) {
+            user = EbeanEx.find(User.class, User.FIELD_NAME, requestData.getPayload().get("name"));
+            if (user == null) {
+                // TODO: Invite user
+                EbeanEx.require(user);
+            }
+        }
 
         // Add the user as member of the team.
-        if (!team.getUsers().contains(user)) {
+        if (user != null && !team.getUsers().contains(user)) {
             team.getUsers().add(user);
             Ebean.save(team);
         }
