@@ -11,8 +11,12 @@ PTSAppControllers.controller("CRUDController", ["$scope", "Restangular", "messag
 			result.save().then(function() {
 				messageCenterService.add("success", "Changes saved", {timeout: 7000});
 				close(result, 100);
-			}, function() {
-				messageCenterService.add("danger", "Something went wrong, please try again", {timeout: 7000});
+			}, function(err) {
+			    	if (err.status == 409) {
+				    messageCenterService.add("danger", "That column contains the maximum number of stories", {timeout: 7000});
+				} else {
+				    messageCenterService.add("danger", "Something went wrong, please try again", {timeout: 7000});
+				}
 				close(result, 100);
 			});
 		}

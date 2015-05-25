@@ -1,9 +1,17 @@
-PTSAppControllers.controller("TeamListController", ["$scope", "Restangular", "ModalService",
-		function($scope, Restangular, ModalService) {
+PTSAppControllers.controller("TeamListController", ["$rootScope", "$scope", "Restangular", "ModalService",
+		function($rootScope, $scope, Restangular, ModalService) {
+		    	$scope.allTeamMembers = [];
 			$scope.update = function() {
+    				$scope.allTeamMembers = [];
 				teamList = Restangular.all("team").getList()
 				.then(function(teams) {
 					$scope.teams = teams;
+					$scope.teams.forEach(function(team) {
+					    team.all("user").getList()
+					    	.then(function(users) {
+						    $scope.allTeamMembers = $scope.allTeamMembers.concat(users);
+						});
+					});
 				});
 			}
 			$scope.showModal = function(model) {
@@ -29,7 +37,8 @@ PTSAppControllers.controller("TeamListController", ["$scope", "Restangular", "Mo
 				}).then(function(modal) {
 					modal.element.modal();
 					modal.close.then(function(result) {
-						$scope.update();
+					    $rootScope.$broadcast("team-created");
+					    $scope.update();
 					});
 				});
 			}

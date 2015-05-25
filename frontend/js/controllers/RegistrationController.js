@@ -1,6 +1,9 @@
-PTSAppControllers.controller("RegistrationController", ["$scope", "Restangular", "messageCenterService", "$location", 
-		function($scope, Restangular, messageCenterService, $location) {
+PTSAppControllers.controller("RegistrationController", ["$scope", "$routeParams", "Restangular", "messageCenterService", "$location",
+		function($scope, $routeParams, Restangular, messageCenterService, $location) {
 			$scope.user = {"email": "", "name": "", "password": "", "passwordconfirm": ""};
+			if ($routeParams.email) {
+			}
+			$scope.user.email = $routeParams.email;
 
 			$scope.register = function(user) {
 				if (user.email.trim() == "" || user.password == "" || user.name == "") {

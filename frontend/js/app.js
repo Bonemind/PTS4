@@ -81,6 +81,9 @@ PTSApp.config(["$routeProvider",
 		}).when("/register", {
 			templateUrl: "templates/Register.html",
 			controller: "RegistrationController"
+		}).when("/register/:email", {
+			templateUrl: "templates/Register.html",
+			controller: "RegistrationController"
 		}).when("/teams", {
 			templateUrl: "templates/TeamList.html",
 			controller: "TeamListController"
@@ -203,16 +206,18 @@ angular.module("PTSApp").directive('teamMember', ["$rootScope",
 				    $scope.$watch("userid", function(newVal, oldVal) {
 					$scope.update(newVal);
 				    });
+
+				    $scope.$watch("teammembers", function(newVal, oldVal) {
+					$scope.update($scope.userid);
+				    });
 				},
 				controller: function($scope, $element, $attrs, $location) {
 					$scope.readable = "None";
 					$scope.update = function(newId) {
 					    $scope.teammembers.forEach(function(member) {
-					    	console.log(newId);
 						if (member.id == newId) {
 						    $scope.readable = member.name;
 						}
-						console.log($scope.readable);
 					    });
 					}
 					$scope.update($scope.userid);

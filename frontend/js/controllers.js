@@ -232,8 +232,12 @@ PTSAppControllers.controller("CRUDController", ["$scope", "Restangular", "messag
 			result.save().then(function() {
 				messageCenterService.add("success", "Changes saved", {timeout: 7000});
 				close(result, 100);
-			}, function() {
-				messageCenterService.add("danger", "Something went wrong, please try again", {timeout: 7000});
+			}, function(err) {
+			    	if (err.status == 409) {
+				    messageCenterService.add("danger", "That column contains the maximum number of stories", {timeout: 7000});
+				} else {
+				    messageCenterService.add("danger", "Something went wrong, please try again", {timeout: 7000});
+				}
 				close(result, 100);
 			});
 		}
@@ -331,6 +335,7 @@ PTSAppControllers.controller("LoginController", ["$rootScope", "$scope", "$http"
 					 	localStorage.setItem("token", data.token);
 					 	localStorage.setItem("user", JSON.stringify(data.user));
 					 	$location.path("/dashboard");
+					 	$rootScope.$broadcast("login");
 					}, function(err) {
 						var status = err.status;
 						if (status >= 500 && status < 600) {
@@ -367,6 +372,8 @@ PTSAppControllers.controller("MainNavController", ["$rootScope", "$scope", "Rest
 	    	$scope.currentTeam = undefined;
 	    	$scope.currentProject = undefined;
 	 	$scope.update = function() {
+			$scope.currentTeam = null;
+			$scope.currentProject = null;
 			Restangular.all("team").getList()
  				.then(function(teams) {
 				 	$scope.teams = teams;
@@ -382,6 +389,9 @@ PTSAppControllers.controller("MainNavController", ["$rootScope", "$scope", "Rest
 		$scope.projectSelect = function(project) {
 		    $scope.currentProject = project;
 		}
+		$rootScope.$on("login", $scope.update);
+		$rootScope.$on("project-created", $scope.update);
+		$rootScope.$on("team-created", $scope.update);
 		$scope.update();
 	}
 ]);
@@ -419,6 +429,7 @@ PTSAppControllers.controller("ProjectListController", ["$rootScope", "$scope", "
 				}).then(function(modal) {
 					modal.element.modal();
 					modal.close.then(function(result) {
+					    	$rootScope.$broadcast("project-created");
 						$scope.update();
 					});
 				});
@@ -428,9 +439,12 @@ PTSAppControllers.controller("ProjectListController", ["$rootScope", "$scope", "
 
 
 
-PTSAppControllers.controller("RegistrationController", ["$scope", "Restangular", "messageCenterService", "$location", 
-		function($scope, Restangular, messageCenterService, $location) {
+PTSAppControllers.controller("RegistrationController", ["$scope", "$routeParams", "Restangular", "messageCenterService", "$location",
+		function($scope, $routeParams, Restangular, messageCenterService, $location) {
 			$scope.user = {"email": "", "name": "", "password": "", "passwordconfirm": ""};
+			if ($routeParams.email) {
+			}
+			$scope.user.email = $routeParams.email;
 
 			$scope.register = function(user) {
 				if (user.email.trim() == "" || user.password == "" || user.name == "") {
@@ -567,12 +581,20 @@ PTSAppControllers.controller("TeamCRUDController", ["$scope", "Restangular", "me
 	}
 ]);
 
-PTSAppControllers.controller("TeamListController", ["$scope", "Restangular", "ModalService",
-		function($scope, Restangular, ModalService) {
+PTSAppControllers.controller("TeamListController", ["$rootScope", "$scope", "Restangular", "ModalService",
+		function($rootScope, $scope, Restangular, ModalService) {
+		    	$scope.allTeamMembers = [];
 			$scope.update = function() {
+    				$scope.allTeamMembers = [];
 				teamList = Restangular.all("team").getList()
 				.then(function(teams) {
 					$scope.teams = teams;
+					$scope.teams.forEach(function(team) {
+					    team.all("user").getList()
+					    	.then(function(users) {
+						    $scope.allTeamMembers = $scope.allTeamMembers.concat(users);
+						});
+					});
 				});
 			}
 			$scope.showModal = function(model) {
@@ -598,7 +620,8 @@ PTSAppControllers.controller("TeamListController", ["$scope", "Restangular", "Mo
 				}).then(function(modal) {
 					modal.element.modal();
 					modal.close.then(function(result) {
-						$scope.update();
+					    $rootScope.$broadcast("team-created");
+					    $scope.update();
 					});
 				});
 			}

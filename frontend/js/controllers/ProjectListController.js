@@ -31,6 +31,7 @@ PTSAppControllers.controller("ProjectListController", ["$rootScope", "$scope", "
 				}).then(function(modal) {
 					modal.element.modal();
 					modal.close.then(function(result) {
+					    	$rootScope.$broadcast("project-created");
 						$scope.update();
 					});
 				});

@@ -3,6 +3,8 @@ PTSAppControllers.controller("MainNavController", ["$rootScope", "$scope", "Rest
 	    	$scope.currentTeam = undefined;
 	    	$scope.currentProject = undefined;
 	 	$scope.update = function() {
+			$scope.currentTeam = null;
+			$scope.currentProject = null;
 			Restangular.all("team").getList()
  				.then(function(teams) {
 				 	$scope.teams = teams;
@@ -18,6 +20,9 @@ PTSAppControllers.controller("MainNavController", ["$rootScope", "$scope", "Rest
 		$scope.projectSelect = function(project) {
 		    $scope.currentProject = project;
 		}
+		$rootScope.$on("login", $scope.update);
+		$rootScope.$on("project-created", $scope.update);
+		$rootScope.$on("team-created", $scope.update);
 		$scope.update();
 	}
 ]);
