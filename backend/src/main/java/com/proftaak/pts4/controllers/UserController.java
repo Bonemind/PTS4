@@ -85,7 +85,7 @@ public class UserController {
     /**
      * PUT /user/1
      */
-    @Field(name = "password", required = true, description = "The new password of the user")
+    @Field(name = "password", description = "The new password of the user")
     @RequireAuth
     @Route(method = HTTPMethod.PUT)
     public static User putHandler(RequestData requestData) throws Exception {
