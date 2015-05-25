@@ -367,13 +367,14 @@ PTSAppControllers.controller("LoginMenuController", ["$rootScope", "$scope", "Re
 			}
 		}]);
 
-PTSAppControllers.controller("MainNavController", ["$rootScope", "$scope", "Restangular", 
-	function($rootScope, $scope, Restangular) {
+PTSAppControllers.controller("MainNavController", ["$rootScope", "$scope", "Restangular", "$location",
+	function($rootScope, $scope, Restangular, $location) {
 	    	$scope.currentTeam = undefined;
 	    	$scope.currentProject = undefined;
 	 	$scope.update = function() {
-			$scope.currentTeam = null;
-			$scope.currentProject = null;
+	 	    	if ($location.url().indexOf("register") >= 0) {
+			    return;
+			}
 			Restangular.all("team").getList()
  				.then(function(teams) {
 				 	$scope.teams = teams;
@@ -641,6 +642,7 @@ PTSAppControllers.controller("TeamListController", ["$rootScope", "$scope", "Res
 
 PTSAppControllers.controller("TeamViewController", ["$rootScope", "$scope", "Restangular", "ModalService", "$routeParams",
 		function($rootScope, $scope, Restangular, ModalService, $routeParams) {
+		    	$scope.users = [];
 			$scope.update = function() {
 				Restangular.one("team", $routeParams.id).get().then(function (team) {
 					$scope.team = team;

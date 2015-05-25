@@ -1,5 +1,6 @@
 PTSAppControllers.controller("TeamViewController", ["$rootScope", "$scope", "Restangular", "ModalService", "$routeParams",
 		function($rootScope, $scope, Restangular, ModalService, $routeParams) {
+		    	$scope.users = [];
 			$scope.update = function() {
 				Restangular.one("team", $routeParams.id).get().then(function (team) {
 					$scope.team = team;

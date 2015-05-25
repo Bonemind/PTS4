@@ -1,6 +1,6 @@
 <div class="row">
 	<h2>Team: {{ team.name }}</h2>
-	<h4>Scrum Master: {{ team.scrumMaster.email }}</h4>
+	<h4>Scrum Master: <team-member userid="team.scrumMaster" teammembers="users"></team-member></h4>
 </div>
 <div class="row">
 	<button class="btn btn-primary" ng-click="showModal(undefined)">

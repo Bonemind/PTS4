@@ -1,10 +1,11 @@
-PTSAppControllers.controller("MainNavController", ["$rootScope", "$scope", "Restangular", 
-	function($rootScope, $scope, Restangular) {
+PTSAppControllers.controller("MainNavController", ["$rootScope", "$scope", "Restangular", "$location",
+	function($rootScope, $scope, Restangular, $location) {
 	    	$scope.currentTeam = undefined;
 	    	$scope.currentProject = undefined;
 	 	$scope.update = function() {
-			$scope.currentTeam = null;
-			$scope.currentProject = null;
+	 	    	if ($location.url().indexOf("register") >= 0) {
+			    return;
+			}
 			Restangular.all("team").getList()
  				.then(function(teams) {
 				 	$scope.teams = teams;
