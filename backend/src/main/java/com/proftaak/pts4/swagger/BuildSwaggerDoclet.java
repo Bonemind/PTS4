@@ -1,12 +1,14 @@
 package com.proftaak.pts4.swagger;
 
 import com.proftaak.pts4.database.DatabaseModel;
+import com.proftaak.pts4.json.JSONSerializerFactory;
 import com.proftaak.pts4.rest.Router;
 import com.proftaak.pts4.rest.annotations.Field;
 import com.proftaak.pts4.rest.annotations.Fields;
 import com.proftaak.pts4.rest.annotations.RequireAuth;
+import com.proftaak.pts4.utils.ReflectionUtils;
 import com.sun.javadoc.*;
-import flexjson.JSONSerializer;
+import flexjson.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -16,9 +18,9 @@ import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.lang.reflect.*;
-import java.lang.reflect.Type;
+import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -53,7 +55,7 @@ public class BuildSwaggerDoclet extends Doclet {
     /**
      * Process a class of any type into a type definition
      *
-     * @param type The type
+     * @param type      The type
      * @param overrides The overrides
      * @return The type info, or null if the type should be ignored
      */
@@ -86,7 +88,7 @@ public class BuildSwaggerDoclet extends Doclet {
                 } else {
                     data.put("$ref", "#/definitions/" + cls.getSimpleName());
                 }
-            } else if (cls != Object.class || cls != Void.class) {
+            } else if (cls == Void.class) {
                 return null;
             } else {
                 // Unknown type, error
@@ -96,7 +98,18 @@ public class BuildSwaggerDoclet extends Doclet {
         return data;
     }
 
+    private static boolean hasErrors = false;
+
+    private static void logError(String message) {
+        if (!BuildSwaggerDoclet.hasErrors) {
+            System.err.println("One or more errors have occurred while building the Swagger docs");
+            BuildSwaggerDoclet.hasErrors = true;
+        }
+        System.err.println(message);
+    }
+
     public static boolean start(RootDoc root) {
+        Reflections.log = null;
         Reflections reflections = new Reflections();
 
         // Basic, static info
@@ -135,6 +148,17 @@ public class BuildSwaggerDoclet extends Doclet {
         fieldData.put("type", "string");
         fieldData.put("description", "An human-readable message describing what went wrong");
 
+        // Build a JSONContext from the JSONSerializer
+        // This can be used to determine which field should or should not be included
+        JSONContext jsonContext = new JSONContext();
+        try {
+            JSONSerializer jsonSerializer = JSONSerializerFactory.createSerializer();
+            jsonContext.setPathExpressions((List<PathExpression>) ReflectionUtils.getFieldValue(JSONSerializer.class, "pathExpressions", jsonSerializer));
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            e.printStackTrace();
+            return false;
+        }
+
         // Create a schema definition for each of the database model classes
         for (Class<? extends DatabaseModel> modelCls : reflections.getSubTypesOf(DatabaseModel.class)) {
             ClassDoc clsDoc = root.classNamed(modelCls.getName());
@@ -145,32 +169,36 @@ public class BuildSwaggerDoclet extends Doclet {
             // Create a map of field -> FieldDoc
             Map<String, FieldDoc> fields = new HashMap<>();
             for (FieldDoc fieldDoc : clsDoc.fields(false)) {
-                fields.put(fieldDoc.name().toUpperCase(), fieldDoc);
+                fields.put(fieldDoc.name(), fieldDoc);
             }
 
             // Create a map of method -> MethodDoc
             Map<String, MethodDoc> methods = new HashMap<>();
             for (MethodDoc methodDoc : clsDoc.methods(false)) {
-                methods.put(methodDoc.name().toUpperCase(), methodDoc);
+                methods.put(methodDoc.name(), methodDoc);
             }
+
+            // Create a BeanAnalyzer for this class
+            // This can be used to get a list of all fields that FlexJSON sees for this class
+            BeanAnalyzer analyzer = BeanAnalyzer.analyze(modelCls);
 
             // Create a list of properties for the model
             properties = subMap(definition, "properties");
-            for (Method method : modelCls.getDeclaredMethods()) {
-                // If the method is not a getter, don't bother
-                if (!method.getName().startsWith("get")) {
+            for (BeanProperty property : analyzer.getProperties()) {
+                // If the property should not be included according to the JSONContext, skip it
+                try {
+                    ReflectionUtils.setFieldValue(JSONContext.class, "path", jsonContext, Path.parse(property.getJsonName()));
+                } catch (NoSuchFieldException | IllegalAccessException e) {
+                    e.printStackTrace();
+                    return false;
+                }
+                if (!jsonContext.isIncluded(property)) {
                     continue;
                 }
 
-                // Get the MethodDoc for this method
-                MethodDoc methodDoc = methods.get(method.getName().toUpperCase());
-
-                // Get the FieldDoc for this method
-                FieldDoc fieldDoc = fields.get(method.getName().toUpperCase().substring(3));
-
                 // Get the type info of the property
                 try {
-                    fieldData = getTypeInfo(method.getGenericReturnType(), new HashMap<Class, Class>() {{
+                    fieldData = getTypeInfo(property.getPropertyType(), new HashMap<Class, Class>() {{
                         put(Collection.class, Void.class);
                         put(DatabaseModel.class, Integer.class);
                     }});
@@ -178,21 +206,26 @@ public class BuildSwaggerDoclet extends Doclet {
                         continue;
                     }
                 } catch (Exception e) {
-                    throw new RuntimeException(String.format(
-                        "%s from return type of %s in class %s",
-                        e.getMessage(), method.getName(), method.getDeclaringClass().getName()
-                    ), e);
+                    logError(String.format(
+                        "%s for type of property %s in class %s",
+                        e.getMessage(), property.getName(), property.getReadMethod().getDeclaringClass().getName()
+                    ));
+                    continue;
+                }
+
+                // Get the description of the property
+                if (fields.containsKey(property.getName())) {
+                    fieldData.put("description", fields.get(property.getName()).commentText());
+                }
+                if (property.getReadMethod() != null) {
+                    MethodDoc methodDoc = methods.get(property.getReadMethod());
+                    if (methodDoc != null && !StringUtils.isEmpty(methodDoc.commentText())) {
+                        fieldData.put("description", methodDoc.commentText());
+                    }
                 }
 
                 // Store the field data into the properties
-                properties.put(StringUtils.uncapitalize(method.getName().substring(3)), fieldData);
-
-                // Get the description of the property
-                if (!StringUtils.isEmpty(methodDoc.commentText())) {
-                    fieldData.put("description", methodDoc.commentText());
-                } else {
-                    fieldData.put("description", fieldDoc.commentText());
-                }
+                properties.put(property.getJsonName(), fieldData);
             }
         }
 
@@ -224,10 +257,11 @@ public class BuildSwaggerDoclet extends Doclet {
                 }
             }
             if (methodDoc == null) {
-                throw new RuntimeException(String.format(
+                logError(String.format(
                     "Unable to find MethodDoc for method %s in class %s",
                     method.getName(), method.getDeclaringClass().getName()
                 ));
+                continue;
             }
 
             // If secured, mark as such
@@ -248,7 +282,7 @@ public class BuildSwaggerDoclet extends Doclet {
                 Collection<Map<String, Object>> parameters = new ArrayList<>();
                 methodMap.put("parameters", parameters);
                 for (Field field : fields.value()) {
-                    Map<String, Object> parameter = new LinkedHashMap<>();
+                    Map<String, Object> parameter;
                     try {
                         parameter = getTypeInfo(field.type(), new HashMap<Class, Class>() {{
                             put(DatabaseModel.class, Integer.class);
@@ -257,10 +291,11 @@ public class BuildSwaggerDoclet extends Doclet {
                             continue;
                         }
                     } catch (Exception e) {
-                        throw new RuntimeException(String.format(
-                            "%s from type of field %s on route %s in class %s",
+                        logError(String.format(
+                            "%s for type of field %s on route %s in class %s",
                             e.getMessage(), field.name(), method.getName(), method.getDeclaringClass().getName()
                         ));
+                        continue;
                     }
                     parameters.add(parameter);
                     parameter.put("name", field.name());
@@ -284,13 +319,13 @@ public class BuildSwaggerDoclet extends Doclet {
 
                 // Get the summary (the @return documentation of the method)
                 Tag[] returnTags = methodDoc.tags("return");
-                if (returnTags.length > 1) {
-                    throw new RuntimeException(String.format(
+                if (returnTags.length != 1) {
+                    /*logError(String.format(
                         "Method %s in class %s must have exactly one return doc tag",
                         method.getName(), method.getDeclaringClass().getName()
-                    ));
-                }
-                if (returnTags.length > 0) {
+                    ));*/
+                    response.put("description", methodDoc.commentText());
+                } else {
                     response.put("description", returnTags[0].text());
                 }
 
@@ -301,8 +336,8 @@ public class BuildSwaggerDoclet extends Doclet {
                         response.put("schema", typeInfo);
                     }
                 } catch (Exception e) {
-                    throw new RuntimeException(String.format(
-                        "%s from return type of route %s in class %s",
+                    logError(String.format(
+                        "%s for return type of route %s in class %s",
                         e.getMessage(), method.getName(), method.getDeclaringClass().getName()
                     ));
                 }
@@ -329,7 +364,7 @@ public class BuildSwaggerDoclet extends Doclet {
         } catch (IOException ignored) {
         }
 
-        return true;
+        return !BuildSwaggerDoclet.hasErrors;
     }
 
     /**
