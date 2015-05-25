@@ -37,23 +37,62 @@ PTSAppControllers.controller("BacklogController", ["$rootScope", "$scope", "Rest
 					
 			}
 
+			$scope.trackEffort = function(task) {
+				task.parentResource = null;
+				var model = Restangular.restangularizeElement(task, {effort: 0}, "effort");
+				ModalService.showModal({
+					templateUrl: "templates/EffortModal.html",
+					controller: "CRUDController",
+					inputs: {
+						model: model,
+						meta: {
+						}
+					}
+
+				}).then(function(modal) {
+					modal.element.modal();
+					modal.close.then(function(result) {
+						$scope.update();
+					});
+				});
+			}
+
 			$scope.labels = ["Jan", "Feb"];
 			$scope.series = ["Iteration", "Ideal"];
 			$scope.data = [["1", "2"], ["3", "4"]];
 			$scope.showBurndown = function() {
+				//We haven't selected an iteration, generating a burndown would be none sensible
 				if ($scope.selectediteration.id === undefined) {
 					return;
 				}
+
+				//Determine the start dates, and number of days in the iteration
 				var dayLength = 3600 * 1000 * 24; 
 				var startDate = new Date($scope.selectediteration.start);
 				var totaldays = new Date($scope.selectediteration.end).getTime() - new Date($scope.selectediteration.start).getTime();
 				totaldays /= dayLength;
 				totaldays = Math.ceil(totaldays);
 					
+				//Determine the total number of points in the iteration
+				//The total number of points in the sprint, including stories added later
 				var totalPoints = 0;
+
+				//The points at the start of the sprint
+				var sprintStartPoints = 0;
 				var datapoints = []
 				$scope.stories.forEach(function(story) {
+					//If this story was added before, or on the startdate of the iteration, add it's storypoints to the total
 					totalPoints += story.points;
+					if (new Date(story.iterationSetOn).setHours(0, 0, 0) <= startDate) {
+						sprintStartPoints += story.points;
+					} else {
+						completedOn = new Date(new Date(story.iterationSetOn).toISOString().slice(0,10)).toLocaleDateString();
+						//The story was added mid-iteration, for the purposes of the chart, a negative amount of work was done
+						if (datapoints[completedOn] == undefined) {
+							datapoints[completedOn] = 0;
+						}
+						datapoints[completedOn] -= story.points;
+					}
 					if (story.completedOn !== undefined && story.completedOn !== null) {
 						completedOn = new Date(new Date(story.completedOn).toISOString().slice(0,10)).toLocaleDateString();
 						if (datapoints[completedOn] == undefined) {
@@ -62,18 +101,25 @@ PTSAppControllers.controller("BacklogController", ["$rootScope", "$scope", "Rest
 						datapoints[completedOn] += story.points;
 					}
 				});
+
+				//Determine the ideal burndown graph
 				var keys = [];
 				var vals = [];
 				var ideal = _.range(totalPoints, 0, totalPoints / (1 - totaldays));
 				ideal.push(0);
-				var totalPointsCopy = totalPoints;
 
+				//The number of points we have sprintPointsLeft in the sprint
+				var sprintPointsLeft = sprintStartPoints;
+
+				//Determine the actual burndown graph
 				for (var i=0; i < totaldays; i++) {
 					var currDate = new Date(startDate.getTime() + i * dayLength);
 					var currDateString = currDate.toLocaleDateString();
+					//If we aren't looking at dates in the future, remove the number of story points done
+					//on this date, from the number of story points left
 					if (currDate < new Date()) {
-						totalPointsCopy -= datapoints[currDateString] || 0;
-						vals.push(totalPointsCopy);
+						sprintPointsLeft -= datapoints[currDateString] || 0;
+						vals.push(sprintPointsLeft);
 					}
 					keys.push(currDateString);
 				}

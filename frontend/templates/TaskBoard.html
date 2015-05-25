@@ -39,9 +39,13 @@
 		{{ task.name }}
 	    </div>
 	    <div class="panel-body">
+		<p>Description: {{ task.description || "-" }}</p>
+		<p>Estimate: {{ task.estimate }}</p>
+		<p ng-show="team.effortTrackingEnabled">Time spent: {{ task.timeSpent }} </p>
 		<span ng-show="task.owner">
 		    Owner: <team-member userid="task.owner" teammembers="teammembers"></team-member>
-		</span>
+		</span><br />
+		<button ng-click="trackEffort(task)" ng-show="task.owner == $root.user.id && team.effortTrackingEnabled" class="btn btn-primary">Track</button>
 		<button ng-show="task.owner == null" class="btn btn-primary" ng-click="claimTask(task)">Claim</button>
 	    </div>
 	</div>
@@ -53,9 +57,13 @@
 		{{ task.name }}
 	    </div>
 	    <div class="panel-body">
+		<p>Description: {{ task.description || "-" }}</p>
+		<p>Estimate: {{ task.timeSpent }}</p>
+		<p ng-show="team.effortTrackingEnabled">Time spent: {{ task.timeSpent }} </p>
 		<span ng-show="task.owner">
 		    Owner: <team-member userid="task.owner" teammembers="teammembers"></team-member>
 		</span>
+		<button ng-click="trackEffort(task)" ng-show="task.owner == $root.user.id && team.effortTrackingEnabled" class="btn btn-primary">Track</button>
 		<button ng-show="task.owner == null" class="btn btn-primary" ng-click="claimTask(task)">Claim</button>
 	    </div>
 	</div>
@@ -66,9 +74,13 @@
 		{{ task.name }}
 	    </div>
 	    <div class="panel-body">
+		<p>Description: {{ task.description || "-" }}</p></br>
+		<p>Estimate: {{ task.timeSpent }}</p>
+		<p ng-show="team.effortTrackingEnabled">Time spent: {{ task.timeSpent }} </p>
 		<span ng-show="task.owner">
 		    Owner: <team-member userid="task.owner" teammembers="teammembers"></team-member>
 		</span>
+		<button ng-click="trackEffort(task)" ng-show="task.owner == $root.user.id && team.effortTrackingEnabled" class="btn btn-primary">Track</button>
 		<button ng-show="task.owner" class="btn btn-primary" ng-click="claimTask(task)">Claim</button>
 	    </div>
 	</div>

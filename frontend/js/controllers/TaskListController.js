@@ -35,7 +35,7 @@ PTSAppControllers.controller("TaskListController", ["$rootScope", "$scope", "Res
 					inputs: {
 						model: model,
 						meta: {
-							StatusList: copiedStatus
+							StatusList: copiedStatus,
 						}
 					}
 

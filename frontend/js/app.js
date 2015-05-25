@@ -201,8 +201,6 @@ angular.module("PTSApp").directive('teamMember', ["$rootScope",
 				template: "{{ readable }}",
     				link: function($scope) {
 				    $scope.$watch("userid", function(newVal, oldVal) {
-				    	console.log("aaaa");
-					console.log(newVal);
 					$scope.update(newVal);
 				    });
 				},
@@ -212,7 +210,7 @@ angular.module("PTSApp").directive('teamMember', ["$rootScope",
 					    $scope.teammembers.forEach(function(member) {
 					    	console.log(newId);
 						if (member.id == newId) {
-						    $scope.readable = member.email;
+						    $scope.readable = member.name;
 						}
 						console.log($scope.readable);
 					    });

@@ -4,6 +4,10 @@
 
 	<form class="simple-form" name="form" novalidate>
 		<div class="form-group" show-errors>
+					<label for="userName">Username</label>
+					<input class="form-control" id="userName" type="text" name="user.name" ng-model="user.name" ng-required /><br />
+		</div>
+		<div class="form-group" show-errors>
 			<label for="userEmail">Email</label>
 			<input class="form-control" id="userEmail" type="email" name="user.email" ng-model="user.email" ng-required /><br />
 		</div>
