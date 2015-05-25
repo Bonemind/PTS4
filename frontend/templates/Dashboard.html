@@ -4,7 +4,7 @@
 	        <div class="panel-heading">Tasks</div>
 	        <div class="panel-body">
 		    <div class="list-group">
-			<div ng-repeat="task in tasks">
+			<div ng-repeat="task in tasks | filter: { owner: $root.user.id }">
 			    <div class="list-group-item">
 				<div class="row-content">
 				    <div class="list-group-item-heading">
@@ -15,7 +15,7 @@
 				    </div>
 				</div>
 			    </div>
-			    <hr />
+			    <hr ng-hide="$last" />
 			</div>
 		    </div>
 		</div>
@@ -41,7 +41,7 @@
 				    </div>
 				</div>
 			    </div>
-			    <hr />
+			    <hr ng-hide="$last" />
 			</div>
 		    </div>
 		</div>
