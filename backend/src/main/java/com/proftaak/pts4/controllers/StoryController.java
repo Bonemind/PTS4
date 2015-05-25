@@ -8,6 +8,8 @@ import com.proftaak.pts4.rest.annotations.*;
 import org.apache.commons.lang3.StringUtils;
 import org.glassfish.grizzly.http.util.HttpStatus;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.HashSet;
 

@@ -91,7 +91,9 @@ public class DBUtils {
         try {
             ReflectionUtils.setFieldValue(Story.class, "completedOn", us3, LocalDateTime.now().minusDays(6).minusHours(4));
             ReflectionUtils.setFieldValue(Story.class, "completedOn", us4, LocalDateTime.now().minusDays(4).minusHours(1));
+            ReflectionUtils.setFieldValue(Story.class, "iterationSetOn", us4, LocalDateTime.now().minusDays(6).minusHours(4));
             ReflectionUtils.setFieldValue(Story.class, "completedOn", us5, LocalDateTime.now().minusDays(1).minusHours(5));
+            ReflectionUtils.setFieldValue(Story.class, "iterationSetOn", us5, LocalDateTime.now().minusDays(2).minusHours(10));
         } catch (NoSuchFieldException | IllegalAccessException e) {
             e.printStackTrace();
         }

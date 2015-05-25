@@ -71,51 +71,52 @@ public class Story implements DatabaseModel<Integer> {
     public static final String FIELD_COMPLETED_ON = "completed_on";
     public static final String FIELD_PROJECT = "project_id";
     public static final String FIELD_ITERATION = "iteration_id";
+    public static final String FIELD_ITERATION_SET_ON = "iteration_set_on";
     public static final String FIELD_STORY_POINTS = "story_points";
     public static final String FIELD_PRIORITY = "priority";
 
     /**
-     * The database id of this userstory
+     * The database id of this user story
      */
     @Id
     @Column(name = FIELD_ID)
     private int id;
 
     /**
-     * The type of this userstory
+     * The type of this user story
      */
     @Column(name = FIELD_TYPE)
     @Enumerated(EnumType.STRING)
     private Type type;
 
     /**
-     * The name of this userstory
+     * The name of this user story
      */
     @Column(name = FIELD_NAME, nullable = false)
     private String name;
 
     /**
-     * The description of this userstory
+     * The description of this user story
      */
     @Column(name = FIELD_DESCRIPTION)
     private String description;
 
     /**
-     * The status of this userstory
+     * The status of this user story
      */
     @Enumerated(EnumType.STRING)
     @Column(name = FIELD_STATUS, nullable = false)
     private Status status;
 
     /**
-     * When the userstory was completed
+     * When the user story was completed
      */
     @JSON(transformer = ToStringTransformer.class)
     @Column(name = FIELD_COMPLETED_ON)
     private LocalDateTime completedOn;
 
     /**
-     * The project this userstory belongs to
+     * The project this user story belongs to
      */
     @JSON(transformer = ToPKTransformer.class)
     @ManyToOne(optional = false)
@@ -123,7 +124,7 @@ public class Story implements DatabaseModel<Integer> {
     private Project project;
 
     /**
-     * The iteration this userstory belongs to
+     * The iteration this user story belongs to
      */
     @JSON(transformer = ToPKTransformer.class)
     @ManyToOne
@@ -131,13 +132,20 @@ public class Story implements DatabaseModel<Integer> {
     private Iteration iteration;
 
     /**
-     * The amount of story points this story has.
+     * When the story was added to the iteration
+     */
+    @JSON(transformer = ToStringTransformer.class)
+    @Column(name = FIELD_ITERATION_SET_ON)
+    private LocalDateTime iterationSetOn;
+
+    /**
+     * The amount of story points this story has
      */
     @Column(name = FIELD_STORY_POINTS)
     private int points;
 
     /**
-     * The priority of this story.
+     * The priority of this story
      */
     @Column(name = FIELD_PRIORITY)
     private int priority;
@@ -245,7 +253,18 @@ public class Story implements DatabaseModel<Integer> {
     }
 
     public void setIteration(Iteration iteration) {
+        // Track when the iteration was set.
+        if (iteration == null) {
+            this.iterationSetOn = null;
+        } else if (this.iteration == null || this.iteration != iteration) {
+            this.iterationSetOn = LocalDateTime.now();
+        }
+
         this.iteration = iteration;
+    }
+
+    public LocalDateTime getIterationSetOn() {
+        return this.iterationSetOn;
     }
 
     public List<Task> getTasks() {
