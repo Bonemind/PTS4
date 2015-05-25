@@ -102,25 +102,30 @@ public class SwitchBoard extends HttpHandler {
      * @param response The response
      */
     public void service(Request request, Response response) {
-        // Try to handle the request with a route
-        for (Map.Entry<Pattern, Map<HTTPMethod, Router.Route>> routeEntry : this.routes.entrySet()) {
-            Matcher matcher = routeEntry.getKey().matcher(request.getRequestURI());
-            if (matcher.matches()) {
-                // Matching route, see if we have a handler for this method
-                for (Map.Entry<HTTPMethod, Router.Route> methodEntry : routeEntry.getValue().entrySet()) {
-                    if (getMethod(methodEntry.getKey()) == request.getMethod()) {
-                        this.handleRequest(request, response, matcher, methodEntry.getValue());
-                        return;
+        try {
+            // Try to handle the request with a route
+            for (Map.Entry<Pattern, Map<HTTPMethod, Router.Route>> routeEntry : this.routes.entrySet()) {
+                Matcher matcher = routeEntry.getKey().matcher(request.getRequestURI());
+                if (matcher.matches()) {
+                    // Matching route, see if we have a handler for this method
+                    for (Map.Entry<HTTPMethod, Router.Route> methodEntry : routeEntry.getValue().entrySet()) {
+                        if (getMethod(methodEntry.getKey()) == request.getMethod()) {
+                            this.handleRequest(request, response, matcher, methodEntry.getValue());
+                            return;
+                        }
                     }
+
+                    // No handler for this method
+                    this.handleError(response, HTTPException.ERROR_METHOD_NOT_ALLOWED);
                 }
-
-                // No handler for this method
-                this.handleError(response, HTTPException.ERROR_METHOD_NOT_ALLOWED);
             }
-        }
 
-        // No matching routes
-        this.handleError(response, HTTPException.ERROR_NOT_FOUND);
+            // No matching routes
+            this.handleError(response, HTTPException.ERROR_NOT_FOUND);
+        } catch (Throwable t) {
+            t.printStackTrace();
+            this.handleError(response, HTTPException.ERROR_INTERNAL);
+        }
     }
 
     /**
