@@ -174,6 +174,11 @@ public class TaskController {
         // Get the task
         Task task = EbeanEx.require(EbeanEx.find(Task.class, requestData.getParameter("id")));
 
+        // Check whether this is enabled for this team
+        if (!task.getStory().getProject().getTeam().isEffortTrackingEnabled()) {
+            throw new HTTPException("Effort tracking is not enabled for this team.", HttpStatus.FORBIDDEN_403);
+        }
+
         // Track the effort
         task.setTimeSpent(task.getTimeSpent() + requestData.getPayload().getDouble("effort"));
 

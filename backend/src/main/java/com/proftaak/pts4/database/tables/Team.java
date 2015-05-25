@@ -18,6 +18,7 @@ public class Team implements DatabaseModel<Integer> {
     public static final String FIELD_ID = "id";
     public static final String FIELD_NAME = "name";
     public static final String FIELD_SCRUM_MASTER = "scrum_master";
+    public static final String FIELD_EFFORT_TRACKING_ENABLED = "effort_tracking";
     public static final String TABLE_JOIN_USER = "teamusers";
 
     /**
@@ -46,6 +47,12 @@ public class Team implements DatabaseModel<Integer> {
      */
     @Embedded
     private KanbanRules kanbanRules;
+
+    /**
+     * Whether effort tracking is enabled for this team
+     */
+    @Column(name = FIELD_EFFORT_TRACKING_ENABLED, nullable = false)
+    private boolean effortTrackingEnabled = true;
 
     /**
      * The users of this team
@@ -113,6 +120,14 @@ public class Team implements DatabaseModel<Integer> {
 
     public void setKanbanRules(KanbanRules kanbanRules) {
         this.kanbanRules = kanbanRules;
+    }
+
+    public boolean isEffortTrackingEnabled() {
+        return this.effortTrackingEnabled;
+    }
+
+    public void setEffortTrackingEnabled(boolean effortTrackingEnabled) {
+        this.effortTrackingEnabled = effortTrackingEnabled;
     }
 
     public List<User> getUsers() {
