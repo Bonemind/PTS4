@@ -1,8 +1,8 @@
 package com.proftaak.pts4.database.tables;
 
 import com.proftaak.pts4.database.DatabaseModel;
-import com.proftaak.pts4.utils.flexjson.ToPKTransformer;
-import com.proftaak.pts4.utils.flexjson.ToStringTransformer;
+import com.proftaak.pts4.json.ToPKTransformer;
+import com.proftaak.pts4.json.ToStringTransformer;
 import flexjson.JSON;
 import org.apache.commons.lang3.StringUtils;
 
@@ -16,7 +16,7 @@ import java.util.List;
  */
 @Entity
 @Table(name = "stories")
-public class Story implements DatabaseModel {
+public class Story implements DatabaseModel<Integer> {
     public enum Status {
         /**
          * Story is defined
@@ -176,7 +176,7 @@ public class Story implements DatabaseModel {
     }
 
     @Override
-    public Object getPK() {
+    public Integer getPK() {
         return this.getId();
     }
 

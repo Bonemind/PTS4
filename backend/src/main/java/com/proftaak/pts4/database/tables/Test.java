@@ -1,7 +1,7 @@
 package com.proftaak.pts4.database.tables;
 
 import com.proftaak.pts4.database.DatabaseModel;
-import com.proftaak.pts4.utils.flexjson.ToPKTransformer;
+import com.proftaak.pts4.json.ToPKTransformer;
 import flexjson.JSON;
 
 import javax.persistence.*;
@@ -10,8 +10,8 @@ import javax.persistence.*;
  * Created by stijn on 7/4/2015.
  */
 @Entity
-@Table(name = "Tests")
-public class Test implements DatabaseModel {
+@Table(name = "tests")
+public class Test implements DatabaseModel<Integer> {
     public static final String FIELD_ID = "id";
     public static final String FIELD_NAME = "name";
     public static final String FIELD_DESCRIPTION = "description";
@@ -61,7 +61,7 @@ public class Test implements DatabaseModel {
     }
 
     @Override
-    public Object getPK() {
+    public Integer getPK() {
         return this.getId();
     }
 

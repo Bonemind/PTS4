@@ -1,8 +1,8 @@
 package com.proftaak.pts4.database.tables;
 
 import com.proftaak.pts4.database.DatabaseModel;
-import com.proftaak.pts4.utils.flexjson.ToPKTransformer;
-import com.proftaak.pts4.utils.flexjson.ToStringTransformer;
+import com.proftaak.pts4.json.ToPKTransformer;
+import com.proftaak.pts4.json.ToStringTransformer;
 import flexjson.JSON;
 
 import javax.persistence.*;
@@ -15,7 +15,7 @@ import java.util.List;
  */
 @Entity
 @Table(name = "iterations")
-public class Iteration implements DatabaseModel {
+public class Iteration implements DatabaseModel<Integer> {
     public static final String FIELD_ID = "id";
     public static final String FIELD_NAME = "name";
     public static final String FIELD_DESCRIPTION = "description";
@@ -84,7 +84,7 @@ public class Iteration implements DatabaseModel {
     }
 
     @Override
-    public Object getPK() {
+    public Integer getPK() {
         return this.getId();
     }
 

@@ -1,7 +1,7 @@
 package com.proftaak.pts4.database.tables;
 
 import com.proftaak.pts4.database.DatabaseModel;
-import com.proftaak.pts4.utils.flexjson.ToPKTransformer;
+import com.proftaak.pts4.json.ToPKTransformer;
 import flexjson.JSON;
 import org.apache.commons.lang3.StringUtils;
 
@@ -12,7 +12,7 @@ import javax.persistence.*;
  */
 @Entity
 @Table(name = "tasks")
-public class Task implements DatabaseModel {
+public class Task implements DatabaseModel<Integer> {
     public enum Status {
         /**
          * Task is defined
@@ -110,7 +110,7 @@ public class Task implements DatabaseModel {
     }
 
     @Override
-    public Object getPK() {
+    public Integer getPK() {
         return this.getId();
     }
 
