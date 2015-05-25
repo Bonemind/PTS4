@@ -1,4 +1,4 @@
-package com.proftaak.pts4.utils.flexjson;
+package com.proftaak.pts4.json;
 
 import flexjson.transformer.AbstractTransformer;
 
