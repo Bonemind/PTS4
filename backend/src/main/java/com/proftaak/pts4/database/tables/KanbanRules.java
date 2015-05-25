@@ -13,8 +13,8 @@ import javax.persistence.Embeddable;
  */
 @Embeddable
 public class KanbanRules {
-    public static final String FIELD_MAX_IN_PROGRESS = "maxInProgress";
-    public static final String FIELD_MAX_DONE = "maxDone";
+    public static final String FIELD_MAX_IN_PROGRESS = "max_in_progress";
+    public static final String FIELD_MAX_DONE = "max_done";
 
     /**
      * The maximum number of stories that can be IN_PROGRESS at the same time
