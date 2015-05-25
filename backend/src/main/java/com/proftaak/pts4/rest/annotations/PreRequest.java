@@ -6,9 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Use this for methods that need to be called before every request in the controller, and it's child controllers
- *
- * @author Michon
+ * Register the method to be called before every request that is handled by one of the routes in the same controller
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)

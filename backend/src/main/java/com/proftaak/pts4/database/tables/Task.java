@@ -1,7 +1,7 @@
 package com.proftaak.pts4.database.tables;
 
 import com.proftaak.pts4.database.DatabaseModel;
-import com.proftaak.pts4.utils.flexjson.ToPKTransformer;
+import com.proftaak.pts4.json.ToPKTransformer;
 import flexjson.JSON;
 import org.apache.commons.lang3.StringUtils;
 
@@ -12,7 +12,7 @@ import javax.persistence.*;
  */
 @Entity
 @Table(name = "tasks")
-public class Task implements DatabaseModel {
+public class Task implements DatabaseModel<Integer> {
     public enum Status {
         /**
          * Task is defined
@@ -35,7 +35,7 @@ public class Task implements DatabaseModel {
     public static final String FIELD_DESCRIPTION = "description";
     public static final String FIELD_STATUS = "status";
     public static final String FIELD_ESTIMATE = "estimate";
-    public static final String FIELD_TODO = "todo";
+    public static final String FIELD_TIME_SPENT = "time_spent";
     public static final String FIELD_STORY = "story_id";
     public static final String FIELD_OWNER = "owner";
 
@@ -72,10 +72,10 @@ public class Task implements DatabaseModel {
     private double estimate = 0;
 
     /**
-     * The remaining time estimate of this task.
+     * The time spent on this task
      */
-    @Column(name = FIELD_TODO, nullable = false)
-    private double todo = 0;
+    @Column(name = FIELD_TIME_SPENT, nullable = false)
+    private double timeSpent = 0;
 
     /**
      * The user story of this task
@@ -104,13 +104,12 @@ public class Task implements DatabaseModel {
         this.setName(name);
         this.setDescription(description);
         this.setEstimate(estimate);
-        this.setTodo(estimate);
         this.setStatus(status);
         this.setOwner(owner);
     }
 
     @Override
-    public Object getPK() {
+    public Integer getPK() {
         return this.getId();
     }
 
@@ -142,12 +141,12 @@ public class Task implements DatabaseModel {
         this.estimate = estimate;
     }
 
-    public double getTodo() {
-        return this.todo;
+    public double getTimeSpent() {
+        return this.timeSpent;
     }
 
-    public void setTodo(double todo) {
-        this.todo = todo;
+    public void setTimeSpent(double timeSpent) {
+        this.timeSpent = timeSpent;
     }
 
     public Status getStatus() {

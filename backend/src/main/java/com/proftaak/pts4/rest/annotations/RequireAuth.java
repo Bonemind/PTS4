@@ -8,9 +8,11 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Use this when you want to only allow access to a route when the user is logged in
- *
- * @author Michon
+ * Limit access to all route to logged in users
+ * <p>
+ * Optionally, also limit it to user with certain roles within the current scope
+ * <p>
+ * Can only be used in conjunction with @Route
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)

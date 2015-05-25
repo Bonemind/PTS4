@@ -5,7 +5,11 @@ import com.proftaak.pts4.database.EbeanEx;
 import com.proftaak.pts4.database.tables.*;
 import com.proftaak.pts4.rest.*;
 import com.proftaak.pts4.rest.annotations.*;
+import org.apache.commons.lang3.StringUtils;
+import org.glassfish.grizzly.http.util.HttpStatus;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.HashSet;
 
@@ -88,9 +92,12 @@ public class StoryController {
             requestData.requireScopeRole(ScopeRole.PRODUCT_OWNER);
         }
 
+        // Get the project
+        Project project = EbeanEx.require(EbeanEx.find(Project.class, requestData.getPayload().get("project")));
+
         // Create the new user story
         Story story = new Story(
-            EbeanEx.require(EbeanEx.find(Project.class, requestData.getPayload().get("project"))),
+            project,
             EbeanEx.find(Iteration.class, requestData.getPayload().get("iteration")),
             Story.Type.valueOf(requestData.getPayload().getOrDefault("type", Story.Type.USER_STORY.toString()).toString()),
             requestData.getPayload().getString("name"),
@@ -99,6 +106,14 @@ public class StoryController {
             0, // Priority
             requestData.getPayload().getInt("points", 0)
         );
+
+        // Check Kanban rules
+        KanbanRules kanbanRules = project.getTeam().getKanbanRules();
+        if (kanbanRules != null) {
+            kanbanRules.enforceRoomFor(story);
+        }
+
+        // Save the new story.
         Ebean.save(story);
 
         // Return the created user story
@@ -147,6 +162,12 @@ public class StoryController {
                 requestData.requireScopeRole(ScopeRole.PRODUCT_OWNER);
             }
             story.setPriority(priority);
+        }
+
+        // Check Kanban rules
+        KanbanRules kanbanRules = story.getProject().getTeam().getKanbanRules();
+        if (kanbanRules != null) {
+            kanbanRules.enforceRoomFor(story);
         }
 
         // Save the changes

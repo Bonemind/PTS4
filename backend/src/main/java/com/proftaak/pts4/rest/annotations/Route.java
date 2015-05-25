@@ -8,7 +8,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * @author Michon
+ * Register the method to handle request to a certain route
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)

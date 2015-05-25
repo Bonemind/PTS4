@@ -92,7 +92,7 @@ public class TestController {
     /**
      * PUT /test/1
      */
-    @Field(name = "name", required = true, description = "The new name of the test")
+    @Field(name = "name", description = "The new name of the test")
     @Field(name = "description", description = "The new description of the test")
     @Field(name = "accepted", description = "The new accepted state of the test")
     @RequireAuth(role = ScopeRole.TEAM_MEMBER)

@@ -32,6 +32,11 @@ public class HTTPException extends Exception {
     public static final HTTPException ERROR_NOT_FOUND = new HTTPException("Not found", HttpStatus.NOT_FOUND_404);
 
     /**
+     * An internal error has occurred while processing the request
+     */
+    public static final HTTPException ERROR_INTERNAL = new HTTPException("Internal server error", HttpStatus.INTERNAL_SERVER_ERROR_500);
+
+    /**
      * The status that goes with this error
      */
     private HttpStatus status = HttpStatus.BAD_REQUEST_400;

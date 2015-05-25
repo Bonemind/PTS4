@@ -2,9 +2,6 @@ package com.proftaak.pts4.controllers;
 
 import com.avaje.ebean.Ebean;
 import com.proftaak.pts4.database.EbeanEx;
-import com.proftaak.pts4.database.tables.Project;
-import com.proftaak.pts4.database.tables.Story;
-import com.proftaak.pts4.database.tables.Team;
 import com.proftaak.pts4.database.tables.User;
 import com.proftaak.pts4.rest.HTTPException;
 import com.proftaak.pts4.rest.HTTPMethod;
@@ -18,8 +15,6 @@ import org.glassfish.grizzly.http.util.HttpStatus;
 
 import javax.persistence.PersistenceException;
 import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashSet;
 import java.util.TreeSet;
 
 /**
@@ -90,7 +85,7 @@ public class UserController {
     /**
      * PUT /user/1
      */
-    @Field(name = "password", required = true, description = "The new password of the user")
+    @Field(name = "password", description = "The new password of the user")
     @RequireAuth
     @Route(method = HTTPMethod.PUT)
     public static User putHandler(RequestData requestData) throws Exception {

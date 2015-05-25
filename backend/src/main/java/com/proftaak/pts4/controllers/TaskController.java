@@ -128,9 +128,6 @@ public class TaskController {
         if (payload.containsKey("estimate")) {
             task.setEstimate(payload.getDouble("estimate"));
         }
-        if (payload.containsKey("todo")) {
-            task.setTodo(payload.getDouble("todo"));
-        }
         if (payload.containsKey("status")) {
             task.setStatus(Task.Status.valueOf(payload.getOrDefault("status", Task.Status.DEFINED.toString()).toString()));
         }
@@ -162,5 +159,29 @@ public class TaskController {
 
         // Delete the task
         Ebean.delete(task);
+    }
+
+    /**
+     * POST /task/1/effort
+     */
+    @Field(name = "effort", required = true, description = "The time spent working on this task", type = Double.class)
+    @RequireAuth(role = ScopeRole.TEAM_MEMBER)
+    @Route(method = HTTPMethod.POST, path = "/task/{id}/effort")
+    public static Task postEffortHandler(RequestData requestData) throws Exception {
+        // Get the task
+        Task task = EbeanEx.require(EbeanEx.find(Task.class, requestData.getParameter("id")));
+
+        // Check whether this is enabled for this team
+        if (!task.getStory().getProject().getTeam().isEffortTrackingEnabled()) {
+            throw new HTTPException("Effort tracking is not enabled for this team.", HttpStatus.FORBIDDEN_403);
+        }
+
+        // Track the effort
+        task.setTimeSpent(task.getTimeSpent() + requestData.getPayload().getDouble("effort"));
+
+        // Save the task
+        Ebean.save(task);
+
+        return task;
     }
 }

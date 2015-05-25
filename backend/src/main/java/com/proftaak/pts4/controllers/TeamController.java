@@ -81,6 +81,8 @@ public class TeamController {
      * POST /team
      */
     @Field(name = "name", required = true, description = "The name of the new team")
+    @Field(name = "effortTrackingEnabled", description = "Whether effort tracking is enabled for the new team")
+    @Field(name = "kanbanRules", description = "The kanban rules for the new team", type = KanbanRules.class)
     @RequireAuth
     @Route(method = HTTPMethod.POST)
     public static Team postHandler(RequestData requestData) throws Exception {
@@ -89,6 +91,8 @@ public class TeamController {
             requestData.getPayload().getString("name"),
             requestData.getUser()
         );
+        team.setEffortTrackingEnabled(requestData.getPayload().getBoolean("effortTrackingEnabled"));
+        team.setKanbanRules(requestData.getPayload().getEmbeddable(KanbanRules.class, "kanbanRules"));
         Ebean.save(team);
 
         // Return the created team
@@ -109,6 +113,12 @@ public class TeamController {
         Payload payload = requestData.getPayload();
         if (payload.containsKey("name")) {
             team.setName(payload.getString("name"));
+        }
+        if (payload.containsKey("effortTrackingEnabled")) {
+            team.setEffortTrackingEnabled(payload.getBoolean("effortTrackingEnabled"));
+        }
+        if (payload.containsKey("kanbanRules")) {
+            team.setKanbanRules(payload.getEmbeddable(KanbanRules.class, "kanbanRules"));
         }
 
         // Save the changes
@@ -160,7 +170,8 @@ public class TeamController {
     /**
      * POST /team/1/user
      */
-    @Field(name = "email", required = true, description = "The email of the new team member")
+    @Field(name = "name", description = "The name of the new team member")
+    @Field(name = "email", description = "The email address of the new team member")
     @RequireAuth(role = ScopeRole.SCRUM_MASTER)
     @Route(method = HTTPMethod.POST, path = "/team/{id}/user")
     public static void postMemberHandler(RequestData requestData) throws Exception {
@@ -168,10 +179,22 @@ public class TeamController {
         Team team = EbeanEx.require(EbeanEx.find(Team.class, requestData.getParameter("id")));
 
         // Get the user
-        User user = EbeanEx.require(EbeanEx.find(User.class, User.FIELD_EMAIL, requestData.getPayload().get("email")));
+        Payload payload = requestData.getPayload();
+        User user = null;
+        if (payload.containsKey("name") == payload.containsKey("email")) {
+            throw new HTTPException("Either name or email must be specified, not both, not neither.", HttpStatus.BAD_REQUEST_400);
+        } else if (payload.containsKey("name")) {
+            user = EbeanEx.require(EbeanEx.find(User.class, User.FIELD_NAME, requestData.getPayload().get("name")));
+        } else if (payload.containsKey("email")) {
+            user = EbeanEx.find(User.class, User.FIELD_NAME, requestData.getPayload().get("name"));
+            if (user == null) {
+                // TODO: Invite user
+                EbeanEx.require(user);
+            }
+        }
 
         // Add the user as member of the team.
-        if (!team.getUsers().contains(user)) {
+        if (user != null && !team.getUsers().contains(user)) {
             team.getUsers().add(user);
             Ebean.save(team);
         }

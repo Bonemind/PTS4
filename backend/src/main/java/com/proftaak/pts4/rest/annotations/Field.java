@@ -3,9 +3,9 @@ package com.proftaak.pts4.rest.annotations;
 import java.lang.annotation.*;
 
 /**
- * Indicate which fields a route accepts
- *
- * @author Michon
+ * Indicates which fields a route accepts/requires
+ * <p>
+ * Can only be used in conjunction with @Route
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)

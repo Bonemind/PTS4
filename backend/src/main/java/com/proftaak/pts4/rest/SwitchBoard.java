@@ -1,5 +1,6 @@
 package com.proftaak.pts4.rest;
 
+import com.proftaak.pts4.json.JSONSerializerFactory;
 import com.proftaak.pts4.rest.annotations.Field;
 import com.proftaak.pts4.rest.annotations.Fields;
 import com.proftaak.pts4.rest.annotations.PreRequest;
@@ -15,7 +16,6 @@ import org.reflections.scanners.MethodAnnotationsScanner;
 import org.reflections.util.ClasspathHelper;
 
 import javax.management.openmbean.KeyAlreadyExistsException;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -102,25 +102,30 @@ public class SwitchBoard extends HttpHandler {
      * @param response The response
      */
     public void service(Request request, Response response) {
-        // Try to handle the request with a route
-        for (Map.Entry<Pattern, Map<HTTPMethod, Router.Route>> routeEntry : this.routes.entrySet()) {
-            Matcher matcher = routeEntry.getKey().matcher(request.getRequestURI());
-            if (matcher.matches()) {
-                // Matching route, see if we have a handler for this method
-                for (Map.Entry<HTTPMethod, Router.Route> methodEntry : routeEntry.getValue().entrySet()) {
-                    if (getMethod(methodEntry.getKey()) == request.getMethod()) {
-                        this.handleRequest(request, response, matcher, methodEntry.getValue());
-                        return;
+        try {
+            // Try to handle the request with a route
+            for (Map.Entry<Pattern, Map<HTTPMethod, Router.Route>> routeEntry : this.routes.entrySet()) {
+                Matcher matcher = routeEntry.getKey().matcher(request.getRequestURI());
+                if (matcher.matches()) {
+                    // Matching route, see if we have a handler for this method
+                    for (Map.Entry<HTTPMethod, Router.Route> methodEntry : routeEntry.getValue().entrySet()) {
+                        if (getMethod(methodEntry.getKey()) == request.getMethod()) {
+                            this.handleRequest(request, response, matcher, methodEntry.getValue());
+                            return;
+                        }
                     }
+
+                    // No handler for this method
+                    this.handleError(response, HTTPException.ERROR_METHOD_NOT_ALLOWED);
                 }
-
-                // No handler for this method
-                this.handleError(response, HTTPException.ERROR_METHOD_NOT_ALLOWED);
             }
-        }
 
-        // No matching routes
-        this.handleError(response, HTTPException.ERROR_NOT_FOUND);
+            // No matching routes
+            this.handleError(response, HTTPException.ERROR_NOT_FOUND);
+        } catch (Throwable t) {
+            t.printStackTrace();
+            this.handleError(response, HTTPException.ERROR_INTERNAL);
+        }
     }
 
     /**
@@ -187,13 +192,7 @@ public class SwitchBoard extends HttpHandler {
         String responseBody = null;
         if (responseObject != null) {
             // Create a new JSON serializer.
-            JSONSerializer jsonSerializer = new JSONSerializer();
-
-            // Exclude the class properties, as these are completely irrelevant for the frontend.
-            jsonSerializer.exclude("*.class");
-
-            // Exclude the PK property, ad this is already included under it's primary name.
-            jsonSerializer.exclude("*.PK");
+            JSONSerializer jsonSerializer = JSONSerializerFactory.createSerializer();
 
             // Serialize the response
             responseBody = jsonSerializer.serialize(responseObject);
@@ -272,9 +271,9 @@ public class SwitchBoard extends HttpHandler {
         }
 
         // If any items remain in the unknown keys, those are actually unknown, so error
-        if (unknownKeys.size() > 0) {
+        /*if (unknownKeys.size() > 0) {
             throw new HTTPException("Unknown parameter: " + unknownKeys.toArray()[0], HttpStatus.BAD_REQUEST_400);
-        }
+        }*/
 
         // The require auth annotation
         RequireAuth authAnnotation = method.getAnnotation(RequireAuth.class);

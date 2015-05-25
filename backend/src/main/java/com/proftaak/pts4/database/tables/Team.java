@@ -1,7 +1,7 @@
 package com.proftaak.pts4.database.tables;
 
 import com.proftaak.pts4.database.DatabaseModel;
-import com.proftaak.pts4.utils.flexjson.ToPKTransformer;
+import com.proftaak.pts4.json.ToPKTransformer;
 import flexjson.JSON;
 
 import javax.persistence.*;
@@ -14,11 +14,11 @@ import java.util.List;
  */
 @Entity
 @Table(name = "teams")
-public class Team implements DatabaseModel {
+public class Team implements DatabaseModel<Integer> {
     public static final String FIELD_ID = "id";
     public static final String FIELD_NAME = "name";
     public static final String FIELD_SCRUM_MASTER = "scrum_master";
-    public static final String FIELD_USERS = "users";
+    public static final String FIELD_EFFORT_TRACKING_ENABLED = "effort_tracking";
     public static final String TABLE_JOIN_USER = "teamusers";
 
     /**
@@ -41,6 +41,18 @@ public class Team implements DatabaseModel {
     @ManyToOne(optional = false)
     @JoinColumn(name = FIELD_SCRUM_MASTER)
     private User scrumMaster;
+
+    /**
+     * The Kanban rules for this team
+     */
+    @Embedded
+    private KanbanRules kanbanRules;
+
+    /**
+     * Whether effort tracking is enabled for this team
+     */
+    @Column(name = FIELD_EFFORT_TRACKING_ENABLED, nullable = false)
+    private boolean effortTrackingEnabled = true;
 
     /**
      * The users of this team
@@ -78,7 +90,7 @@ public class Team implements DatabaseModel {
     }
 
     @Override
-    public Object getPK() {
+    public Integer getPK() {
         return this.getId();
     }
 
@@ -100,6 +112,22 @@ public class Team implements DatabaseModel {
 
     public void setScrumMaster(User scrumMaster) {
         this.scrumMaster = scrumMaster;
+    }
+
+    public KanbanRules getKanbanRules() {
+        return this.kanbanRules;
+    }
+
+    public void setKanbanRules(KanbanRules kanbanRules) {
+        this.kanbanRules = kanbanRules;
+    }
+
+    public boolean isEffortTrackingEnabled() {
+        return this.effortTrackingEnabled;
+    }
+
+    public void setEffortTrackingEnabled(boolean effortTrackingEnabled) {
+        this.effortTrackingEnabled = effortTrackingEnabled;
     }
 
     public List<User> getUsers() {

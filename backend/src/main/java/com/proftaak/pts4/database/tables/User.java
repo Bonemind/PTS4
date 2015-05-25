@@ -13,7 +13,7 @@ import java.util.List;
  */
 @Entity
 @Table(name = "users")
-public class User implements DatabaseModel {
+public class User implements DatabaseModel<Integer> {
     public static final String FIELD_ID = "id";
     public static final String FIELD_EMAIL = "email";
     public static final String FIELD_NAME = "name";
@@ -92,7 +92,7 @@ public class User implements DatabaseModel {
     }
 
     @Override
-    public Object getPK() {
+    public Integer getPK() {
         return this.getId();
     }
 

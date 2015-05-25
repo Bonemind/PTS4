@@ -100,8 +100,8 @@ public class ProjectController {
     /**
      * PUT /project/1
      */
-    @Field(name = "productOwner", required = true, description = "The email of the new user that will be the product owner of the project", type = User.class)
-    @Field(name = "name", required = true, description = "The new name of the project")
+    @Field(name = "productOwner", description = "The email of the new user that will be the product owner of the project", type = User.class)
+    @Field(name = "name", description = "The new name of the project")
     @Field(name = "description", description = "The new description of the project")
     @RequireAuth(role = ScopeRole.SCRUM_MASTER_OR_PRODUCT_OWNER)
     @Route(method = HTTPMethod.PUT)
