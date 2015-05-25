@@ -8,6 +8,10 @@ PTSAppControllers.controller("TeamViewController", ["$rootScope", "$scope", "Res
 						$scope.users = users;
 					});
 				});
+				Restangular.all("user").getList()
+   					.then(function(users) {
+					    $scope.allUsers = users;
+					});
 			}
 
 			$scope.deleteUser = function(user) {
@@ -21,12 +25,14 @@ PTSAppControllers.controller("TeamViewController", ["$rootScope", "$scope", "Res
 				if (model === undefined) {
 					model = Restangular.restangularizeElement($scope.team, {email: ""}, "user");
 				}
+
 				ModalService.showModal({
 					templateUrl: "templates/UserAddModal.html",
 					controller: "CRUDController",
 					inputs: {
 						model: model,
 						meta: {
+						    allUsers: $scope.allUsers
 						}
 					}
 

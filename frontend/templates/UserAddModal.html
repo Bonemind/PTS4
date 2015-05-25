@@ -11,7 +11,7 @@
 				<div class="form-group">
 					<label class="col-sm-2 control-label" for="nameInput">Email</label>
 					<div class="col-sm-10">
-						<input type="text" ng-model="model.email" class="form-control" id="nameInput" />
+					    <autocomplete ng-model="model.email" attr-input-id="nameInput" attr-input-class="form-control" data="meta.allUsers"></autoomplete>
 					</div>
 				</div>
 			</form>

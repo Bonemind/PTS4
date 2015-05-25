@@ -15,6 +15,8 @@
 	<script src="bower_components/angular-modal-service/dst/angular-modal-service.js"></script>
 	<script src="bower_components/Chart.js/Chart.min.js"></script>
 	<script src="bower_components/angular-chart.js/dist/angular-chart.js"></script>
+	<script src="bower_components/allmighty-autocomplete/script/autocomplete.js"></script>
+	<link rel="stylesheet" href="bower_components/allmighty-autocomplete/style/autocomplete.css">
 	<link rel="stylesheet" href="bower_components/angular-loading-bar/build/loading-bar.css">
 	<link rel="stylesheet" href="bower_components/angular-chart.js/dist/angular-chart.css">
 	<link rel="stylesheet" href="bower_components/bootstrap-material-design/dist/css/material-fullpalette.css">
@@ -111,7 +113,7 @@
 			<li ng-hide="loggedIn"><a href="#/register">Register</a></li>
 			<li ng-hide="loggedIn"><a href="#/login">Login</a></li>
 			<li ng-show="loggedIn" class="dropdown">
-				<a class="dropdown toggle" data-toggle="dropdown" role="button" aria-expanded="false">{{ $root.user.email }} <span class="caret"></span></a>
+				<a class="dropdown toggle" data-toggle="dropdown" role="button" aria-expanded="false">{{ $root.user.name }} <span class="caret"></span></a>
 				<ul class="dropdown-menu" role="menu">
 					<li><a href="#/login" ng-click="logout()" href="#">Logout</a></li>
 				</ul>

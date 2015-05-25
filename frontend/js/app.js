@@ -7,6 +7,7 @@ var PTSApp = angular.module("PTSApp", [
 	"angularModalService",
 	"chart.js",
 	"ui.bootstrap.showErrors",
+	"autocomplete",
 	"MessageCenterModule"
 	]).run(["$rootScope", "$injector", function($rootScope, $injector) {
 
