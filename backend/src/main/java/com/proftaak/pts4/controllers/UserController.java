@@ -2,6 +2,7 @@ package com.proftaak.pts4.controllers;
 
 import com.avaje.ebean.Ebean;
 import com.proftaak.pts4.database.EbeanEx;
+import com.proftaak.pts4.database.tables.PendingInvitation;
 import com.proftaak.pts4.database.tables.User;
 import com.proftaak.pts4.rest.HTTPException;
 import com.proftaak.pts4.rest.HTTPMethod;
@@ -77,6 +78,17 @@ public class UserController {
         } catch (PersistenceException e) {
             throw new HTTPException("That email address or name is already in use", HttpStatus.CONFLICT_409);
         }
+
+        // Check if there are any pending invitations for this email address
+        Collection<PendingInvitation> pendingInvitations = Ebean.find(PendingInvitation.class)
+            .where()
+            .eq(PendingInvitation.FIELD_EMAIL, requestData.getPayload().get("email").toString())
+            .findList();
+        for (PendingInvitation invitation : pendingInvitations) {
+            user.getTeams().add(invitation.getTeam());
+            Ebean.delete(invitation);
+        }
+        Ebean.save(user);
 
         // Return the created user
         return user;

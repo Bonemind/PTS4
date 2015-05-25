@@ -1,6 +1,8 @@
 package com.proftaak.pts4.controllers;
 
 import com.avaje.ebean.Ebean;
+import com.avaje.ebean.Expr;
+import com.avaje.ebeaninternal.server.expression.SimpleExpression;
 import com.proftaak.pts4.database.EbeanEx;
 import com.proftaak.pts4.database.tables.Token;
 import com.proftaak.pts4.database.tables.User;
@@ -23,12 +25,17 @@ public class AuthController {
      *
      * @return A new token that you can use to authenticate yourself
      */
-    @Field(name = "email", required = true, description = "The email address of the user you're trying to authenticate as")
+    @Field(name = "user", required = true, description = "The username or email address of the user you're trying to authenticate as")
     @Field(name = "password", required = true, description = "The password of the user you're trying to authenticate as")
     @Route(method = HTTPMethod.POST, path = "/auth/login")
     public static Token loginHandler(RequestData requestData) throws Exception {
         // Check the login details
-        User user = EbeanEx.find(User.class, User.FIELD_EMAIL, requestData.getPayload().get("email"));
+        User user = EbeanEx.require(EbeanEx.find(Ebean.find(User.class)
+            .where()
+            .or(
+                Expr.ieq(User.FIELD_EMAIL, requestData.getPayload().get("user").toString()),
+                Expr.ieq(User.FIELD_NAME, requestData.getPayload().get("user").toString())
+            ).query()));
         if (user == null || !user.checkPassword(requestData.getPayload().getString("password"))) {
             throw new HTTPException("Invalid login details", HttpStatus.UNAUTHORIZED_401);
         }

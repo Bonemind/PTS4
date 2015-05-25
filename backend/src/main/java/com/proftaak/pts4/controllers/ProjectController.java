@@ -87,7 +87,7 @@ public class ProjectController {
         // Create the new project
         Project project = new Project(
             EbeanEx.require(EbeanEx.find(Team.class, requestData.getPayload().get("team"))),
-            EbeanEx.require(EbeanEx.find(User.class, User.FIELD_EMAIL, requestData.getPayload().get("productOwner"))),
+            EbeanEx.require(EbeanEx.find(User.class, User.FIELD_NAME, requestData.getPayload().get("productOwner"))),
             requestData.getPayload().getString("name"),
             requestData.getPayload().getString("description")
         );
@@ -112,7 +112,7 @@ public class ProjectController {
         // Change the project
         Payload payload = requestData.getPayload();
         if (payload.containsKey("productOwner")) {
-            project.setProductOwner(EbeanEx.find(User.class, User.FIELD_EMAIL, requestData.getPayload().get("productOwner")));
+            project.setProductOwner(EbeanEx.find(User.class, User.FIELD_NAME, requestData.getPayload().get("productOwner")));
         }
         if (payload.containsKey("name")) {
             project.setName(payload.getString("name"));

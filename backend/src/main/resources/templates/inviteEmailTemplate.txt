@@ -1,0 +1,10 @@
+<p>
+You've been invited to participate in a team on the As Of Yet Unnamed Scrum Tool!
+</p><p>
+If you wish to participate, please <a href="{url}">register</a> an account now.
+</p><p>
+If you do not wish to participate, just ignore this mail, we will not bother you again, unless someone else invites you.
+</p><p>
+Hope to see you soon,<br />
+The AOYUST team
+</p>

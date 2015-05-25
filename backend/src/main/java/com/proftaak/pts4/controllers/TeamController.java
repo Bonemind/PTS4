@@ -5,11 +5,14 @@ import com.proftaak.pts4.database.EbeanEx;
 import com.proftaak.pts4.database.tables.*;
 import com.proftaak.pts4.rest.*;
 import com.proftaak.pts4.rest.annotations.*;
+import com.proftaak.pts4.utils.MailUtils;
+import com.proftaak.pts4.utils.PropertiesUtils;
 import org.glassfish.grizzly.http.util.HttpStatus;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
+import java.io.InputStream;
+import java.net.URI;
+import java.net.URLEncoder;
+import java.util.*;
 
 /**
  * @author Michon
@@ -186,10 +189,40 @@ public class TeamController {
         } else if (payload.containsKey("name")) {
             user = EbeanEx.require(EbeanEx.find(User.class, User.FIELD_NAME, requestData.getPayload().get("name")));
         } else if (payload.containsKey("email")) {
-            user = EbeanEx.find(User.class, User.FIELD_NAME, requestData.getPayload().get("name"));
+            String email = (String) requestData.getPayload().get("email");
+
+            // If there is a user with that email address, carry on as usual
+            user = EbeanEx.find(User.class, User.FIELD_NAME, email);
+
             if (user == null) {
-                // TODO: Invite user
-                EbeanEx.require(user);
+                // If not, check if the email has been invited already
+                for (PendingInvitation invitation : team.getPendingInvitations()) {
+                    if (invitation.getEmail().equals(email)) {
+                        return;
+                    }
+                }
+
+                // Create the invite
+                PendingInvitation invitation = new PendingInvitation(email, team);
+                Ebean.save(invitation);
+
+                // Read the template
+                InputStream messageTemplateStream = TeamController.class.getClassLoader().getResourceAsStream("templates/inviteEmailTemplate.txt");
+                StringBuilder messageBuilder = new StringBuilder();
+                Scanner scanner = new Scanner(messageTemplateStream);
+                while (scanner.hasNextLine()) {
+                    String line = scanner.nextLine();
+                    messageBuilder.append(line).append("\n");
+                }
+                scanner.close();
+
+                // Fill the template
+                String message = messageBuilder.toString();
+                Properties prop = PropertiesUtils.getProperties();
+                message = message.replace("{url}", prop.getProperty("general.weburl") + "#/register/" + URLEncoder.encode(email, "UTF-8"));
+
+                // Send the email
+                MailUtils.sendMail(email, "Invite to AOYUST", message);
             }
         }
 
