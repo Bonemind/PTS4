@@ -1,5 +1,6 @@
 package com.proftaak.pts4.rest;
 
+import com.proftaak.pts4.json.JSONSerializerFactory;
 import com.proftaak.pts4.rest.annotations.Field;
 import com.proftaak.pts4.rest.annotations.Fields;
 import com.proftaak.pts4.rest.annotations.PreRequest;
@@ -15,7 +16,6 @@ import org.reflections.scanners.MethodAnnotationsScanner;
 import org.reflections.util.ClasspathHelper;
 
 import javax.management.openmbean.KeyAlreadyExistsException;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -187,13 +187,7 @@ public class SwitchBoard extends HttpHandler {
         String responseBody = null;
         if (responseObject != null) {
             // Create a new JSON serializer.
-            JSONSerializer jsonSerializer = new JSONSerializer();
-
-            // Exclude the class properties, as these are completely irrelevant for the frontend.
-            jsonSerializer.exclude("*.class");
-
-            // Exclude the PK property, ad this is already included under it's primary name.
-            jsonSerializer.exclude("*.PK");
+            JSONSerializer jsonSerializer = JSONSerializerFactory.createSerializer();
 
             // Serialize the response
             responseBody = jsonSerializer.serialize(responseObject);
@@ -272,9 +266,9 @@ public class SwitchBoard extends HttpHandler {
         }
 
         // If any items remain in the unknown keys, those are actually unknown, so error
-        if (unknownKeys.size() > 0) {
+        /*if (unknownKeys.size() > 0) {
             throw new HTTPException("Unknown parameter: " + unknownKeys.toArray()[0], HttpStatus.BAD_REQUEST_400);
-        }
+        }*/
 
         // The require auth annotation
         RequireAuth authAnnotation = method.getAnnotation(RequireAuth.class);
