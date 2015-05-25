@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 /**
  * Collection of @Field annotations
- *
+ * <p>
  * Do not use this directly
  */
 @Retention(RetentionPolicy.RUNTIME)

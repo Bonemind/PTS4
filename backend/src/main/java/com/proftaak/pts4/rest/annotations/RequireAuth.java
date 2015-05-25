@@ -9,9 +9,9 @@ import java.lang.annotation.Target;
 
 /**
  * Limit access to all route to logged in users
- *
+ * <p>
  * Optionally, also limit it to user with certain roles within the current scope
- *
+ * <p>
  * Can only be used in conjunction with @Route
  */
 @Retention(RetentionPolicy.RUNTIME)

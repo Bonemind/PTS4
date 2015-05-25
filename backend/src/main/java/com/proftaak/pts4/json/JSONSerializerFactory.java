@@ -6,7 +6,8 @@ import flexjson.JSONSerializer;
  * Created by Michon on 25-5-2015.
  */
 public class JSONSerializerFactory {
-    private JSONSerializerFactory() {}
+    private JSONSerializerFactory() {
+    }
 
     /**
      * Create a new JSONSerializer, preconfigured to ignore irrelevant fields

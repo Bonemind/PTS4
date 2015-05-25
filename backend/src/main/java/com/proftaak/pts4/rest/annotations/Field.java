@@ -4,7 +4,7 @@ import java.lang.annotation.*;
 
 /**
  * Indicates which fields a route accepts/requires
- *
+ * <p>
  * Can only be used in conjunction with @Route
  */
 @Retention(RetentionPolicy.RUNTIME)

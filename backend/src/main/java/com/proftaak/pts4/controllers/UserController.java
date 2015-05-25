@@ -2,9 +2,6 @@ package com.proftaak.pts4.controllers;
 
 import com.avaje.ebean.Ebean;
 import com.proftaak.pts4.database.EbeanEx;
-import com.proftaak.pts4.database.tables.Project;
-import com.proftaak.pts4.database.tables.Story;
-import com.proftaak.pts4.database.tables.Team;
 import com.proftaak.pts4.database.tables.User;
 import com.proftaak.pts4.rest.HTTPException;
 import com.proftaak.pts4.rest.HTTPMethod;
@@ -18,8 +15,6 @@ import org.glassfish.grizzly.http.util.HttpStatus;
 
 import javax.persistence.PersistenceException;
 import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashSet;
 import java.util.TreeSet;
 
 /**
