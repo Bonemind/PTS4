@@ -128,9 +128,6 @@ public class TaskController {
         if (payload.containsKey("estimate")) {
             task.setEstimate(payload.getDouble("estimate"));
         }
-        if (payload.containsKey("todo")) {
-            task.setTodo(payload.getDouble("todo"));
-        }
         if (payload.containsKey("status")) {
             task.setStatus(Task.Status.valueOf(payload.getOrDefault("status", Task.Status.DEFINED.toString()).toString()));
         }
