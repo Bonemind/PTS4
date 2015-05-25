@@ -104,6 +104,9 @@ PTSApp.config(["$routeProvider",
 		}).when("/teams/:id/taskboard", {
 		 	templateUrl: "templates/TaskBoard.html",
 			controller: "BacklogController"
+		}).when("/dashboard", {
+			templateUrl: "templates/Dashboard.html",
+			controller: "DashboardController"
 		});
 	}]);
 
