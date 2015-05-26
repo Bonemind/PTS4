@@ -7,7 +7,7 @@
 	<div class="row pad-bottom-100" dnd-list="stories" dnd-drop="storyDropped(event, index, item, external, type)">
 			<div class="panel panel-default" ng-repeat="story in stories | orderBy: '+priority'"  dnd-draggable="story">
 			    <div class="panel-heading">
-				<span>{{ story.name }}</span> {{ story.priority }}
+				<span>{{ story.name }}</span>
 			    </div>
 			    <div class="panel-body">
 				<span><pts-status status="story.status"></pts-status></span>
