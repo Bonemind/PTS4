@@ -186,7 +186,7 @@ public class TeamController {
         // Get the user
         String identifier = requestData.getPayload().getString("user");
         User user = User.findByNameOrEmail(identifier);
-        if (user == null && identifier.contains("@")) {
+        if (user == null && identifier != null && identifier.contains("@")) {
             PendingInvitation.sendInvite(identifier, team);
         }
 
