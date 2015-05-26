@@ -32,6 +32,7 @@
     "angular-chart.js": "~0.6.0",
     "Chart.js": "~1.0.2",
     "bootstrap-material-design": "~0.3.0",
-    "allmighty-autocomplete": "*"
+    "allmighty-autocomplete": "*",
+    "angular-drag-and-drop-lists": "~1.2.0"
   }
 }

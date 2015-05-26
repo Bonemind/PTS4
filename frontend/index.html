@@ -16,12 +16,14 @@
 	<script src="bower_components/Chart.js/Chart.min.js"></script>
 	<script src="bower_components/angular-chart.js/dist/angular-chart.js"></script>
 	<script src="bower_components/allmighty-autocomplete/script/autocomplete.js"></script>
+	<script src="bower_components/angular-drag-and-drop-lists/angular-drag-and-drop-lists.js"></script>
 	<link rel="stylesheet" href="bower_components/allmighty-autocomplete/style/autocomplete.css">
 	<link rel="stylesheet" href="bower_components/angular-loading-bar/build/loading-bar.css">
 	<link rel="stylesheet" href="bower_components/angular-chart.js/dist/angular-chart.css">
 	<link rel="stylesheet" href="bower_components/bootstrap-material-design/dist/css/material-fullpalette.css">
 	<link rel="stylesheet" href="bower_components/bootstrap-material-design/dist/css/ripples.min.css">
 	<link rel="stylesheet" href="bower_components/bootstrap-material-design/dist/css/roboto.min.css">
+	<link rel="stylesheet" href="css/style.css">
 	<script type="text/javascript" src="bower_components/angular-bootstrap-show-errors/src/showErrors.min.js"></script>
 	<script type="text/javascript" src="bower_components/bootstrap-material-design/dist/js/material.min.js"></script>
 	<script type="text/javascript" src="bower_components/bootstrap-material-design/dist/js/ripples.min.js"></script>
@@ -72,6 +74,9 @@
 				</li>
 				<li>
 					<a href="#/teams/{{ currentTeam.id }}/projects">Projects</a>
+				</li>
+				<li>
+					<a href="#/teams/{{ currentTeam.id }}/stories">Story Backlog</a>
 				</li>
 				<li>
 					<a href="#/teams/{{ currentTeam.id }}/users">Members</a>

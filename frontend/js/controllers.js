@@ -1,5 +1,5 @@
-PTSAppControllers.controller("BacklogController", ["$rootScope", "$scope", "Restangular", "ModalService", "$routeParams",
-		function($rootScope, $scope, Restangular, ModalService, $routeParams) {
+PTSAppControllers.controller("BacklogController", ["$rootScope", "$scope", "Restangular", "ModalService", "$routeParams", "messageCenterService",
+		function($rootScope, $scope, Restangular, ModalService, $routeParams, messageCenterService) {
 			$scope.selectediteration = {id: undefined, name: "None"};
 			$scope.selectedproject = {id: undefined, name: "None"};
 			$scope.update = function() {
@@ -57,6 +57,48 @@ PTSAppControllers.controller("BacklogController", ["$rootScope", "$scope", "Rest
 				});
 			}
 
+			$scope.storyDropped = function(e, index, droppedStory, external, type, status) {
+				$scope.stories = _.filter($scope.stories, function(story) {
+					return droppedStory.id != story.id;
+				});
+				droppedStory.status = status;
+				console.log(droppedStory);
+				var restangularized = Restangular.restangularizeElement(null, droppedStory, "story");
+				restangularized.put()
+					.then(function() {
+						messageCenterService.add('success', "Changes saved");
+					}, function(err) {
+						if (err.status == 409) {
+							messageCenterService.add("danger", "You can not add more stories in that column");
+						} else if (err.status) {
+							messageCenterService.add("danger", "You are not allowed to do that");
+						}
+						$scope.update();
+					});
+				return droppedStory;
+			}
+
+			$scope.taskDropped = function(e, index, droppedTask, external, type, status, story) {
+				console.log(story);
+				console.log(droppedTask);
+				story.tasks = _.filter(story.tasks, function(task) {
+					return droppedTask.id != task.id;
+				});
+				droppedTask.status = status;
+				console.log("aaaaaaaaa");
+				var restangularized = Restangular.restangularizeElement(null, droppedTask, "task");
+				restangularized.put()
+					.then(function() {
+						messageCenterService.add('success', "Changes saved");
+					}, function(err) {
+						if (err.status) {
+							messageCenterService.add("danger", "You are not allowed to do that");
+						}
+						$scope.update();
+					});
+				console.log("bbbbbbb");
+				return droppedTask;
+			}
 			$scope.labels = ["Jan", "Feb"];
 			$scope.series = ["Iteration", "Ideal"];
 			$scope.data = [["1", "2"], ["3", "4"]];
@@ -328,7 +370,7 @@ PTSAppControllers.controller("LoginController", ["$rootScope", "$scope", "$http"
 					messageCenterService.add("warning", "Fill in all fields", {timeout: 8000});
 					return;
 				} 
-				Restangular.all("auth").all("login").post({"email": user.email, "password": user.password})
+				Restangular.all("auth").all("login").post({"user": user.email, "password": user.password})
  					.then(function(data) {
 					 	$rootScope.token = data.token;
 					 	$rootScope.user = data.user;
@@ -666,7 +708,7 @@ PTSAppControllers.controller("TeamViewController", ["$rootScope", "$scope", "Res
 
 			$scope.showModal = function(model) {
 				if (model === undefined) {
-					model = Restangular.restangularizeElement($scope.team, {name: ""}, "user");
+					model = Restangular.restangularizeElement($scope.team, {user: ""}, "user");
 				}
 				ModalService.showModal({
 					templateUrl: "templates/UserAddModal.html",
@@ -689,40 +731,33 @@ PTSAppControllers.controller("TeamViewController", ["$rootScope", "$scope", "Res
 		}]);
 
 
-PTSAppControllers.controller("UserStoryListController", ["$rootScope", "$scope", "Restangular", "ModalService",
-		function($rootScope, $scope, Restangular, ModalService) {
+PTSAppControllers.controller("UserStoryListController", ["$rootScope", "$routeParams", "$scope", "Restangular", "ModalService",
+		function($rootScope, $routeParams, $scope, Restangular, ModalService) {
 			$scope.update = function() {
-				Restangular.all("story").getList()
-				.then(function(stories) {
-					$scope.stories = stories;
-					console.log(stories);
-				});
-			}
-
-			$scope.showModal = function(model) {
-				if (model === undefined) {
-					model = Restangular.restangularizeElement(null, {name: "", description: "", status: "DEFINED" }, "story");
-				} else {
-					model = Restangular.copy(model);
-				}
-				
-				var copiedStatus = cleanupStatusList($rootScope.user, $rootScope.StatusList);
-				ModalService.showModal({
-					templateUrl: "templates/UserStoryModal.html",
-					controller: "CRUDController",
-					inputs: {
-						model: model,
-						meta: {
-							StatusList: copiedStatus
-						}
-					}
-
-				}).then(function(modal) {
-					modal.element.modal();
-					modal.close.then(function(result) {
-						$scope.update();
+			    	Restangular.one("team", $routeParams.id).get()
+    					.then(function(team) {
+					    $scope.team = team;
+					    team.all("story").getList()
+					    .then(function(stories) {
+						    $scope.stories = stories;
+						    console.log(stories);
+					    });
 					});
-				});
 			}
+
+			$scope.storyDropped = function(e, index, item) {
+			    var sorted = _.sortBy($scope.stories, "priority");
+			    var filtered = _.filter(sorted, function(s) { return s.id != item.id });
+			    filtered.splice(index - 1, 0, item);
+			    
+			    for (var i = 0; i < filtered.length; i++) {
+				Restangular.restangularizeElement(null, {id: filtered[i].id, priority: i}, "story").put()
+				    .then(function() {
+					$scope.update();
+				});
+			    }
+			    return item;
+			}
+
 			$scope.update();
 		}]);

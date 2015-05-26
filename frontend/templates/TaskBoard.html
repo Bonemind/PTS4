@@ -33,8 +33,8 @@
 	<a href="#/story/{{story.id}}/tasks">{{ story.name }}</a>
 	<span class="label pull-right" ng-class="(story.type==='DEFECT') ? 'label-danger' : 'label-primary'"><pts-type type="story.type"></pts-type></span>
     </div>
-    <div class="col-xs-3">
-	<div class="panel panel-default" ng-repeat="task in story.tasks | filter: {status: 'DEFINED'}">
+    <div class="col-xs-3 min-h-100" dnd-list="story.tasks" dnd-drop="taskDropped(event, index, item, external, type, 'DEFINED', story)">
+	<div class="panel panel-default" ng-repeat="task in story.tasks | filter: {status: 'DEFINED'}" dnd-draggable="task">
 	    <div class="panel-heading">
 		{{ task.name }}
 	    </div>
@@ -51,8 +51,8 @@
 	</div>
 
     </div>
-    <div class="col-xs-3">
-	<div class="panel panel-default" ng-repeat="task in story.tasks | filter: {status: 'IN_PROGRESS'}">
+    <div class="col-xs-3 min-h-100" dnd-list="story.tasks" dnd-drop="taskDropped(event, index, item, external, type, 'IN_PROGRESS', story)">
+	<div class="panel panel-default" ng-repeat="task in story.tasks | filter: {status: 'IN_PROGRESS'}" dnd-draggable="task">
 	    <div class="panel-heading">
 		{{ task.name }}
 	    </div>
@@ -68,8 +68,8 @@
 	    </div>
 	</div>
     </div>
-    <div class="col-xs-3">
-	<div class="panel panel-default" ng-repeat="task in story.tasks | filter: {status: 'COMPLETED'}">
+    <div class="col-xs-3 min-h-100" dnd-list="story.tasks" dnd-drop="taskDropped(event, index, item, external, type, 'DONE', story)">
+	<div class="panel panel-default" ng-repeat="task in story.tasks | filter: {status: 'DONE'}" dnd-draggable="task">
 	    <div class="panel-heading">
 		{{ task.name }}
 	    </div>

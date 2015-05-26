@@ -8,6 +8,7 @@ var PTSApp = angular.module("PTSApp", [
 	"chart.js",
 	"ui.bootstrap.showErrors",
 	"autocomplete",
+	"dndLists",
 	"MessageCenterModule"
 	]).run(["$rootScope", "$injector", function($rootScope, $injector) {
 
@@ -93,7 +94,7 @@ PTSApp.config(["$routeProvider",
 		}).when("/teams/:id/users", {
 		 	templateUrl: "templates/TeamView.html",
 			controller: "TeamViewController"
-		}).when("/stories", {
+		}).when("/teams/:id/stories", {
 			templateUrl: "templates/UserStoryList.html",
 			controller: "UserStoryListController"
 		}).when("/teams/:id/backlog", {

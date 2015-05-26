@@ -1,37 +1,30 @@
-PTSAppControllers.controller("UserStoryListController", ["$rootScope", "$scope", "Restangular", "ModalService",
-		function($rootScope, $scope, Restangular, ModalService) {
+PTSAppControllers.controller("UserStoryListController", ["$rootScope", "$routeParams", "$scope", "Restangular", "ModalService",
+		function($rootScope, $routeParams, $scope, Restangular, ModalService) {
 			$scope.update = function() {
-				Restangular.all("story").getList()
-				.then(function(stories) {
-					$scope.stories = stories;
-					console.log(stories);
-				});
-			}
-
-			$scope.showModal = function(model) {
-				if (model === undefined) {
-					model = Restangular.restangularizeElement(null, {name: "", description: "", status: "DEFINED" }, "story");
-				} else {
-					model = Restangular.copy(model);
-				}
-				
-				var copiedStatus = cleanupStatusList($rootScope.user, $rootScope.StatusList);
-				ModalService.showModal({
-					templateUrl: "templates/UserStoryModal.html",
-					controller: "CRUDController",
-					inputs: {
-						model: model,
-						meta: {
-							StatusList: copiedStatus
-						}
-					}
-
-				}).then(function(modal) {
-					modal.element.modal();
-					modal.close.then(function(result) {
-						$scope.update();
+			    	Restangular.one("team", $routeParams.id).get()
+    					.then(function(team) {
+					    $scope.team = team;
+					    team.all("story").getList()
+					    .then(function(stories) {
+						    $scope.stories = stories;
+						    console.log(stories);
+					    });
 					});
-				});
 			}
+
+			$scope.storyDropped = function(e, index, item) {
+			    var sorted = _.sortBy($scope.stories, "priority");
+			    var filtered = _.filter(sorted, function(s) { return s.id != item.id });
+			    filtered.splice(index - 1, 0, item);
+			    
+			    for (var i = 0; i < filtered.length; i++) {
+				Restangular.restangularizeElement(null, {id: filtered[i].id, priority: i}, "story").put()
+				    .then(function() {
+					$scope.update();
+				});
+			    }
+			    return item;
+			}
+
 			$scope.update();
 		}]);

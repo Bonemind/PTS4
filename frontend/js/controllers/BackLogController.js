@@ -1,5 +1,5 @@
-PTSAppControllers.controller("BacklogController", ["$rootScope", "$scope", "Restangular", "ModalService", "$routeParams",
-		function($rootScope, $scope, Restangular, ModalService, $routeParams) {
+PTSAppControllers.controller("BacklogController", ["$rootScope", "$scope", "Restangular", "ModalService", "$routeParams", "messageCenterService",
+		function($rootScope, $scope, Restangular, ModalService, $routeParams, messageCenterService) {
 			$scope.selectediteration = {id: undefined, name: "None"};
 			$scope.selectedproject = {id: undefined, name: "None"};
 			$scope.update = function() {
@@ -57,6 +57,48 @@ PTSAppControllers.controller("BacklogController", ["$rootScope", "$scope", "Rest
 				});
 			}
 
+			$scope.storyDropped = function(e, index, droppedStory, external, type, status) {
+				$scope.stories = _.filter($scope.stories, function(story) {
+					return droppedStory.id != story.id;
+				});
+				droppedStory.status = status;
+				console.log(droppedStory);
+				var restangularized = Restangular.restangularizeElement(null, droppedStory, "story");
+				restangularized.put()
+					.then(function() {
+						messageCenterService.add('success', "Changes saved");
+					}, function(err) {
+						if (err.status == 409) {
+							messageCenterService.add("danger", "You can not add more stories in that column");
+						} else if (err.status) {
+							messageCenterService.add("danger", "You are not allowed to do that");
+						}
+						$scope.update();
+					});
+				return droppedStory;
+			}
+
+			$scope.taskDropped = function(e, index, droppedTask, external, type, status, story) {
+				console.log(story);
+				console.log(droppedTask);
+				story.tasks = _.filter(story.tasks, function(task) {
+					return droppedTask.id != task.id;
+				});
+				droppedTask.status = status;
+				console.log("aaaaaaaaa");
+				var restangularized = Restangular.restangularizeElement(null, droppedTask, "task");
+				restangularized.put()
+					.then(function() {
+						messageCenterService.add('success', "Changes saved");
+					}, function(err) {
+						if (err.status) {
+							messageCenterService.add("danger", "You are not allowed to do that");
+						}
+						$scope.update();
+					});
+				console.log("bbbbbbb");
+				return droppedTask;
+			}
 			$scope.labels = ["Jan", "Feb"];
 			$scope.series = ["Iteration", "Ideal"];
 			$scope.data = [["1", "2"], ["3", "4"]];

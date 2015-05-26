@@ -24,7 +24,7 @@ PTSAppControllers.controller("TeamViewController", ["$rootScope", "$scope", "Res
 
 			$scope.showModal = function(model) {
 				if (model === undefined) {
-					model = Restangular.restangularizeElement($scope.team, {name: ""}, "user");
+					model = Restangular.restangularizeElement($scope.team, {user: ""}, "user");
 				}
 				ModalService.showModal({
 					templateUrl: "templates/UserAddModal.html",
