@@ -157,11 +157,7 @@ public class StoryController {
             story.setPoints(payload.getInt("points"));
         }
         if (payload.containsKey("priority")) {
-            int priority = payload.getInt("priority");
-            if (story.getPriority() != priority) {
-                requestData.requireScopeRole(ScopeRole.PRODUCT_OWNER);
-            }
-            story.setPriority(priority);
+            story.setPriority(payload.getInt("priority"));
         }
 
         // Check Kanban rules
