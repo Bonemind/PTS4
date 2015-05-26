@@ -8,7 +8,10 @@ import com.proftaak.pts4.database.tables.*;
 import com.proftaak.pts4.utils.PropertiesUtils;
 import com.proftaak.pts4.utils.ReflectionUtils;
 import javassist.NotFoundException;
+import org.reflections.Reflections;
 
+import javax.persistence.Embeddable;
+import javax.persistence.Entity;
 import java.io.FileNotFoundException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -41,13 +44,18 @@ public class DBUtils {
         dbConfig.setPassword(p.getProperty("database.password"));
         config.setDataSourceConfig(dbConfig);
 
-        // Set DDL options..
+        // Set DDL options
         config.setDdlGenerate(true);
         config.setDdlRun(true);
 
         // Register the server as the default server
         config.setDefaultServer(true);
         config.setRegister(true);
+
+        // Explicitly register all classes
+        Reflections reflections = new Reflections(TABLE_PACKAGE);
+        reflections.getTypesAnnotatedWith(Entity.class).forEach(config::addClass);
+        reflections.getTypesAnnotatedWith(Embeddable.class).forEach(config::addClass);
 
         // Create the instance
         EbeanServerFactory.create(config);
