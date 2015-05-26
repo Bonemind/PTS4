@@ -30,6 +30,7 @@ public class User implements DatabaseModel<Integer> {
     /**
      * The email address of this user
      */
+    @JSON(include = false)
     @Column(name = FIELD_EMAIL, nullable = false, unique = true)
     private String email;
 

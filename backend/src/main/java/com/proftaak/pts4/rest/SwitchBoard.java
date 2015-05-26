@@ -168,6 +168,7 @@ public class SwitchBoard extends HttpHandler {
         response.addHeader("Access-Control-Allow-Headers", "Content-Type,X-TOKEN");
 
         Object responseObject = null;
+        JSONSerializer serializer = null;
         try {
             // Build the request
             RequestData requestData = RequestData.buildRequest(request, matcher);
@@ -184,18 +185,19 @@ public class SwitchBoard extends HttpHandler {
             } catch (InvocationTargetException e) {
                 throw e.getCause();
             }
+
+            // Get the serializer.
+            serializer = requestData.getSerializer();
         } catch (Throwable throwable) {
             responseObject = this.handleError(response, throwable);
+            serializer = JSONSerializerFactory.createSerializer();
         }
 
         // Serialize the response object, if any
         String responseBody = null;
         if (responseObject != null) {
-            // Create a new JSON serializer.
-            JSONSerializer jsonSerializer = JSONSerializerFactory.createSerializer();
-
             // Serialize the response
-            responseBody = jsonSerializer.serialize(responseObject);
+            responseBody = serializer.serialize(responseObject);
         }
 
         // Build the response

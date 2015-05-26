@@ -78,6 +78,14 @@ public class Team implements DatabaseModel<Integer> {
     private List<Iteration> iterations = new ArrayList<>();
 
     /**
+     * The pending invitations for this team
+     */
+    @JSON(include = false)
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name = PendingInvitation.FIELD_TEAM)
+    private List<PendingInvitation> pendingInvitations = new ArrayList<>();
+
+    /**
      * ORM-Lite no-arg constructor
      */
     public Team() {
@@ -138,15 +146,11 @@ public class Team implements DatabaseModel<Integer> {
         return this.projects;
     }
 
-    public void setProjects(List<Project> projects) {
-        this.projects = projects;
-    }
-
     public List<Iteration> getIterations() {
         return this.iterations;
     }
 
-    public void setIterations(List<Iteration> iterations) {
-        this.iterations = iterations;
+    public List<PendingInvitation> getPendingInvitations() {
+        return this.pendingInvitations;
     }
 }

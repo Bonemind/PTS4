@@ -12,12 +12,12 @@ public class PropertiesUtils {
     /**
      * The properties file name
      */
-    private static final String PROPERTIES_FILE = "config.properties";
+    private static final String PROPERTIES_FILE = "config/config.properties";
 
     /**
      * The user properties file name
      */
-    private static final String USER_PROPERTIES_FILE = "user.properties";
+    private static final String USER_PROPERTIES_FILE = "config/user.properties";
 
     /**
      * The properties object
