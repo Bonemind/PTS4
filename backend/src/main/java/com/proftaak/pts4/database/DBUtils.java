@@ -93,9 +93,9 @@ public class DBUtils {
 
         Story us1 = new Story(p, null, Story.Type.DEFECT, "Foo", null, Story.Status.DEFINED, 0, 3);
         Story us2 = new Story(p, it, Story.Type.USER_STORY, "Lorem", "Lorem Ipsum Dolor Sit Amet", Story.Status.IN_PROGRESS, 1, 4);
-        Story us3 = new Story(p, it, Story.Type.USER_STORY, "Bar", null, Story.Status.DONE, 0, 3);
-        Story us4 = new Story(p, it, Story.Type.USER_STORY, "Foo Bar", null, Story.Status.DONE, 1, 4);
-        Story us5 = new Story(p, it, Story.Type.USER_STORY, "Stuff", null, Story.Status.DONE, 1, 6);
+        Story us3 = new Story(p, it, Story.Type.USER_STORY, "Bar", null, Story.Status.DONE, 2, 3);
+        Story us4 = new Story(p, it, Story.Type.USER_STORY, "Foo Bar", null, Story.Status.DONE, 3, 4);
+        Story us5 = new Story(p, it, Story.Type.USER_STORY, "Stuff", null, Story.Status.DONE, 4, 6);
         try {
             ReflectionUtils.setFieldValue(Story.class, "completedOn", us3, LocalDateTime.now().plusDays(2).minusHours(4));
             ReflectionUtils.setFieldValue(Story.class, "completedOn", us4, LocalDateTime.now().minusDays(4).minusHours(1));
