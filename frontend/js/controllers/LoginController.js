@@ -5,7 +5,7 @@ PTSAppControllers.controller("LoginController", ["$rootScope", "$scope", "$http"
 					messageCenterService.add("warning", "Fill in all fields", {timeout: 8000});
 					return;
 				} 
-				Restangular.all("auth").all("login").post({"email": user.email, "password": user.password})
+				Restangular.all("auth").all("login").post({"user": user.email, "password": user.password})
  					.then(function(data) {
 					 	$rootScope.token = data.token;
 					 	$rootScope.user = data.user;
