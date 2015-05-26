@@ -50,11 +50,6 @@ public class UserController {
         // Get the user
         User user = EbeanEx.find(User.class, requestData.getParameter("id"));
 
-        // Check whether this matches the currently logged in user
-        if (!user.equals(requestData.getUser())) {
-            throw HTTPException.ERROR_FORBIDDEN;
-        }
-
         // Return the user
         return user;
     }

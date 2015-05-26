@@ -166,6 +166,9 @@ public class TeamController {
         // Get the team
         Team team = EbeanEx.require(EbeanEx.find(Team.class, requestData.getParameter("id")));
 
+        // Include the emails
+        requestData.getSerializer().include("*.email");
+
         // Return the users
         return team.getUsers();
     }
