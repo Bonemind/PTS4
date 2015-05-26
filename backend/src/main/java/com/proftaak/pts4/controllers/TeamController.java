@@ -176,8 +176,7 @@ public class TeamController {
     /**
      * POST /team/1/user
      */
-    @Field(name = "name", description = "The name of the new team member")
-    @Field(name = "email", description = "The email address of the new team member")
+    @Field(name = "user", required = true, description = "The name or email address of the new team member")
     @RequireAuth(role = ScopeRole.SCRUM_MASTER)
     @Route(method = HTTPMethod.POST, path = "/team/{id}/user")
     public static void postMemberHandler(RequestData requestData) throws Exception {
@@ -185,48 +184,10 @@ public class TeamController {
         Team team = EbeanEx.require(EbeanEx.find(Team.class, requestData.getParameter("id")));
 
         // Get the user
-        Payload payload = requestData.getPayload();
-        User user = null;
-        if (payload.containsKey("name") == payload.containsKey("email")) {
-            throw new HTTPException("Either name or email must be specified, not both, not neither.", HttpStatus.BAD_REQUEST_400);
-        } else if (payload.containsKey("name")) {
-            user = EbeanEx.require(EbeanEx.find(User.class, User.FIELD_NAME, requestData.getPayload().get("name")));
-        } else if (payload.containsKey("email")) {
-            String email = (String) requestData.getPayload().get("email");
-
-            // If there is a user with that email address, carry on as usual
-            user = EbeanEx.find(User.class, User.FIELD_NAME, email);
-
-            if (user == null) {
-                // If not, check if the email has been invited already
-                for (PendingInvitation invitation : team.getPendingInvitations()) {
-                    if (invitation.getEmail().equals(email)) {
-                        return;
-                    }
-                }
-
-                // Create the invite
-                PendingInvitation invitation = new PendingInvitation(email, team);
-                Ebean.save(invitation);
-
-                // Read the template
-                InputStream messageTemplateStream = TeamController.class.getClassLoader().getResourceAsStream("templates/inviteEmailTemplate.txt");
-                StringBuilder messageBuilder = new StringBuilder();
-                Scanner scanner = new Scanner(messageTemplateStream);
-                while (scanner.hasNextLine()) {
-                    String line = scanner.nextLine();
-                    messageBuilder.append(line).append("\n");
-                }
-                scanner.close();
-
-                // Fill the template
-                String message = messageBuilder.toString();
-                Properties prop = PropertiesUtils.getProperties();
-                message = message.replace("{url}", prop.getProperty("general.weburl") + "#/register/" + URLEncoder.encode(email, "UTF-8"));
-
-                // Send the email
-                MailUtils.sendMail(email, "Invite to AOYUST", message);
-            }
+        String identifier = requestData.getPayload().getString("user");
+        User user = User.findByNameOrEmail(identifier);
+        if (user == null && identifier.contains("@")) {
+            PendingInvitation.sendInvite(identifier, team);
         }
 
         // Add the user as member of the team.

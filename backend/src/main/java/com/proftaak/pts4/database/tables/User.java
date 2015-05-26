@@ -1,6 +1,9 @@
 package com.proftaak.pts4.database.tables;
 
+import com.avaje.ebean.Ebean;
+import com.avaje.ebean.Expr;
 import com.proftaak.pts4.database.DatabaseModel;
+import com.proftaak.pts4.database.EbeanEx;
 import flexjson.JSON;
 import org.mindrot.jbcrypt.BCrypt;
 
@@ -152,4 +155,21 @@ public class User implements DatabaseModel<Integer> {
     public List<Project> getOwnedProjects() {
         return this.ownedProjects;
     }
+
+
+    /**
+     * Find an user by either it's name or it's email address
+     *
+     * @param identifier The name/email address
+     */
+    public static User findByNameOrEmail(String identifier) {
+        return EbeanEx.find(Ebean.find(User.class)
+            .where()
+            .or(
+                Expr.ieq(User.FIELD_EMAIL, identifier),
+                Expr.ieq(User.FIELD_NAME, identifier)
+            ).query()
+        );
+    }
+
 }
