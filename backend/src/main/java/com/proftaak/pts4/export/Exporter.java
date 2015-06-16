@@ -11,6 +11,8 @@ import javax.xml.transform.stream.StreamResult;
 import org.w3c.dom.*;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.StringWriter;
 import java.util.List;
 
 /**
@@ -18,7 +20,7 @@ import java.util.List;
  */
 public class Exporter {
 
-    public static void export(Team team) {
+    public static String export(Team team) {
         try {
             DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
@@ -48,14 +50,17 @@ public class Exporter {
             TransformerFactory transformerFactory = TransformerFactory.newInstance();
             Transformer transformer = transformerFactory.newTransformer();
             DOMSource source = new DOMSource(doc);
-            StreamResult result = new StreamResult(new File("C:\\export_test.xml"));
 
-            // Output to console for testing
-            // StreamResult result = new StreamResult(System.out);
+            //create a StringWriter for the output
+            StringWriter outWriter = new StringWriter();
+            StreamResult result = new StreamResult(outWriter);
 
+            transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+            transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
             transformer.transform(source, result);
 
-            System.out.println("Successfully exported.");
+            StringBuffer sb = outWriter.getBuffer();
+            return sb.toString();
         } catch (ParserConfigurationException e) {
             e.printStackTrace();
         } catch (TransformerConfigurationException e) {
@@ -63,6 +68,8 @@ public class Exporter {
         } catch (TransformerException e) {
             e.printStackTrace();
         }
+
+        return null;
     }
 
     private static void writeIterations(List<Iteration> iterations, Element teamElement, Document doc) {
@@ -111,7 +118,9 @@ public class Exporter {
         projElement.setAttribute("name", project.getName());
         projElement.setAttribute("description", project.getDescription());
 
-        projElement.appendChild(Exporter.writeUser(project.getProductOwner(), doc));
+        Element POElement = doc.createElement("productOwner");
+        POElement.appendChild(Exporter.writeUser(project.getProductOwner(), doc));
+        projElement.appendChild(POElement);
 
         Element storiesElement = doc.createElement("stories");
         for (Story story : project.getStories()) {
@@ -134,7 +143,9 @@ public class Exporter {
         if (story.getCompletedOn() != null)
             storyElement.setAttribute("completedOn", story.getCompletedOn().toString());
 
-        storyElement.setAttribute("addedToIterationOn", story.getIterationSetOn().toString());
+        if (story.getIterationSetOn() != null)
+            storyElement.setAttribute("addedToIterationOn", story.getIterationSetOn().toString());
+
         storyElement.setAttribute("points", String.valueOf(story.getPoints()));
         storyElement.setAttribute("priority", String.valueOf(story.getPriority()));
 
@@ -163,10 +174,12 @@ public class Exporter {
         taskElement.setAttribute("estimate", String.valueOf(task.getEstimate()));
         taskElement.setAttribute("timeSpent", String.valueOf(task.getTimeSpent()));
 
-        Element ownerElement = doc.createElement("owner");
-        ownerElement.appendChild(Exporter.writeUser(task.getOwner(), doc));
+        if (task.getOwner() != null) {
+            Element ownerElement = doc.createElement("owner");
+            ownerElement.appendChild(Exporter.writeUser(task.getOwner(), doc));
 
-        taskElement.appendChild(ownerElement);
+            taskElement.appendChild(ownerElement);
+        }
 
         return taskElement;
     }
@@ -182,7 +195,7 @@ public class Exporter {
     }
 
     private static void writeScrumMater(User scrumMaster, Element teamElement, Document doc) {
-        Element SMElement = doc.createElement("scrum master");
+        Element SMElement = doc.createElement("scrumMaster");
         Element userElement = Exporter.writeUser(scrumMaster, doc);
 
         teamElement.appendChild(SMElement);
