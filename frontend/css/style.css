@@ -5,3 +5,39 @@
 .pad-bottom-100 {
 	padding-bottom: 200px;
 }
+
+.modal-open {
+	overflow: scroll;
+}
+
+.li-pointer li, .li-pointer a {
+	cursor: pointer;
+}
+
+.navbar .divider-vertical {
+	height: 60px;
+	margin: 0 9px;
+	border-right: 1px solid #ffffff;
+	border-left: 1px solid #f2f2f2;
+}
+
+.navbar-inverse .divider-vertical {
+	border-right-color: #7986cb;
+	border-left-color: #7986cb;
+}
+
+.navbar-center {
+	position: absolute;
+	width: 100%;
+	left: 0;
+	top: 0;
+	text-align: center;
+	margin: auto;
+	margin-top: 10px;
+	height:100%
+	line-height: 30px;
+	font-size: 30px;
+}
+
+
+

@@ -12,6 +12,10 @@ var PTSApp = angular.module("PTSApp", [
 	"MessageCenterModule"
 	]).run(["$rootScope", "$injector", function($rootScope, $injector) {
 
+	    	//Manages the title changing of routes
+		$rootScope.$on('$routeChangeSuccess', function (event, current, previous) {
+	    	        $rootScope.title = current.$$route.title;
+		});
 		$rootScope.StatusList = [
 			{status: "DEFINED", text : "Defined"},
 			{status: "IN_PROGRESS", text: "In Progress"},
@@ -74,48 +78,63 @@ PTSApp.config(["RestangularProvider", function(RestangularProvider) {
 PTSApp.config(["$routeProvider",
 	function($routeProvider) {
 		$routeProvider.when("/login", {
+		    	title: "Login",
 			templateUrl: "templates/Login.html",
 			controller: "LoginController"
 		}).when("/", {
+		        title: "Home",
 			templateUrl: "templates/Index.html",
 			controller: "IndexContoller"
 		}).when("/register", {
+		    	title: "Register",
 			templateUrl: "templates/Register.html",
 			controller: "RegistrationController"
 		}).when("/register/:email", {
+		    	title: "Register",
 			templateUrl: "templates/Register.html",
 			controller: "RegistrationController"
 		}).when("/teams", {
+		    	title: "Teams",
 			templateUrl: "templates/TeamList.html",
 			controller: "TeamListController"
 		}).when("/teams/:id/projects", {
+		    	title: "Projects",
 		 	templateUrl: "templates/ProjectList.html",
 			controller: "ProjectListController"
 		}).when("/teams/:id/users", {
+		    	title: "Teammembers",
 		 	templateUrl: "templates/TeamView.html",
 			controller: "TeamViewController"
 		}).when("/teams/:id/stories", {
+		    	title: "Stories",
 			templateUrl: "templates/UserStoryList.html",
-			controller: "UserStoryListController"
+			controller: "UserStoryListController"		
 		}).when("/teams/:id/backlog", {
+		    	title: "Team backlog",
 		 	templateUrl: "templates/Backlog.html",
 		 	controller: "BacklogController"
 		}).when("/teams/:id/backlog/:projectId", {
+		    	title: "Project backlog",
 		 	templateUrl: "templates/Backlog.html",
 		 	controller: "BacklogController"
 		}).when("/teams/:id/iterations", {
+		    	title: "Sprints",
 		 	templateUrl: "templates/IterationList.html",
 			controller: "IterationListController"
 		}).when("/story/:id/tasks", {
+		    	title: "Story",
 			templateUrl: "templates/TaskList.html",
 			controller: "TaskListController"
 		}).when("/teams/:id/taskboard", {
+		    	title: "Taskboard",
 		 	templateUrl: "templates/TaskBoard.html",
 			controller: "BacklogController"
 		}).when("/teams/:id/taskboard/:projectId", {
+		    	title: "Project taskboard",
 		 	templateUrl: "templates/TaskBoard.html",
 			controller: "BacklogController"
 		}).when("/dashboard", {
+		    	title: "Dashboard",
 			templateUrl: "templates/Dashboard.html",
 			controller: "DashboardController"
 		});

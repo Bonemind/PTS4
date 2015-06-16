@@ -1,9 +1,4 @@
 <div class="row">
-    <div class="col-xs-2 col-xs-offset-5">
-    	<h1 class="center">Backlog</h1>
-    </div>
-</div>
-<div class="row">
     <div class="col-xs-4">
 	<div class="form-inline">
 	    <label for="iterationSelect">Sprint:</label>
@@ -20,7 +15,7 @@
 	<div class="panel panel-default" ng-repeat="story in stories | filter: {status: 'DEFINED'} | orderBy: '-priority'" dnd-draggable="story" dnd-moved="storyMoved(story)" dnd-effect-allowed="move">
 	    <div class="panel-heading">
 		<a href="#/story/{{story.id}}/tasks">{{ story.name }}</a>
-		<span class="label pull-right" ng-class="(story.type==='DEFECT') ? 'label-danger' : 'label-primary'"><pts-type type="story.type"></pts-type></span>
+		<span class="label pull-right" ng-class="(story.type==='DEFECT') ? 'label-danger' : 'label-info'"><pts-type type="story.type"></pts-type></span>
 	    </div>
 	    <div class="panel-body">
 		    {{ story.description }}
@@ -32,11 +27,13 @@
 	</div>
     </div>
     <div class="col-xs-3 min-h-100" dnd-list="stories" dnd-drop="storyDropped(event, index, item, external, type, 'IN_PROGRESS')">
-	<h1 style="display:inline-block">In Progress</h1> <span class="pull-right" style="display:inline-block" ng-show="team.kanbanRules">Max: {{ team.kanbanRules.maxInProgress }}</span>
+	<div class="row">
+		<h1 style="display:inline-block">In Progress</h1> <span class="pull-right" style="display:inline-block" ng-show="team.kanbanRules">Max: {{ team.kanbanRules.maxInProgress }}</span>
+	</div>
 	<div class="panel panel-default" ng-repeat="story in stories | filter: {status: 'IN_PROGRESS'} | orderBy: '-priority'" dnd-draggable="story">
 	    <div class="panel-heading">
 		<a href="#/story/{{story.id}}/tasks">{{ story.name }}</a>
-		<span class="label pull-right" ng-class="(story.type==='DEFECT') ? 'label-danger' : 'label-primary'"><pts-type type="story.type"></pts-type></span>
+		<span class="label pull-right" ng-class="(story.type==='DEFECT') ? 'label-danger' : 'label-info'"><pts-type type="story.type"></pts-type></span>
 	    </div>
 	    <div class="panel-body">
 		    {{ story.description }}
@@ -47,11 +44,13 @@
 	</div>
     </div>
     <div class="col-xs-3 min-h-100" dnd-list="stories" dnd-drop="storyDropped(event, index, item, external, type, 'DONE')">
+	    <div class="row">
 	<h1 style="display:inline-block">Done</h1> <span class="pull-right" style="display:inline-block" ng-show="team.kanbanRules">Max: {{ team.kanbanRules.maxDone }}</span>
+	</div>
 	<div class="panel panel-default" ng-repeat="story in stories | filter: {status: 'DONE'} | orderBy: '-priority'" dnd-draggable="story">
 	    <div class="panel-heading">
 		<a href="#/story/{{story.id}}/tasks">{{ story.name }}</a>
-		<span class="label pull-right" ng-class="(story.type==='DEFECT') ? 'label-danger' : 'label-primary'"><pts-type type="story.type"></pts-type></span>
+		<span class="label pull-right" ng-class="(story.type==='DEFECT') ? 'label-danger' : 'label-info'"><pts-type type="story.type"></pts-type></span>
 	    </div>
 	    <div class="panel-body">
 		    {{ story.description }}
@@ -66,7 +65,7 @@
 	<div class="panel panel-default" ng-repeat="story in stories | filter: {status: 'ACCEPTED'}" dnd-draggable="story">
 	    <div class="panel-heading">
 		<a href="#/story/{{story.id}}/tasks">{{ story.name }}</a>
-		<span class="label pull-right" ng-class="(story.type==='DEFECT') ? 'label-danger' : 'label-primary'"><pts-type type="story.type"></pts-type></span>
+		<span class="label pull-right" ng-class="(story.type==='DEFECT') ? 'label-danger' : 'label-info'"><pts-type type="story.type"></pts-type></span>
 	    </div>
 	    <div class="panel-body">
 		    {{ story.description }}
