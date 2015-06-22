@@ -42,7 +42,7 @@ public class VersionOneImporter extends Importer {
 
     public VersionOneImporter() {
         this.accesToken = "1.2f+cgMtkfPWXzrLy3LrOuTJR9gQ=";
-        this.baseUrl = "https://www52.v1host.com/sdf/";
+        this.baseUrl = "https://www52.v1host.com/sdf";
     }
 
     /***
@@ -88,6 +88,8 @@ public class VersionOneImporter extends Importer {
      * @throws APIException
      */
     public Project importProject(String nameOfProject, Team team, User productOwner) throws OidException, ConnectionException, APIException {
+        if (services == null) throw new InvalidParameterException("first init  the connection");
+
         // setup query
         IAssetType projects = services.getMeta().getAssetType("Scope");
         Query query = new Query(projects);
@@ -128,37 +130,12 @@ public class VersionOneImporter extends Importer {
         // get all stories
         HashMap<Integer, Story> stories = importStories(project, projectIdentifier, iterations);
 
-        // get all tasks & get all defects
+        // get all tasks, get all defects & get all tests
         importTasks(project, projectIdentifier, stories);
         importDefects(project, projectIdentifier, iterations);
-
-        System.out.println(project.getName());
+        importTests(project, projectIdentifier, stories);
 
         List<Story> testStories = project.getStories();
-
-        System.out.println("Main Test:");
-        for (Story story : testStories){
-            System.out.println(story.getName());
-            System.out.println(story.getIteration().getName());
-
-            for(Task task : story.getTasks()){
-                System.out.println(task.getName());
-                System.out.println(task.getStory().getName());
-            }
-
-            for (Iteration iteration : team.getIterations()){
-                System.out.println(iteration.getName());
-                for (Story storyIteration : iteration.getStories()){
-                    System.out.println(storyIteration.getName());
-                    System.out.println(storyIteration.getIteration().getName());
-
-                    for(Task taskIteration : storyIteration.getTasks()){
-                        System.out.println(taskIteration.getName());
-                        System.out.println(taskIteration.getStory().getName());
-                    }
-                }
-            }
-        }
 
         return project;
     }
@@ -173,7 +150,7 @@ public class VersionOneImporter extends Importer {
      * @throws APIException
      * @throws OidException
      */
-    public HashMap<Integer, Story> importStories(Project project, int projectIdentifier, HashMap<Integer, Iteration> iterations) throws ConnectionException, APIException, OidException {
+    private HashMap<Integer, Story> importStories(Project project, int projectIdentifier, HashMap<Integer, Iteration> iterations) throws ConnectionException, APIException, OidException {
         // get all available statuses
         HashMap<Integer, Story.Status> statuses = importStoryStatuses();
 
@@ -274,7 +251,7 @@ public class VersionOneImporter extends Importer {
      * @throws APIException
      * @throws OidException
      */
-    public void importDefects(Project project, int projectIdentifier, HashMap<Integer, Iteration> iterations) throws ConnectionException, APIException, OidException {
+    private void importDefects(Project project, int projectIdentifier, HashMap<Integer, Iteration> iterations) throws ConnectionException, APIException, OidException {
         // get all available statuses
         HashMap<Integer, Story.Status> statuses = importStoryStatuses();
 
@@ -362,7 +339,7 @@ public class VersionOneImporter extends Importer {
      * @throws APIException
      * @throws OidException
      */
-    public HashMap<Integer, Task> importTasks(Project project, int projectIdentifier, HashMap<Integer, Story> stories) throws ConnectionException, APIException, OidException {
+    private HashMap<Integer, Task> importTasks(Project project, int projectIdentifier, HashMap<Integer, Story> stories) throws ConnectionException, APIException, OidException {
         // get all available statuses
         HashMap<Integer, Task.Status> statuses = importTaskStatuses();
 
@@ -444,7 +421,7 @@ public class VersionOneImporter extends Importer {
      * @throws APIException
      * @throws OidException
      */
-    public HashMap<Integer, Iteration> importIterations(Team team) throws ConnectionException, APIException, OidException {
+    private HashMap<Integer, Iteration> importIterations(Team team) throws ConnectionException, APIException, OidException {
         // create returnValue
         HashMap<Integer, Iteration> returnValue = new HashMap<>();
 
@@ -493,6 +470,74 @@ public class VersionOneImporter extends Importer {
         return returnValue;
     }
 
+    /***
+     * imports all the tests from the given project
+     * @param project
+     * @param stories
+     */
+    private void importTests(Project project, int projectIdentifier, HashMap<Integer, Story> stories) throws ConnectionException, APIException, OidException {
+        // setup Query
+        IAssetType tests = services.getMeta().getAssetType("Test");
+        Query query = new Query(tests);
+
+        // setup attributes that are used in query
+        IAttributeDefinition nameOfTestAtr = tests.getAttributeDefinition("Name");
+        IAttributeDefinition storyAtr = tests.getAttributeDefinition("Super");
+        IAttributeDefinition description = tests.getAttributeDefinition("Description");
+        IAttributeDefinition parent = tests.getAttributeDefinition("Parent");
+        IAttributeDefinition estimate = tests.getAttributeDefinition("Estimate");
+        IAttributeDefinition projectVO = tests.getAttributeDefinition("Scope");
+        IAttributeDefinition status = tests.getAttributeDefinition("Status");
+        IAttributeDefinition identifier = tests.getAttributeDefinition("ID");
+
+        // add attributes to query
+        query.getSelection().add(nameOfTestAtr);
+        query.getSelection().add(projectVO);
+        query.getSelection().add(description);
+        query.getSelection().add(estimate);
+        query.getSelection().add(status);
+        query.getSelection().add(identifier);
+        query.getSelection().add(parent);
+
+        // get result from query
+        QueryResult queryResult = services.retrieve(query);
+
+        for (Asset testInResult : queryResult.getAssets()){
+            if (projectIdentifier != (parseInt(testInResult.getAttribute(projectVO).toString()))) continue;
+
+            // parse name & description
+            String nameOfTest = parseString(testInResult.getAttribute(nameOfTestAtr).toString());
+            String descriptionOfResult = parseString(testInResult.getAttribute(description).toString());
+
+
+            // parse the estimateOfPoints
+            int estimateOfPoints = 0;
+            if (!parseString(testInResult.getAttribute(estimate).toString()).toLowerCase().equals("null")) {
+                estimateOfPoints = (int) Math.round(Double.parseDouble(parseString(testInResult.getAttribute(estimate).toString())));
+            }
+
+            // parse the identifier
+            int identifierOfResult = parseInt(testInResult.getAttribute(identifier).toString());
+
+            // parse the parent
+            int parentIdentifier = parseInt(testInResult.getAttribute(parent).toString());
+            Story story = stories.get(parentIdentifier);
+
+            // create test
+            Test test = new Test(story, nameOfTest, descriptionOfResult);
+
+            // set relationships
+            story.getTests().add(test);
+        }
+    }
+
+    /***
+     * imports all the story statuses available and match them to the native Story enum
+     * @return
+     * @throws ConnectionException
+     * @throws APIException
+     * @throws OidException
+     */
     private HashMap<Integer, Story.Status> importStoryStatuses() throws ConnectionException, APIException, OidException {
         // create returnValue
         HashMap<Integer, Story.Status> returnValue = new HashMap<>();
@@ -538,6 +583,13 @@ public class VersionOneImporter extends Importer {
         return returnValue;
     }
 
+    /***
+     * imports all the task statuses available and match them to the native Story enum
+     * @return
+     * @throws ConnectionException
+     * @throws APIException
+     * @throws OidException
+     */
     private HashMap<Integer, Task.Status> importTaskStatuses() throws ConnectionException, APIException, OidException {
         // create returnValue
         HashMap<Integer, Task.Status> returnValue = new HashMap<>();

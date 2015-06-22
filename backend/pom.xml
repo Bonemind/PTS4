@@ -193,5 +193,10 @@
             <artifactId>VersionOne.SDK.Java.APIClient</artifactId>
             <version>15.0.0</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.4</version>
+        </dependency>
     </dependencies>
 </project>

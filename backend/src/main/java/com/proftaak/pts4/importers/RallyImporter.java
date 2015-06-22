@@ -1,4 +1,4 @@
-package com.proftaak.pts4.imports;
+package com.proftaak.pts4.importers;
 
 import com.avaje.ebean.Ebean;
 import com.proftaak.pts4.database.tables.*;
