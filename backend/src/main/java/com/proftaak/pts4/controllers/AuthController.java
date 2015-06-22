@@ -13,6 +13,7 @@ import com.proftaak.pts4.rest.annotations.Controller;
 import com.proftaak.pts4.rest.annotations.Field;
 import com.proftaak.pts4.rest.annotations.RequireAuth;
 import com.proftaak.pts4.rest.annotations.Route;
+import com.proftaak.pts4.rest.response.RawResponse;
 import org.glassfish.grizzly.http.util.HttpStatus;
 
 /**

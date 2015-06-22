@@ -4,43 +4,23 @@ import com.avaje.ebean.Ebean;
 import com.proftaak.pts4.database.EbeanEx;
 import com.proftaak.pts4.database.tables.PendingInvitation;
 import com.proftaak.pts4.database.tables.User;
-import com.proftaak.pts4.rest.HTTPException;
-import com.proftaak.pts4.rest.HTTPMethod;
-import com.proftaak.pts4.rest.Payload;
-import com.proftaak.pts4.rest.RequestData;
+import com.proftaak.pts4.rest.*;
 import com.proftaak.pts4.rest.annotations.Controller;
 import com.proftaak.pts4.rest.annotations.Field;
 import com.proftaak.pts4.rest.annotations.RequireAuth;
 import com.proftaak.pts4.rest.annotations.Route;
+import com.proftaak.pts4.rest.response.JSONResponse;
+import com.proftaak.pts4.rest.response.ResponseFactory;
 import org.glassfish.grizzly.http.util.HttpStatus;
 
 import javax.persistence.PersistenceException;
 import java.util.Collection;
-import java.util.TreeSet;
 
 /**
  * @author Michon
  */
 @Controller
 public class UserController {
-
-    /**
-     * GET /user
-     * Returns a sorted list of usernames instead of users
-     */
-    @RequireAuth
-    @Route(method = HTTPMethod.GET)
-    public static Collection<String> getAllHandler(RequestData requestData) throws Exception {
-        Collection<String> usernames = new TreeSet<>();
-
-        // Get the username of every user
-        for (User user : Ebean.find(User.class).findList()) {
-            usernames.add(user.getName());
-        }
-
-        return usernames;
-    }
-
     /**
      * GET /user/1
      */
@@ -52,6 +32,16 @@ public class UserController {
 
         // Return the user
         return user;
+    }
+
+    /**
+     * GET /user
+     * Returns a sorted list of usernames instead of users
+     */
+    @RequireAuth
+    @Route(method = HTTPMethod.GET)
+    public static JSONResponse<Collection<String>> getAllHandler(RequestData requestData) throws Exception {
+        return ResponseFactory.queryToList(requestData, User.class, Ebean.createQuery(User.class), User::getName);
     }
 
     /**

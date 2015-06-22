@@ -1,6 +1,8 @@
 package com.proftaak.pts4.database.tables;
 
-import com.proftaak.pts4.database.DatabaseModel;
+import com.avaje.ebean.Ebean;
+import com.avaje.ebean.Query;
+import com.proftaak.pts4.database.IDatabaseModel;
 import com.proftaak.pts4.json.ToPKTransformer;
 import flexjson.JSON;
 
@@ -14,7 +16,7 @@ import java.util.List;
  */
 @Entity
 @Table(name = "teams")
-public class Team implements DatabaseModel<Integer> {
+public class Team implements IDatabaseModel<Integer> {
     public static final String FIELD_ID = "id";
     public static final String FIELD_NAME = "name";
     public static final String FIELD_SCRUM_MASTER = "scrum_master";
@@ -152,5 +154,14 @@ public class Team implements DatabaseModel<Integer> {
 
     public List<PendingInvitation> getPendingInvitations() {
         return this.pendingInvitations;
+    }
+
+    /**
+     * Build a query to get all teams to which a given user belongs
+     */
+    public static Query<Team> queryForUser(User user) {
+        Query<Team> query = Ebean.createQuery(Team.class);
+        query.where().eq("users." + User.FIELD_ID, user.getId());
+        return query;
     }
 }

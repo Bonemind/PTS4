@@ -23,7 +23,7 @@ public class KanbanRules {
     private Integer maxInProgress;
 
     /**
-     * The maximum number of stories that can be IN_PROGRESS at the same time
+     * The maximum number of stories that can be DONE at the same time
      */
     @Column(name = FIELD_MAX_DONE)
     private Integer maxDone;

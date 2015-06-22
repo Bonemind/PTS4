@@ -1,7 +1,7 @@
 package com.proftaak.pts4.database.tables;
 
 import com.avaje.ebean.Ebean;
-import com.proftaak.pts4.database.DatabaseModel;
+import com.proftaak.pts4.database.IDatabaseModel;
 import com.proftaak.pts4.utils.MailUtils;
 import com.proftaak.pts4.utils.PropertiesUtils;
 
@@ -16,7 +16,7 @@ import java.util.Scanner;
  */
 @Entity
 @Table(name = "pending_invitations")
-public class PendingInvitation implements DatabaseModel<Integer> {
+public class PendingInvitation implements IDatabaseModel<Integer> {
     public static final String FIELD_ID = "id";
     public static final String FIELD_EMAIL = "email";
     public static final String FIELD_TEAM = "team";
