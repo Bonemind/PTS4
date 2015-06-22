@@ -278,7 +278,8 @@ public class SwitchBoard extends HttpHandler {
 
     /**
      * Process the annotations of the route that is being accessed
-     *  @param method      The method to process the annotations of
+     *
+     * @param method      The method to process the annotations of
      * @param requestData The data for the current request
      * @param warnings
      */
@@ -323,7 +324,8 @@ public class SwitchBoard extends HttpHandler {
 
     /**
      * Call all pre-request methods in the current controller
-     *  @param method      The method to call the pre-request methods for
+     *
+     * @param method      The method to call the pre-request methods for
      * @param requestData The data for the current request
      * @param warnings
      */

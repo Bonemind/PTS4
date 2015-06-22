@@ -10,7 +10,7 @@ import org.glassfish.grizzly.http.util.HttpStatus;
 public class QueryParameter {
     /**
      * The key of the query parameter
-     *
+     * <p>
      * This is everything before the operator
      */
     private String key;
@@ -22,7 +22,7 @@ public class QueryParameter {
 
     /**
      * The value of the query parameter
-     *
+     * <p>
      * This is everything after the operator
      */
     private String value;
@@ -47,7 +47,7 @@ public class QueryParameter {
 
     /**
      * Parse a NameValuePair into a QueryParameter
-     *
+     * <p>
      * The already made split on = is ignored, and instead we use our own operators from the Operator class
      * This is done by looking for the symbols defined in Operator in the string, and splitting it on that
      * Everything before the operator becomes the key, everything after it becomes the value

@@ -2,12 +2,10 @@ package com.proftaak.pts4.rest.response;
 
 import com.proftaak.pts4.json.JSONSerializerFactory;
 import flexjson.JSONSerializer;
-import org.apache.commons.lang3.StringUtils;
 import org.glassfish.grizzly.http.server.Response;
 import org.glassfish.grizzly.http.util.HttpStatus;
 
-import javax.management.openmbean.KeyAlreadyExistsException;
-import java.util.*;
+import java.util.Map;
 
 /**
  * Created by Michon on 17-6-2015.

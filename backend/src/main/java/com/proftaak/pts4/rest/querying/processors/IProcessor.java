@@ -3,8 +3,8 @@ package com.proftaak.pts4.rest.querying.processors;
 import com.avaje.ebean.Query;
 import com.proftaak.pts4.database.IDatabaseModel;
 import com.proftaak.pts4.rest.HTTPException;
-import com.proftaak.pts4.rest.response.metadata.Metadata;
 import com.proftaak.pts4.rest.querying.QueryData;
+import com.proftaak.pts4.rest.response.metadata.Metadata;
 import com.proftaak.pts4.utils.JSONUtils;
 import flexjson.BeanProperty;
 import org.apache.commons.lang3.StringUtils;
@@ -21,11 +21,11 @@ public interface IProcessor {
     /**
      * Apply query parameters taken from the URL query to the given query
      *
-     * @param requestData    The current request scope
-     * @param metadata       The metadata object
-     * @param modelCls       The class that is being queried/filtered
-     * @param query          The prepared query
-     * @param <T>            The class that is being queried/filtered
+     * @param requestData The current request scope
+     * @param metadata    The metadata object
+     * @param modelCls    The class that is being queried/filtered
+     * @param query       The prepared query
+     * @param <T>         The class that is being queried/filtered
      * @throws HTTPException If any invalid query parameters are found
      */
     <T extends IDatabaseModel> void apply(QueryData queryData, Metadata metadata, Class<T> modelCls, Query<T> query) throws HTTPException;

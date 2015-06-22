@@ -85,14 +85,14 @@ public class StoryController {
 
         // Create the new user story
         Story story = new Story(
-            project,
-            EbeanEx.find(Iteration.class, requestData.getPayload().get("iteration")),
-            Story.Type.valueOf(requestData.getPayload().getOrDefault("type", Story.Type.USER_STORY.toString()).toString()),
-            requestData.getPayload().getString("name"),
-            requestData.getPayload().getString("description"),
-            status,
-            0, // Priority
-            requestData.getPayload().getInt("points", 0)
+                project,
+                EbeanEx.find(Iteration.class, requestData.getPayload().get("iteration")),
+                Story.Type.valueOf(requestData.getPayload().getOrDefault("type", Story.Type.USER_STORY.toString()).toString()),
+                requestData.getPayload().getString("name"),
+                requestData.getPayload().getString("description"),
+                status,
+                0, // Priority
+                requestData.getPayload().getInt("points", 0)
         );
 
         // Check Kanban rules

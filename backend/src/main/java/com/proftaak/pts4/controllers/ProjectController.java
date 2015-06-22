@@ -82,10 +82,10 @@ public class ProjectController {
     public static Project postHandler(RequestData requestData) throws Exception {
         // Create the new project
         Project project = new Project(
-            EbeanEx.require(EbeanEx.find(Team.class, requestData.getPayload().get("team"))),
-            EbeanEx.require(EbeanEx.find(User.class, User.FIELD_NAME, requestData.getPayload().get("productOwner"))),
-            requestData.getPayload().getString("name"),
-            requestData.getPayload().getString("description")
+                EbeanEx.require(EbeanEx.find(Team.class, requestData.getPayload().get("team"))),
+                EbeanEx.require(EbeanEx.find(User.class, User.FIELD_NAME, requestData.getPayload().get("productOwner"))),
+                requestData.getPayload().getString("name"),
+                requestData.getPayload().getString("description")
         );
         Ebean.save(project);
 

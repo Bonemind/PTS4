@@ -29,12 +29,12 @@ public class RallyImporter {
     private static Map<String, Object> newObjects_refObjectUUID = new HashMap<>();
 
 
-
     /**
      * Import function for a project from rally. (rally exports individual files).
-     * @param importFiles   A set of files which are directly rally csv export files.
-     * @param team  The team to add the project in the import to.
-     * @return  True if the import was successful, otherwise false.
+     *
+     * @param importFiles A set of files which are directly rally csv export files.
+     * @param team        The team to add the project in the import to.
+     * @return True if the import was successful, otherwise false.
      */
     public synchronized static boolean importRally(Set<File> importFiles, Team team) {
         // Set the team available for all methods
@@ -50,7 +50,7 @@ public class RallyImporter {
 
                 RallyImporter.createIterations(document);
             } catch (Exception exception) {
-                System.err.println( exception.getClass() + " exception caught while importing iterations");
+                System.err.println(exception.getClass() + " exception caught while importing iterations");
             }
         }
 
@@ -123,7 +123,7 @@ public class RallyImporter {
 
     private static void createIteration(Node iterationNode) {
         // Create the project, only for the first iteration
-        if(RallyImporter.newProject == null){
+        if (RallyImporter.newProject == null) {
             System.out.println("Creating a project");
             RallyImporter.newProject = new Project();
             RallyImporter.team.getProjects().add(newProject);
@@ -187,7 +187,7 @@ public class RallyImporter {
         String description = RallyImporter.getNodeText(storyNode, "Description");
 
         // Set points to 0, if null
-        if(points == null){
+        if (points == null) {
             points = "0";
         }
 
@@ -208,7 +208,7 @@ public class RallyImporter {
 
         // Get the type
         Story.Type type = Story.Type.USER_STORY;
-        if(isDefect){
+        if (isDefect) {
             type = Story.Type.DEFECT;
         }
 
@@ -235,9 +235,9 @@ public class RallyImporter {
         } else {
             // Otherwise look deeper for tasks
             NodeList children = node.getChildNodes();
-            for(int i = 0; i < children.getLength(); i++){
+            for (int i = 0; i < children.getLength(); i++) {
                 Node child = children.item(i);
-                if(child.getNodeType() == Node.ELEMENT_NODE){
+                if (child.getNodeType() == Node.ELEMENT_NODE) {
                     RallyImporter.createTasks(child);
                 }
             }
@@ -254,10 +254,10 @@ public class RallyImporter {
         String description = RallyImporter.getNodeText(taskNode, "Description");
 
         // Set estimate and timeTODO to 0, if null
-        if(estimate == null){
+        if (estimate == null) {
             estimate = "0.0";
         }
-        if(timeTodo == null){
+        if (timeTodo == null) {
             timeTodo = "0.0";
         }
 
@@ -285,7 +285,6 @@ public class RallyImporter {
         story.getTasks().add(newTask);
         newTask.setTimeSpent(timeSpent);
     }
-
 
 
     private static String getNodeText(Node parent, String childnodeName) {
@@ -325,8 +324,7 @@ public class RallyImporter {
     }
 
 
-
-    private static void reset(){
+    private static void reset() {
         RallyImporter.team = null;
         RallyImporter.newProject = null;
         newObjects_refObjectUUID = new HashMap<>();

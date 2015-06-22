@@ -1,8 +1,8 @@
 package com.proftaak.pts4.database.tables;
 
-import com.avaje.ebean.Query;
 import com.avaje.ebean.Ebean;
 import com.avaje.ebean.Expr;
+import com.avaje.ebean.Query;
 import com.proftaak.pts4.database.IDatabaseModel;
 import com.proftaak.pts4.json.ToPKTransformer;
 import flexjson.JSON;

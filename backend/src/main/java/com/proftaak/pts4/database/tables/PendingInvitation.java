@@ -41,7 +41,8 @@ public class PendingInvitation implements IDatabaseModel<Integer> {
     @JoinColumn(name = FIELD_TEAM)
     private Team team;
 
-    public PendingInvitation() {}
+    public PendingInvitation() {
+    }
 
     public PendingInvitation(String email, Team team) {
         this.email = email;

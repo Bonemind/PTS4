@@ -2,7 +2,8 @@ package com.proftaak.pts4.controllers;
 
 import com.avaje.ebean.Ebean;
 import com.proftaak.pts4.database.EbeanEx;
-import com.proftaak.pts4.database.tables.*;
+import com.proftaak.pts4.database.tables.Story;
+import com.proftaak.pts4.database.tables.Test;
 import com.proftaak.pts4.rest.*;
 import com.proftaak.pts4.rest.annotations.*;
 import com.proftaak.pts4.rest.response.JSONResponse;
@@ -66,9 +67,9 @@ public class TestController {
 
         // Create the new test
         Test test = new Test(
-            story,
-            requestData.getPayload().getString("name"),
-            requestData.getPayload().getString("description")
+                story,
+                requestData.getPayload().getString("name"),
+                requestData.getPayload().getString("description")
         );
         Ebean.save(test);
 

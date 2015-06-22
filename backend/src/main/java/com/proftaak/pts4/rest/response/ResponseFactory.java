@@ -11,7 +11,7 @@ import com.proftaak.pts4.rest.querying.processors.PaginationProcessor;
 import com.proftaak.pts4.rest.querying.processors.SortProcessor;
 import org.apache.commons.collections4.IteratorUtils;
 
-import java.util.*;
+import java.util.Collection;
 import java.util.function.Function;
 
 /**
@@ -21,7 +21,7 @@ public class ResponseFactory {
     /**
      * The processors, in order of use
      */
-    private static IProcessor[] processors = new IProcessor[] {
+    private static IProcessor[] processors = new IProcessor[]{
             new FilteringProcessor(),
             new SortProcessor(),
             new PaginationProcessor(),
@@ -30,10 +30,10 @@ public class ResponseFactory {
     /**
      * Convert a query into a list, using filters and pagination from the query parameters of the URL
      *
-     * @param  requestData The current request context
-     * @param  modelCls    The model class that is being queried/filtered
-     * @param  query       The prepared query
-     * @param  <T>         The model class that is being queried/filtered
+     * @param requestData The current request context
+     * @param modelCls    The model class that is being queried/filtered
+     * @param query       The prepared query
+     * @param <T>         The model class that is being queried/filtered
      * @return The JSON response with the results, and all relevant metadata
      * @throws HTTPException If any of the URL's query parameters are invalid
      */
@@ -43,7 +43,7 @@ public class ResponseFactory {
 
     /**
      * Like queryToList(RequestData, Class<T>, Query<T>), but with the collection mapped through a function
-     *
+     * <p>
      * What this essentially means is that each of the items in the resulting list will be fed to a mapping function,
      * and the returned value is used instead
      *

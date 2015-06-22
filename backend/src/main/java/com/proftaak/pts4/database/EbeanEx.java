@@ -5,9 +5,6 @@ import com.avaje.ebean.Query;
 import com.proftaak.pts4.rest.HTTPException;
 
 import javax.persistence.JoinColumn;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import java.lang.reflect.Field;
 import java.util.stream.Stream;
 
@@ -90,7 +87,7 @@ public class EbeanEx {
      * @param owners    The owning instances
      * @param <T>       The owned model class
      * @param <R>       The owning model class
-     * @return          The query
+     * @return The query
      */
     @SafeVarargs
     public static <T extends IDatabaseModel, R extends IDatabaseModel> Query<T> queryBelongingTo(Class<T> ownedCls, Class<R> owningCls, R... owners) throws Exception {
@@ -112,7 +109,7 @@ public class EbeanEx {
      * @param owners    The owning instances
      * @param <T>       The owned model class
      * @param <R>       The owning model class
-     * @return          The query
+     * @return The query
      */
     public static <T extends IDatabaseModel, R extends IDatabaseModel> Query<T> queryBelongingTo(Class<T> ownedCls, Class<R> owningCls, Query<R> owningQuery) throws Exception {
         Query<T> query = Ebean.find(ownedCls);

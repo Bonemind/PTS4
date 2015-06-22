@@ -2,7 +2,9 @@ package com.proftaak.pts4.controllers;
 
 import com.avaje.ebean.Ebean;
 import com.proftaak.pts4.database.EbeanEx;
-import com.proftaak.pts4.database.tables.*;
+import com.proftaak.pts4.database.tables.Story;
+import com.proftaak.pts4.database.tables.Task;
+import com.proftaak.pts4.database.tables.User;
 import com.proftaak.pts4.rest.*;
 import com.proftaak.pts4.rest.annotations.*;
 import com.proftaak.pts4.rest.response.JSONResponse;
@@ -76,12 +78,12 @@ public class TaskController {
 
         // Create the new task
         Task task = new Task(
-            story,
-            assignedOwner,
-            requestData.getPayload().getString("name"),
-            requestData.getPayload().getString("description"),
-            requestData.getPayload().getDouble("estimate", 0.0),
-            Task.Status.valueOf(requestData.getPayload().getOrDefault("status", Task.Status.DEFINED.toString()).toString())
+                story,
+                assignedOwner,
+                requestData.getPayload().getString("name"),
+                requestData.getPayload().getString("description"),
+                requestData.getPayload().getDouble("estimate", 0.0),
+                Task.Status.valueOf(requestData.getPayload().getOrDefault("status", Task.Status.DEFINED.toString()).toString())
         );
         Ebean.save(task);
 

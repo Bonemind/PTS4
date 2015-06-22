@@ -1,13 +1,12 @@
 package com.proftaak.pts4.utils;
 
-import com.proftaak.pts4.database.IDatabaseModel;
 import com.proftaak.pts4.json.JSONSerializerFactory;
 import flexjson.*;
-import org.apache.commons.lang3.StringUtils;
 
-import javax.persistence.Column;
-import javax.persistence.JoinColumn;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * @author Michon

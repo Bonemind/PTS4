@@ -4,7 +4,10 @@ import com.avaje.ebean.Ebean;
 import com.proftaak.pts4.database.EbeanEx;
 import com.proftaak.pts4.database.tables.PendingInvitation;
 import com.proftaak.pts4.database.tables.User;
-import com.proftaak.pts4.rest.*;
+import com.proftaak.pts4.rest.HTTPException;
+import com.proftaak.pts4.rest.HTTPMethod;
+import com.proftaak.pts4.rest.Payload;
+import com.proftaak.pts4.rest.RequestData;
 import com.proftaak.pts4.rest.annotations.Controller;
 import com.proftaak.pts4.rest.annotations.Field;
 import com.proftaak.pts4.rest.annotations.RequireAuth;
@@ -54,9 +57,9 @@ public class UserController {
     public static User postHandler(RequestData requestData) throws Exception {
         // Create the new user
         User user = new User(
-            requestData.getPayload().get("email").toString(),
-            requestData.getPayload().get("name").toString(),
-            requestData.getPayload().get("password").toString()
+                requestData.getPayload().get("email").toString(),
+                requestData.getPayload().get("name").toString(),
+                requestData.getPayload().get("password").toString()
         );
         try {
             Ebean.save(user);
@@ -66,9 +69,9 @@ public class UserController {
 
         // Check if there are any pending invitations for this email address
         Collection<PendingInvitation> pendingInvitations = Ebean.find(PendingInvitation.class)
-            .where()
-            .eq(PendingInvitation.FIELD_EMAIL, requestData.getPayload().get("email").toString())
-            .findList();
+                .where()
+                .eq(PendingInvitation.FIELD_EMAIL, requestData.getPayload().get("email").toString())
+                .findList();
         for (PendingInvitation invitation : pendingInvitations) {
             user.getTeams().add(invitation.getTeam());
             Ebean.delete(invitation);

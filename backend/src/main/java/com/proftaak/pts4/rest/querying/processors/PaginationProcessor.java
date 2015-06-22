@@ -25,12 +25,12 @@ public class PaginationProcessor implements IProcessor {
     /**
      * Parse a parameter for an integer value, and bind it between an upper and lower limit
      *
-     * @param  queryData    The query data
-     * @param  metadata     The metadata object on which to set warnings
-     * @param  paramName    The parameter name
-     * @param  defaultValue The default value
-     * @param  minValue     The lower limit
-     * @param  maxValue     The upper limit
+     * @param queryData    The query data
+     * @param metadata     The metadata object on which to set warnings
+     * @param paramName    The parameter name
+     * @param defaultValue The default value
+     * @param minValue     The lower limit
+     * @param maxValue     The upper limit
      * @return The integer value
      */
     private static int parseAndBound(QueryData queryData, Metadata metadata, String paramName, int defaultValue, int minValue, int maxValue) {

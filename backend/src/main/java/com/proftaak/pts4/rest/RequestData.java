@@ -3,9 +3,7 @@ package com.proftaak.pts4.rest;
 import com.avaje.ebean.Ebean;
 import com.proftaak.pts4.database.tables.Token;
 import com.proftaak.pts4.database.tables.User;
-import com.proftaak.pts4.json.JSONSerializerFactory;
 import flexjson.JSONDeserializer;
-import flexjson.JSONSerializer;
 import org.glassfish.grizzly.http.server.Request;
 import org.glassfish.grizzly.http.util.HttpStatus;
 

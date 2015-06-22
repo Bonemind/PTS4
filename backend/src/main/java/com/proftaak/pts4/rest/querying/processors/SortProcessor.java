@@ -3,7 +3,6 @@ package com.proftaak.pts4.rest.querying.processors;
 import com.avaje.ebean.OrderBy;
 import com.avaje.ebean.Query;
 import com.proftaak.pts4.database.IDatabaseModel;
-import com.proftaak.pts4.rest.response.ResponseFactory;
 import com.proftaak.pts4.rest.HTTPException;
 import com.proftaak.pts4.rest.querying.Operator;
 import com.proftaak.pts4.rest.querying.QueryData;

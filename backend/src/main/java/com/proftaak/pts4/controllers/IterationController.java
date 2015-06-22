@@ -80,11 +80,11 @@ public class IterationController {
     public static Iteration postHandler(RequestData requestData) throws Exception {
         // Create the new iteration
         Iteration iteration = new Iteration(
-            EbeanEx.require(EbeanEx.find(Team.class, requestData.getPayload().get("team"))),
-            LocalDate.parse(requestData.getPayload().getString("start")),
-            LocalDate.parse(requestData.getPayload().getString("end")),
-            requestData.getPayload().getString("name"),
-            requestData.getPayload().getString("description")
+                EbeanEx.require(EbeanEx.find(Team.class, requestData.getPayload().get("team"))),
+                LocalDate.parse(requestData.getPayload().getString("start")),
+                LocalDate.parse(requestData.getPayload().getString("end")),
+                requestData.getPayload().getString("name"),
+                requestData.getPayload().getString("description")
         );
         Ebean.save(iteration);
 

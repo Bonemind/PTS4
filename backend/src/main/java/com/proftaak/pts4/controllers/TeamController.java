@@ -10,7 +10,7 @@ import com.proftaak.pts4.rest.response.JSONResponse;
 import com.proftaak.pts4.rest.response.ResponseFactory;
 import org.glassfish.grizzly.http.util.HttpStatus;
 
-import java.util.*;
+import java.util.Collection;
 
 /**
  * @author Michon
@@ -82,8 +82,8 @@ public class TeamController {
     public static Team postHandler(RequestData requestData) throws Exception {
         // Create the new team
         Team team = new Team(
-            requestData.getPayload().getString("name"),
-            requestData.getUser()
+                requestData.getPayload().getString("name"),
+                requestData.getUser()
         );
         team.setEffortTrackingEnabled(requestData.getPayload().getBoolean("effortTrackingEnabled"));
         team.setKanbanRules(requestData.getPayload().getEmbeddable(KanbanRules.class, "kanbanRules"));

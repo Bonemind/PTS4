@@ -1,21 +1,14 @@
 package com.proftaak.pts4.rest.querying;
 
-import com.proftaak.pts4.database.IDatabaseModel;
 import com.proftaak.pts4.rest.HTTPException;
 import com.proftaak.pts4.rest.RequestData;
-import com.proftaak.pts4.utils.JSONUtils;
-import flexjson.BeanProperty;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
 
-import javax.persistence.Column;
-import javax.persistence.JoinColumn;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Map;
 
 /**
  * All query data, basically a collection of QueryParameters with some utility methods
@@ -23,12 +16,12 @@ import java.util.Map;
 public class QueryData extends HashMap<String, Collection<QueryParameter>> {
     /**
      * Get the value of the query parameter with the given key and operator, if any
-     *
+     * <p>
      * If none is found, return the default value instead
      *
-     * @param  key          The key of the query parameter
-     * @param  operator     The operator of the query parameter
-     * @param  defaultValue The default to be used if the value is not present
+     * @param key          The key of the query parameter
+     * @param operator     The operator of the query parameter
+     * @param defaultValue The default to be used if the value is not present
      * @return Either the value from the query parameters, or the default value
      */
     public String getStringValueForOp(String key, Operator operator, String defaultValue) {
@@ -60,7 +53,7 @@ public class QueryData extends HashMap<String, Collection<QueryParameter>> {
     /**
      * Parse a query string into a QueryData object
      *
-     * @param  queryString The query string
+     * @param queryString The query string
      * @return A new QueryData object with all parameters in the query as QueryParameters
      */
     public static QueryData fromQueryString(String queryString) throws HTTPException {
@@ -80,7 +73,8 @@ public class QueryData extends HashMap<String, Collection<QueryParameter>> {
 
     /**
      * Parse the query string from the request in RequestData into a QueryData object
-     *  ho* @see   fromQueryString
+     * ho* @see   fromQueryString
+     *
      * @param requestData The requestdata
      */
     public static QueryData fromRequestData(RequestData requestData) throws HTTPException {

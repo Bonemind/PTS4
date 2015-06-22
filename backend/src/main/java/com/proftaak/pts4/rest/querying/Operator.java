@@ -14,6 +14,7 @@ public enum Operator {
     EQ("=");
 
     public final String symbol;
+
     Operator(String symbol) {
         this.symbol = symbol;
     }
