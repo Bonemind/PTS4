@@ -8,10 +8,7 @@ import javax.xml.transform.*;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-<<<<<<< Updated upstream
-=======
 import com.proftaak.pts4.rest.HTTPException;
->>>>>>> Stashed changes
 import org.w3c.dom.*;
 
 import java.io.File;
