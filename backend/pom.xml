@@ -188,5 +188,10 @@
             <artifactId>mail</artifactId>
             <version>1.4.7</version>
         </dependency>
+        <dependency>
+            <groupId>com.versionone</groupId>
+            <artifactId>VersionOne.SDK.Java.APIClient</artifactId>
+            <version>15.0.0</version>
+        </dependency>
     </dependencies>
 </project>
