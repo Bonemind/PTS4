@@ -59,6 +59,7 @@ PTSApp.config(["RestangularProvider", function(RestangularProvider) {
 	RestangularProvider.setParentless(false);
 	//Make sure a delete request has an empty body
 	RestangularProvider.setRequestInterceptor(function(elem, operation) {
+	  
 	   if (operation === "remove") {
 	         return undefined;
 	   } 
@@ -71,6 +72,12 @@ PTSApp.config(["RestangularProvider", function(RestangularProvider) {
 		 }
 	   }
 	   return elem;
+	});
+
+	//Wrapped data unwarpping
+	RestangularProvider.setResponseInterceptor(function(data, operation) {
+	    return data;
+	    return data.data;
 	});
 }]);
 
@@ -312,6 +319,7 @@ function cleanupStatusList(user, statusList) {
 	return copiedStatus;
 }
 
+//Provides date addition
 function dateAdd(date, interval, units) {
   var ret = new Date(date); //don't change original date
   switch(interval.toLowerCase()) {
@@ -326,6 +334,31 @@ function dateAdd(date, interval, units) {
     default       :  ret = undefined;  break;
   }
   return ret;
+}
+
+//Converts b64 encoded data to a blob
+function b64toBlob(b64Data, contentType, sliceSize) {
+    contentType = contentType || '';
+    sliceSize = sliceSize || 512;
+
+    var byteCharacters = atob(b64Data);
+    var byteArrays = [];
+
+    for (var offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+	var slice = byteCharacters.slice(offset, offset + sliceSize);
+
+	var byteNumbers = new Array(slice.length);
+	for (var i = 0; i < slice.length; i++) {
+	    byteNumbers[i] = slice.charCodeAt(i);
+	}
+
+	var byteArray = new Uint8Array(byteNumbers);
+
+	byteArrays.push(byteArray);
+    }
+
+    var blob = new Blob(byteArrays, {type: 'application/octet-stream'});
+    return blob;
 }
 
 
