@@ -47,11 +47,6 @@ public class RequestData {
     private Request request;
 
     /**
-     * The serializer that will be used to serialize the return data
-     */
-    private JSONSerializer serializer;
-
-    /**
      * The roles the current user has within the current scope.
      */
     private Collection<ScopeRole> roles = new HashSet<>();
@@ -75,10 +70,6 @@ public class RequestData {
 
     public Request getRequest() {
         return this.request;
-    }
-
-    public JSONSerializer getSerializer() {
-        return this.serializer;
     }
 
     public void addScopeRole(ScopeRole role) {
@@ -109,9 +100,6 @@ public class RequestData {
     protected static RequestData buildRequest(Request request, Matcher matcher) throws HTTPException {
         RequestData data = new RequestData();
 
-        // Create a serializer
-        data.serializer = JSONSerializerFactory.createSerializer();
-
         // Store the request
         data.request = request;
 
@@ -127,6 +115,9 @@ public class RequestData {
             }
         } catch (Exception e) {
             throw new HTTPException("Malformed payload", HttpStatus.BAD_REQUEST_400);
+        }
+        if (data.payload == null) {
+            data.payload = new Payload(new HashMap<>());
         }
 
         // Get the token/user, if any
