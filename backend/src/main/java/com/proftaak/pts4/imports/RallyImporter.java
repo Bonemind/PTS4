@@ -1,5 +1,6 @@
 package com.proftaak.pts4.imports;
 
+import com.avaje.ebean.Ebean;
 import com.proftaak.pts4.database.tables.*;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -60,6 +61,8 @@ public class RallyImporter {
             return false;
         }
 
+        RallyImporter.newProject.setProductOwner(team.getScrumMaster());
+
         // Create the stories and defects
         for (File file : importFiles) {
             try {
@@ -85,6 +88,11 @@ public class RallyImporter {
                 System.err.println(exception.getClass() + " exception caught while importing tasks");
             }
         }
+
+        Ebean.beginTransaction();
+        Ebean.save(RallyImporter.team.getIterations());
+        Ebean.save(RallyImporter.team);
+        Ebean.commitTransaction();
 
         System.out.println("Import succeeded");
         RallyImporter.reset();
@@ -118,6 +126,7 @@ public class RallyImporter {
         if(RallyImporter.newProject == null){
             System.out.println("Creating a project");
             RallyImporter.newProject = new Project();
+            RallyImporter.team.getProjects().add(newProject);
             String projectName = RallyImporter.getNodeRefName(iterationNode, "Project");
             newProject.setName(projectName);
             newProject.setTeam(RallyImporter.team);
@@ -136,6 +145,7 @@ public class RallyImporter {
         newIteration.setName(iterationName);
         newIteration.setStart(LocalDate.parse(startDate));
         newIteration.setEnd(LocalDate.parse(endDate));
+        RallyImporter.team.getIterations().add(newIteration);
 
         // Add the new iteration object to the given team
         newIteration.setTeam(RallyImporter.team);
@@ -210,6 +220,7 @@ public class RallyImporter {
         int defaultPriority = 1;
         int storypoints = (int) Math.round(Double.valueOf(points));
         Story newStory = new Story(RallyImporter.newProject, iteration, type, storyName, description, storyStatus, defaultPriority, storypoints);
+        RallyImporter.newProject.getStories().add(newStory);
 
         // Add the new story with his rally uuid to a map
         String uuid = RallyImporter.getNodeText(storyNode, "ObjectUUID");
@@ -271,6 +282,7 @@ public class RallyImporter {
 
         // Create a new task object
         Task newTask = new Task(story, null, taskName, description, Double.valueOf(estimate), taskStatus);
+        story.getTasks().add(newTask);
         newTask.setTimeSpent(timeSpent);
     }
 

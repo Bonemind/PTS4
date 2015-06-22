@@ -8,6 +8,10 @@ import javax.xml.transform.*;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+<<<<<<< Updated upstream
+=======
+import com.proftaak.pts4.rest.HTTPException;
+>>>>>>> Stashed changes
 import org.w3c.dom.*;
 
 import java.io.File;
@@ -19,39 +23,38 @@ import java.util.List;
  * Created by Stan
  */
 public class Exporter {
-
-    public static String export(Team team) {
+    public static String export(Team team) throws HTTPException {
         try {
             DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
             Document doc = docBuilder.newDocument();
 
-            // Write team into the document.
+            // Write team into the document
             Element teamElement = doc.createElement("team");
             teamElement.setAttribute("name", team.getName());
             teamElement.setAttribute("effortTrackingEnabled", String.valueOf(team.isEffortTrackingEnabled()));
 
-            // Make team the root element.
+            // Make team the root element
             doc.appendChild(teamElement);
 
-            // Write the scrum master into the document.
-            Exporter.writeScrumMater(team.getScrumMaster(), teamElement, doc);
+            // Write the scrum master into the document
+            Exporter.writeScrumMaster(team.getScrumMaster(), teamElement, doc);
 
-            // Write the users into the document.
+            // Write the users into the document
             Exporter.writeUsers(team.getUsers(), teamElement, doc);
 
-            // Write projects into the document.
+            // Write projects into the document
             Exporter.writeProjects(team.getProjects(), teamElement, doc);
 
-            // Write iteratons into the document.
+            // Write iterations into the document
             Exporter.writeIterations(team.getIterations(), teamElement, doc);
 
-            // write the content into xml file
+            // Write the content into xml file
             TransformerFactory transformerFactory = TransformerFactory.newInstance();
             Transformer transformer = transformerFactory.newTransformer();
             DOMSource source = new DOMSource(doc);
 
-            //create a StringWriter for the output
+            // Create a StringWriter for the output
             StringWriter outWriter = new StringWriter();
             StreamResult result = new StreamResult(outWriter);
 
@@ -61,15 +64,10 @@ public class Exporter {
 
             StringBuffer sb = outWriter.getBuffer();
             return sb.toString();
-        } catch (ParserConfigurationException e) {
+        } catch (ParserConfigurationException | TransformerException e) {
             e.printStackTrace();
-        } catch (TransformerConfigurationException e) {
-            e.printStackTrace();
-        } catch (TransformerException e) {
-            e.printStackTrace();
+            throw HTTPException.ERROR_INTERNAL;
         }
-
-        return null;
     }
 
     private static void writeIterations(List<Iteration> iterations, Element teamElement, Document doc) {
@@ -194,7 +192,7 @@ public class Exporter {
         return testElement;
     }
 
-    private static void writeScrumMater(User scrumMaster, Element teamElement, Document doc) {
+    private static void writeScrumMaster(User scrumMaster, Element teamElement, Document doc) {
         Element SMElement = doc.createElement("scrumMaster");
         Element userElement = Exporter.writeUser(scrumMaster, doc);
 

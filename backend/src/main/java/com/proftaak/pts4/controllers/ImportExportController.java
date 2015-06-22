@@ -14,6 +14,7 @@ import com.proftaak.pts4.rest.annotations.Controller;
 import com.proftaak.pts4.rest.annotations.Field;
 import com.proftaak.pts4.rest.annotations.RequireAuth;
 import com.proftaak.pts4.rest.annotations.Route;
+import com.proftaak.pts4.rest.response.RawResponse;
 import org.glassfish.grizzly.http.util.HttpStatus;
 
 import javax.persistence.PersistenceException;
@@ -27,15 +28,15 @@ import java.util.TreeSet;
 public class ImportExportController {
 
     /**
-     * GET /importexport/1
+     * GET /team/1/export
      */
     @RequireAuth
-    @Route(method = HTTPMethod.GET_ONE)
-    public static String getOneHandler(RequestData requestData) throws Exception {
+    @Route(method = HTTPMethod.GET_ONE, path = "/team/{id}/export")
+    public static RawResponse getOneHandler(RequestData requestData) throws Exception {
         // Get the team
         Team team = EbeanEx.find(Team.class, requestData.getParameter("id"));
 
-        // Exported the team and return the string result.
-        return Exporter.export(team);
+        // Exported the team and return the string result
+        return new RawResponse(Exporter.export(team), "application/xml");
     }
 }
