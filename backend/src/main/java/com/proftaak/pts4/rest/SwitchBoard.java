@@ -1,11 +1,11 @@
 package com.proftaak.pts4.rest;
 
-import com.proftaak.pts4.json.JSONSerializerFactory;
 import com.proftaak.pts4.rest.annotations.Field;
 import com.proftaak.pts4.rest.annotations.Fields;
 import com.proftaak.pts4.rest.annotations.PreRequest;
 import com.proftaak.pts4.rest.annotations.RequireAuth;
-import flexjson.JSONSerializer;
+import com.proftaak.pts4.rest.response.BaseResponse;
+import com.proftaak.pts4.rest.response.JSONResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.glassfish.grizzly.http.server.HttpHandler;
 import org.glassfish.grizzly.http.server.Request;
@@ -16,10 +16,11 @@ import org.reflections.scanners.MethodAnnotationsScanner;
 import org.reflections.util.ClasspathHelper;
 
 import javax.management.openmbean.KeyAlreadyExistsException;
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -36,6 +37,16 @@ public class SwitchBoard extends HttpHandler {
      * The routes this switchboard handles
      */
     private Map<Pattern, Map<HTTPMethod, Router.Route>> routes = new HashMap<>();
+
+    /**
+     * The request counter
+     */
+    private AtomicInteger requestCounter = new AtomicInteger(0);
+
+    /**
+     * The logs
+     */
+    private Logger log = Logger.getLogger(SwitchBoard.class.getName());
 
     public SwitchBoard() {
         // Get the option route.
@@ -102,6 +113,35 @@ public class SwitchBoard extends HttpHandler {
      * @param response The response
      */
     public void service(Request request, Response response) {
+        final int requestNumber = this.requestCounter.getAndIncrement();
+        final long requestStart = System.nanoTime();
+
+        // Log request in access log
+        log.info(String.format(
+                "%d - %s %d - %s %s",
+                requestNumber,
+                request.getRemoteAddr(), request.getRemotePort(),
+                request.getMethod().toString(), request.getRequestURI()
+        ));
+
+        // Handle the request
+        this.handleRequest(request, response);
+
+        // Log the execution time
+        log.fine(String.format(
+                "%d - Took %dms",
+                requestNumber, (System.nanoTime() - requestStart) / 1000000
+        ));
+    }
+
+    /**
+     * Handle a request
+     *
+     * @param request  The request
+     * @param response The response
+     */
+    private void handleRequest(Request request, Response response) {
+        // Handle the request
         try {
             // Try to handle the request with a route
             for (Map.Entry<Pattern, Map<HTTPMethod, Router.Route>> routeEntry : this.routes.entrySet()) {
@@ -167,8 +207,10 @@ public class SwitchBoard extends HttpHandler {
         response.addHeader("Access-Control-Allow-Methods", StringUtils.join(methods, ","));
         response.addHeader("Access-Control-Allow-Headers", "Content-Type,X-TOKEN");
 
-        Object responseObject = null;
-        JSONSerializer serializer = null;
+        // The warnings
+        Collection<String> warnings = new ArrayList<>();
+
+        Object responseData = null;
         try {
             // Build the request
             RequestData requestData = RequestData.buildRequest(request, matcher);
@@ -177,44 +219,33 @@ public class SwitchBoard extends HttpHandler {
             this.handlePrerequests(route.handler, requestData);
 
             // Handle the annotations for the current route
-            this.handleAnnotations(route.handler, requestData);
+            this.handleAnnotations(route.handler, requestData, warnings);
 
             // Call the handling method
             try {
-                responseObject = route.handler.invoke(null, requestData);
+                responseData = route.handler.invoke(null, requestData);
             } catch (InvocationTargetException e) {
                 throw e.getCause();
             }
-
-            // Get the serializer.
-            serializer = requestData.getSerializer();
         } catch (Throwable throwable) {
-            responseObject = this.handleError(response, throwable);
-            serializer = JSONSerializerFactory.createSerializer();
+            responseData = this.handleError(response, throwable);
         }
 
-        // Serialize the response object, if any
-        String responseBody = null;
-        if (responseObject != null) {
-            // Serialize the response
-            responseBody = serializer.serialize(responseObject);
-        }
-
-        // Build the response
-        response.setContentType("application/json");
-        if (responseBody == null || responseBody.length() == 0) {
-            response.setContentLength(0);
-            if (response.getStatus() == HttpStatus.OK_200.getStatusCode()) {
-                response.setStatus(HttpStatus.NO_CONTENT_204);
-            }
+        // Get the response object
+        BaseResponse responseObject;
+        if (responseData instanceof BaseResponse) {
+            responseObject = (BaseResponse) responseData;
         } else {
-            response.setContentLength(responseBody.length());
-            try {
-                response.getWriter().write(responseBody);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            responseObject = new JSONResponse<>(responseData);
         }
+
+        // Add the warnings to the metadata
+        for (String warning : warnings) {
+            responseObject.getMetadata().addWarning(warning);
+        }
+
+        // Prepare the response
+        responseObject.prepareResponse(response);
     }
 
     /**
@@ -250,8 +281,9 @@ public class SwitchBoard extends HttpHandler {
      *
      * @param method      The method to process the annotations of
      * @param requestData The data for the current request
+     * @param warnings
      */
-    private void handleAnnotations(Method method, RequestData requestData) throws HTTPException {
+    private void handleAnnotations(Method method, RequestData requestData, Collection<String> warnings) throws HTTPException {
         // The (so far) unknown fields that are present in the payload
         Set<String> unknownKeys = new TreeSet<>();
         if (requestData.getPayload() != null) {
@@ -272,10 +304,10 @@ public class SwitchBoard extends HttpHandler {
             }
         }
 
-        // If any items remain in the unknown keys, those are actually unknown, so error
-        /*if (unknownKeys.size() > 0) {
-            throw new HTTPException("Unknown parameter: " + unknownKeys.toArray()[0], HttpStatus.BAD_REQUEST_400);
-        }*/
+        // If any items remain in the unknown keys, those are actually unknown, so display warnings for these
+        for (String unknownKey : unknownKeys) {
+            warnings.add("Unknown parameter: " + unknownKey);
+        }
 
         // The require auth annotation
         RequireAuth authAnnotation = method.getAnnotation(RequireAuth.class);
@@ -295,6 +327,7 @@ public class SwitchBoard extends HttpHandler {
      *
      * @param method      The method to call the pre-request methods for
      * @param requestData The data for the current request
+     * @param warnings
      */
     private void handlePrerequests(Method method, RequestData requestData) throws Exception {
         // Call all pre-request methods from the controller in which the method lives

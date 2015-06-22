@@ -1,6 +1,7 @@
 package com.proftaak.pts4.controllers;
 
 import com.avaje.ebean.Ebean;
+import com.avaje.ebean.Query;
 import com.proftaak.pts4.database.EbeanEx;
 import com.proftaak.pts4.database.tables.Project;
 import com.proftaak.pts4.database.tables.Story;
@@ -8,9 +9,10 @@ import com.proftaak.pts4.database.tables.Team;
 import com.proftaak.pts4.database.tables.User;
 import com.proftaak.pts4.rest.*;
 import com.proftaak.pts4.rest.annotations.*;
+import com.proftaak.pts4.rest.response.JSONResponse;
+import com.proftaak.pts4.rest.response.ResponseFactory;
 
 import java.util.Collection;
-import java.util.HashSet;
 
 /**
  * @author Michon
@@ -64,14 +66,8 @@ public class ProjectController {
      */
     @RequireAuth
     @Route(method = HTTPMethod.GET)
-    public static Collection<Project> getAllHandler(RequestData requestData) throws Exception {
-        Collection<Project> projects = new HashSet<>();
-        User user = requestData.getUser();
-        for (Team team : user.getTeams()) {
-            projects.addAll(team.getProjects());
-        }
-        projects.addAll(user.getOwnedProjects());
-        return projects;
+    public static JSONResponse<Collection<Project>> getAllHandler(RequestData requestData) throws Exception {
+        return ResponseFactory.queryToList(requestData, Project.class, Project.queryForUser(requestData.getUser()));
     }
 
     /**
@@ -86,10 +82,10 @@ public class ProjectController {
     public static Project postHandler(RequestData requestData) throws Exception {
         // Create the new project
         Project project = new Project(
-            EbeanEx.require(EbeanEx.find(Team.class, requestData.getPayload().get("team"))),
-            EbeanEx.require(EbeanEx.find(User.class, User.FIELD_NAME, requestData.getPayload().get("productOwner"))),
-            requestData.getPayload().getString("name"),
-            requestData.getPayload().getString("description")
+                EbeanEx.require(EbeanEx.find(Team.class, requestData.getPayload().get("team"))),
+                EbeanEx.require(EbeanEx.find(User.class, User.FIELD_NAME, requestData.getPayload().get("productOwner"))),
+                requestData.getPayload().getString("name"),
+                requestData.getPayload().getString("description")
         );
         Ebean.save(project);
 
@@ -146,11 +142,9 @@ public class ProjectController {
      */
     @RequireAuth(role = ScopeRole.TEAM_MEMBER)
     @Route(method = HTTPMethod.GET, path = "/project/{id}/story")
-    public static Collection<Story> getStoryHandler(RequestData requestData) throws Exception {
-        // Get the project
+    public static JSONResponse<Collection<Story>> getStoryHandler(RequestData requestData) throws Exception {
         Project project = EbeanEx.require(EbeanEx.find(Project.class, requestData.getParameter("id")));
-
-        // Return the stories
-        return project.getStories();
+        Query<Story> query = EbeanEx.queryBelongingTo(Story.class, Project.class, project);
+        return ResponseFactory.queryToList(requestData, Story.class, query);
     }
 }

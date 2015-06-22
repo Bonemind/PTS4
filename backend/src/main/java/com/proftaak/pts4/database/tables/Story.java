@@ -1,6 +1,8 @@
 package com.proftaak.pts4.database.tables;
 
-import com.proftaak.pts4.database.DatabaseModel;
+import com.avaje.ebean.Query;
+import com.proftaak.pts4.database.EbeanEx;
+import com.proftaak.pts4.database.IDatabaseModel;
 import com.proftaak.pts4.json.ToPKTransformer;
 import com.proftaak.pts4.json.ToStringTransformer;
 import flexjson.JSON;
@@ -16,7 +18,7 @@ import java.util.List;
  */
 @Entity
 @Table(name = "stories")
-public class Story implements DatabaseModel<Integer> {
+public class Story implements IDatabaseModel<Integer> {
     public enum Status {
         /**
          * Story is defined
@@ -289,5 +291,12 @@ public class Story implements DatabaseModel<Integer> {
 
     public List<Test> getTests() {
         return this.tests;
+    }
+
+    /**
+     * Build a query to get all stories to which a given user has access
+     */
+    public static Query<Story> queryForUser(User user) throws Exception {
+        return EbeanEx.queryBelongingTo(Story.class, Project.class, Project.queryForUser(user));
     }
 }

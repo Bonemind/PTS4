@@ -1,6 +1,6 @@
 package com.proftaak.pts4.database.tables;
 
-import com.proftaak.pts4.database.DatabaseModel;
+import com.proftaak.pts4.database.IDatabaseModel;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -11,7 +11,7 @@ import java.util.UUID;
  */
 @Entity
 @Table(name = "tokens")
-public class Token implements DatabaseModel<String> {
+public class Token implements IDatabaseModel<String> {
     public static final String FIELD_TOKEN = "token";
     public static final String FIELD_USER = "user_id";
     public static final String FIELD_DATE_CREATION = "date_creation";

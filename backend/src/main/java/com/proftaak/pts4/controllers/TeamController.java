@@ -1,18 +1,16 @@
 package com.proftaak.pts4.controllers;
 
 import com.avaje.ebean.Ebean;
+import com.avaje.ebean.Query;
 import com.proftaak.pts4.database.EbeanEx;
 import com.proftaak.pts4.database.tables.*;
 import com.proftaak.pts4.rest.*;
 import com.proftaak.pts4.rest.annotations.*;
-import com.proftaak.pts4.utils.MailUtils;
-import com.proftaak.pts4.utils.PropertiesUtils;
+import com.proftaak.pts4.rest.response.JSONResponse;
+import com.proftaak.pts4.rest.response.ResponseFactory;
 import org.glassfish.grizzly.http.util.HttpStatus;
 
-import java.io.InputStream;
-import java.net.URI;
-import java.net.URLEncoder;
-import java.util.*;
+import java.util.Collection;
 
 /**
  * @author Michon
@@ -69,15 +67,8 @@ public class TeamController {
      */
     @RequireAuth
     @Route(method = HTTPMethod.GET)
-    public static Collection<Team> getAllHandler(RequestData requestData) throws Exception {
-        User user = requestData.getUser();
-        // TODO: remove the being a part of a team if you're product owner of one of their projects
-        Collection<Team> teams = new HashSet<>();
-        teams.addAll(user.getTeams());
-        for (Project project : user.getOwnedProjects()) {
-            teams.add(project.getTeam());
-        }
-        return teams;
+    public static JSONResponse<Collection<Team>> getAllHandler(RequestData requestData) throws Exception {
+        return ResponseFactory.queryToList(requestData, Team.class, Team.queryForUser(requestData.getUser()));
     }
 
     /**
@@ -91,8 +82,8 @@ public class TeamController {
     public static Team postHandler(RequestData requestData) throws Exception {
         // Create the new team
         Team team = new Team(
-            requestData.getPayload().getString("name"),
-            requestData.getUser()
+                requestData.getPayload().getString("name"),
+                requestData.getUser()
         );
         team.setEffortTrackingEnabled(requestData.getPayload().getBoolean("effortTrackingEnabled"));
         team.setKanbanRules(requestData.getPayload().getEmbeddable(KanbanRules.class, "kanbanRules"));
@@ -149,12 +140,10 @@ public class TeamController {
      */
     @RequireAuth(role = ScopeRole.TEAM_MEMBER)
     @Route(method = HTTPMethod.GET, path = "/team/{id}/project")
-    public static Collection<Project> getProjectHandler(RequestData requestData) throws Exception {
-        // Get the team
+    public static JSONResponse<Collection<Project>> getProjectHandler(RequestData requestData) throws Exception {
         Team team = EbeanEx.require(EbeanEx.find(Team.class, requestData.getParameter("id")));
-
-        // Return the stories
-        return team.getProjects();
+        Query<Project> query = EbeanEx.queryBelongingTo(Project.class, Team.class, team);
+        return ResponseFactory.queryToList(requestData, Project.class, query);
     }
 
     /**
@@ -162,15 +151,11 @@ public class TeamController {
      */
     @RequireAuth(role = ScopeRole.TEAM_MEMBER)
     @Route(method = HTTPMethod.GET, path = "/team/{id}/user")
-    public static Collection<User> getUserHandler(RequestData requestData) throws Exception {
-        // Get the team
+    public static JSONResponse<Collection<User>> getUserHandler(RequestData requestData) throws Exception {
         Team team = EbeanEx.require(EbeanEx.find(Team.class, requestData.getParameter("id")));
-
-        // Include the emails
-        requestData.getSerializer().include("*.email");
-
-        // Return the users
-        return team.getUsers();
+        Query<User> query = Ebean.createQuery(User.class);
+        query.where().eq("teams." + Team.FIELD_ID, team);
+        return ResponseFactory.queryToList(requestData, User.class, query);
     }
 
     /**
@@ -224,16 +209,11 @@ public class TeamController {
      */
     @RequireAuth(role = ScopeRole.TEAM_MEMBER)
     @Route(method = HTTPMethod.GET, path = "/team/{id}/story")
-    public static Collection<Story> getStoryHandler(RequestData requestData) throws Exception {
-        // Get the team
+    public static JSONResponse<Collection<Story>> getStoryHandler(RequestData requestData) throws Exception {
         Team team = EbeanEx.require(EbeanEx.find(Team.class, requestData.getParameter("id")));
-
-        // Get all stories
-        Collection<Story> stories = new ArrayList<>();
-        for (Project project : team.getProjects()) {
-            stories.addAll(project.getStories());
-        }
-        return stories;
+        Query<Project> projectQuery = EbeanEx.queryBelongingTo(Project.class, Team.class, team);
+        Query<Story> query = EbeanEx.queryBelongingTo(Story.class, Project.class, projectQuery);
+        return ResponseFactory.queryToList(requestData, Story.class, query);
     }
 
     /**
@@ -241,11 +221,9 @@ public class TeamController {
      */
     @RequireAuth(role = ScopeRole.TEAM_MEMBER)
     @Route(method = HTTPMethod.GET, path = "/team/{id}/iteration")
-    public static Collection<Iteration> getIterationHandler(RequestData requestData) throws Exception {
-        // Get the team
+    public static JSONResponse<Collection<Iteration>> getIterationHandler(RequestData requestData) throws Exception {
         Team team = EbeanEx.require(EbeanEx.find(Team.class, requestData.getParameter("id")));
-
-        // Return the iterations
-        return team.getIterations();
+        Query<Iteration> query = EbeanEx.queryBelongingTo(Iteration.class, Team.class, team);
+        return ResponseFactory.queryToList(requestData, Iteration.class, query);
     }
 }

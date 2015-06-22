@@ -1,6 +1,8 @@
 package com.proftaak.pts4.database.tables;
 
-import com.proftaak.pts4.database.DatabaseModel;
+import com.avaje.ebean.Query;
+import com.proftaak.pts4.database.EbeanEx;
+import com.proftaak.pts4.database.IDatabaseModel;
 import com.proftaak.pts4.json.ToPKTransformer;
 import flexjson.JSON;
 
@@ -11,7 +13,7 @@ import javax.persistence.*;
  */
 @Entity
 @Table(name = "tests")
-public class Test implements DatabaseModel<Integer> {
+public class Test implements IDatabaseModel<Integer> {
     public static final String FIELD_ID = "id";
     public static final String FIELD_NAME = "name";
     public static final String FIELD_DESCRIPTION = "description";
@@ -103,5 +105,12 @@ public class Test implements DatabaseModel<Integer> {
 
     public void setStory(Story story) {
         this.story = story;
+    }
+
+    /**
+     * Build a query to get all tests to which a given user has access
+     */
+    public static Query<Test> queryForUser(User user) throws Exception {
+        return EbeanEx.queryBelongingTo(Test.class, Story.class, Story.queryForUser(user));
     }
 }

@@ -23,7 +23,7 @@ public class KanbanRules {
     private Integer maxInProgress;
 
     /**
-     * The maximum number of stories that can be IN_PROGRESS at the same time
+     * The maximum number of stories that can be DONE at the same time
      */
     @Column(name = FIELD_MAX_DONE)
     private Integer maxDone;
@@ -72,21 +72,21 @@ public class KanbanRules {
         // Enforce the max, if any
         if (max != null) {
             int inStatus = Ebean.find(Story.class)
-                .where()
-                .ne(Story.FIELD_ID, story.getId())
-                .eq(Story.FIELD_STATUS, story.getStatus())
-                .in(Story.FIELD_PROJECT, Ebean.find(Project.class)
-                        .select(Project.FIELD_ID)
-                        .where()
-                        .eq(Project.FIELD_TEAM, story.getProject().getTeam().getPK())
-                        .query()
-                )
-                .findRowCount();
+                    .where()
+                    .ne(Story.FIELD_ID, story.getId())
+                    .eq(Story.FIELD_STATUS, story.getStatus())
+                    .in(Story.FIELD_PROJECT, Ebean.find(Project.class)
+                                    .select(Project.FIELD_ID)
+                                    .where()
+                                    .eq(Project.FIELD_TEAM, story.getProject().getTeam().getPK())
+                                    .query()
+                    )
+                    .findRowCount();
 
             if (inStatus >= max) {
                 throw new HTTPException(String.format(
-                    "There are already %d stories in %s, no more are allowed",
-                    inStatus, StringUtils.capitalize(story.getStatus().toString())
+                        "There are already %d stories in %s, no more are allowed",
+                        inStatus, StringUtils.capitalize(story.getStatus().toString())
                 ), HttpStatus.CONFLICT_409);
             }
         }

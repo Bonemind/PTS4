@@ -5,7 +5,7 @@ import flexjson.JSON;
 /**
  * Created by Michon on 13-4-2015.
  */
-public interface DatabaseModel<T> {
+public interface IDatabaseModel<T> {
     /**
      * Get the primary key of this object
      *
