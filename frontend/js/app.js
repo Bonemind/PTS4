@@ -76,7 +76,9 @@ PTSApp.config(["RestangularProvider", function(RestangularProvider) {
 
 	//Wrapped data unwarpping
 	RestangularProvider.setResponseInterceptor(function(data, operation) {
-	    return data;
+	    if (operation == "getList" && data.data.constructor.toString().indexOf("Array()") == -1) {
+	    	return [data.data];
+	    }
 	    return data.data;
 	});
 }]);
@@ -360,6 +362,22 @@ function b64toBlob(b64Data, contentType, sliceSize) {
     var blob = new Blob(byteArrays, {type: 'application/octet-stream'});
     return blob;
 }
+
+angular.module('PTSApp').directive('fileModel', ['$parse', function ($parse) {
+    return {
+	restrict: 'A',
+link: function(scope, element, attrs) {
+    var model = $parse(attrs.fileModel);
+    var modelSetter = model.assign;
+
+    element.bind('change', function(){
+	scope.$apply(function(){
+	    modelSetter(scope, element[0].files[0]);
+	});
+    });
+}
+};
+}]);
 
 
 //Controllers module
