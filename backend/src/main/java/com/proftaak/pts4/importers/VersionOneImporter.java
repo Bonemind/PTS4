@@ -1,5 +1,6 @@
 package com.proftaak.pts4.importers;
 
+import com.avaje.ebean.Ebean;
 import com.proftaak.pts4.database.tables.*;
 import com.versionone.apiclient.Asset;
 import com.versionone.apiclient.Query;
@@ -127,6 +128,11 @@ public class VersionOneImporter {
         Project project = new Project(team, productOwner, nameOfProject, descriptionOfResult);
         team.getProjects().add(project);
 
+        // saving project to database
+        Ebean.beginTransaction();
+        Ebean.save(project);
+        Ebean.commitTransaction();
+
         // get all stories
         HashMap<Integer, Story> stories = importStories(project, projectIdentifier, iterations);
 
@@ -134,8 +140,6 @@ public class VersionOneImporter {
         importTasks(project, projectIdentifier, stories);
         importDefects(project, projectIdentifier, iterations);
         importTests(project, projectIdentifier, stories);
-
-        List<Story> testStories = project.getStories();
 
         return project;
     }
@@ -223,11 +227,11 @@ public class VersionOneImporter {
             returnValue.put(identifierOfResult, story);
 
             // set relationships
-            if (iterationResult == null){
-                project.getStories().add(story);
-            } else {
+            if (iterationResult != null){
                 iterationResult.getStories().add(story);
             }
+            project.getStories().add(story);
+
 
             System.out.println(storyInResult.getAttribute(nameOfIterationAtr).toString());
             System.out.println(storyInResult.getAttribute(projectVO).toString());
@@ -381,7 +385,7 @@ public class VersionOneImporter {
             String descriptionOfResult = parseString(taskInResult.getAttribute(description).toString());
 
             // parse the status
-            Task.Status taskStatus = null;
+            Task.Status taskStatus = Task.Status.DEFINED;
             if (!parseString(taskInResult.getAttribute(status).toString()).toLowerCase().equals("null")) {
                 taskStatus = statuses.get(parseInt(taskInResult.getAttribute(status).toString()));
             }
@@ -400,7 +404,7 @@ public class VersionOneImporter {
             Story story = stories.get(parentIdentifier);
 
             // set relationships
-            Task task = new Task(story, new User(), nameOfTask, descriptionOfResult, (double)estimateOfPoints,  taskStatus);
+            Task task = new Task(story, null, nameOfTask, descriptionOfResult, (double)estimateOfPoints,  taskStatus);
             story.getTasks().add(task);
 
             // add to returnValue
@@ -452,10 +456,15 @@ public class VersionOneImporter {
             // needed to test for more then one project
             //if (projectIdentifier != (parseInt(iteration.getAttribute(scope).toString()))) continue;
 
+            // setting start & end date
             LocalDate startDate = parseDate(iteration.getAttribute(beginDate).toString());
             LocalDate endingDate = parseDate(iteration.getAttribute(beginDate).toString());
-            String name = iteration.getAttribute(nameOfIterationAtr).toString();
-            String iterationDescription = iteration.getAttribute(nameOfIterationAtr).toString();
+
+            // setting name & description
+            String name = parseString(iteration.getAttribute(nameOfIterationAtr).toString());
+            String iterationDescription = parseString(iteration.getAttribute(nameOfIterationAtr).toString());
+
+            // parsing identifier
             String unparsedIdentifier = iteration.getAttribute(id).toString().split(":")[1];
             int requestedId = Integer.parseInt(unparsedIdentifier.substring(0, unparsedIdentifier.length() - 1));
 
@@ -708,5 +717,14 @@ public class VersionOneImporter {
      */
     private int parseInt(String input){
         return Integer.valueOf(parseString(input).split(":")[1]);
+    }
+
+    /***
+     * parse
+     * @param ipnut
+     * @return
+     */
+    private String parseDescription(String ipnut){
+
     }
 }

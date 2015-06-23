@@ -88,6 +88,8 @@ public class ImportExportController {
         versionOneImporter.initConnection();
         Project project = versionOneImporter.importProject(payload.getString("project"), team, team.getScrumMaster());
         Ebean.beginTransaction();
+        Ebean.save(team.getIterations());
+        Ebean.update(team);
         Ebean.save(project);
         Ebean.commitTransaction();
     }
