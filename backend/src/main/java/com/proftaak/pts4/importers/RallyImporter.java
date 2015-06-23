@@ -36,9 +36,9 @@ public class RallyImporter {
      *
      * @param inputStreams A set of input streams which are directly rally XML export files.
      * @param team         The team to add the project in the import to.
-     * @return True if the import was successful, otherwise false.
+     * @return The imported project
      */
-    public synchronized static boolean importRally(Collection<InputStream> inputStreams, Team team) {
+    public synchronized static Project importRally(Collection<InputStream> inputStreams, Team team) {
         // Set the team available for all methods
         RallyImporter.team = team;
 
@@ -60,7 +60,7 @@ public class RallyImporter {
         if (RallyImporter.newProject == null) {
             RallyImporter.reset();
             System.err.println("Found no iterations, and couldn't import the project");
-            return false;
+            return null;
         }
 
         RallyImporter.newProject.setProductOwner(team.getScrumMaster());
@@ -99,8 +99,9 @@ public class RallyImporter {
         Ebean.commitTransaction();
 
         System.out.println("Import succeeded");
+        Project project = RallyImporter.newProject;
         RallyImporter.reset();
-        return true;
+        return project;
     }
 
     private static void createIterations(Node node) {
@@ -189,6 +190,9 @@ public class RallyImporter {
         String points = RallyImporter.getNodeText(storyNode, "PlanEstimate");
         String status = RallyImporter.getNodeText(storyNode, "ScheduleState");
         String description = RallyImporter.getNodeText(storyNode, "Description");
+
+        // Clean the description of <div> tags
+        description = description.replace("<div>", "\n").replace("</div>", "");
 
         // Set points to 0, if null
         if (points == null) {

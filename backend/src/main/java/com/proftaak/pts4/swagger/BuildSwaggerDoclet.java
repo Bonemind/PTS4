@@ -1,12 +1,15 @@
 package com.proftaak.pts4.swagger;
 
-import com.proftaak.pts4.database.DatabaseModel;
-import com.proftaak.pts4.database.tables.KanbanRules;
+import com.proftaak.pts4.database.IDatabaseModel;
 import com.proftaak.pts4.json.JSONSerializerFactory;
 import com.proftaak.pts4.rest.Router;
 import com.proftaak.pts4.rest.annotations.Field;
 import com.proftaak.pts4.rest.annotations.Fields;
 import com.proftaak.pts4.rest.annotations.RequireAuth;
+import com.proftaak.pts4.rest.response.JSONResponse;
+import com.proftaak.pts4.rest.response.RawResponse;
+import com.proftaak.pts4.rest.response.metadata.PaginationMetadata;
+import com.proftaak.pts4.utils.JSONUtils;
 import com.proftaak.pts4.utils.ReflectionUtils;
 import com.sun.javadoc.*;
 import flexjson.*;
@@ -15,6 +18,8 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.reflections.Reflections;
 
+import javax.persistence.Embeddable;
+import javax.persistence.Entity;
 import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -51,7 +56,7 @@ public class BuildSwaggerDoclet extends Doclet {
         put(LocalDate.class, new ImmutablePair<>("string", "date"));
         put(LocalDateTime.class, new ImmutablePair<>("string", "date-time"));
         put(Date.class, new ImmutablePair<>("string", "date-time"));
-        put(KanbanRules.class, new ImmutablePair<>("temp", "filler"));
+        put(RawResponse.class, new ImmutablePair<>("string", "see method documentation"));
     }};
 
     /**
@@ -63,13 +68,25 @@ public class BuildSwaggerDoclet extends Doclet {
      */
     public static Map<String, Object> getTypeInfo(Type type, Map<Class, Class> overrides) throws Exception {
         Map<String, Object> data = new HashMap<>();
-        if (type instanceof ParameterizedType && Collection.class.isAssignableFrom((Class<?>) ((ParameterizedType) type).getRawType())) {
-            // Collection
-            if (overrides.containsKey(Collection.class)) {
-                return getTypeInfo(Collection.class, overrides);
-            } else {
-                data.put("type", "array");
-                data.put("items", getTypeInfo(((ParameterizedType) type).getActualTypeArguments()[0], overrides));
+        if (type instanceof ParameterizedType) {
+            if (JSONResponse.class.isAssignableFrom((Class<?>) ((ParameterizedType) type).getRawType())) {
+                // JSONReponse object
+                return getTypeInfo(((ParameterizedType) type).getActualTypeArguments()[0], overrides);
+            } else if (Collection.class.isAssignableFrom((Class<?>) ((ParameterizedType) type).getRawType())) {
+                // Collection
+                if (overrides.containsKey(Collection.class)) {
+                    return getTypeInfo(Collection.class, overrides);
+                } else {
+                    Map<String, Object> subTypeData = getTypeInfo(((ParameterizedType) type).getActualTypeArguments()[0], overrides);
+                    if (((String) subTypeData.getOrDefault("$ref", "")).endsWith("Single")) {
+                        String ref = (String) subTypeData.get("$ref");
+                        subTypeData.put("$ref", ref.substring(0, ref.length() - 6) + "List");
+                        return subTypeData;
+                    } else {
+                        data.put("type", "array");
+                        data.put("items", subTypeData);
+                    }
+                }
             }
         } else {
             Class cls = (Class) type;
@@ -79,18 +96,25 @@ public class BuildSwaggerDoclet extends Doclet {
             } else if (TYPE_MAP.containsKey(cls)) {
                 // Known type from TYPE_MAP
                 data.put("type", TYPE_MAP.get(cls).getLeft());
+                if (StringUtils.isNotEmpty(TYPE_MAP.get(cls).getRight())) {
+                    data.put("format", TYPE_MAP.get(cls).getRight());
+                }
             } else if (cls.isEnum()) {
                 // Enum
                 data.put("type", "string");
                 data.put("enum", cls.getEnumConstants());
-            } else if (DatabaseModel.class.isAssignableFrom(cls)) {
+            } else if (IDatabaseModel.class.isAssignableFrom(cls)) {
                 // Datadata model
-                if (overrides.containsKey(DatabaseModel.class)) {
-                    return getTypeInfo(DatabaseModel.class, overrides);
+                if (overrides.containsKey(IDatabaseModel.class)) {
+                    return getTypeInfo(IDatabaseModel.class, overrides);
                 } else {
-                    data.put("$ref", "#/definitions/" + cls.getSimpleName());
+                    data.put("$ref", "#/definitions/" + cls.getSimpleName() + "Single");
                 }
-            } else if (cls == Void.class) {
+            } else if (cls.getAnnotation(Embeddable.class) != null) {
+                // Embeddable
+                data.put("$ref", "#/definitions/" + cls.getSimpleName());
+            } else if (cls == Void.class || cls == void.class) {
+                // Void, returns nothing
                 return null;
             } else {
                 // Unknown type, error
@@ -150,19 +174,36 @@ public class BuildSwaggerDoclet extends Doclet {
         fieldData.put("type", "string");
         fieldData.put("description", "An human-readable message describing what went wrong");
 
-        // Build a JSONContext from the JSONSerializer
-        // This can be used to determine which field should or should not be included
+        // Create a definition of the envelope for all non-BaseResponse non-collections
+        Map<String, Object> envelopeSingleDefinition = new HashMap<>();
+        properties = subMap(envelopeSingleDefinition, "properties");
+        fieldData = subMap(properties, "warnings");
+        fieldData.put("type", "array");
+        fieldData.put("description", "Human-readable warning messages about errors in the usage of the API that are not severe enough to warrant stopping the request");
+        fieldData = subMap(fieldData, "items");
+        fieldData.put("type", "string");
+
+        // Create a definition of the envelope for all non-BaseResponse collections
+        Map<String, Object> envelopeCollectionDefinition = JSONUtils.toHashMap(envelopeSingleDefinition);
+        properties = subMap(envelopeCollectionDefinition, "properties");
+        fieldData = subMap(properties, "pagination");
+        fieldData.put("$ref", "#/definitions/PaginationMetadata");
+
+        // Initialize a JSONContext, using the settings from a JSONSerializer out of our factory.
         JSONContext jsonContext = new JSONContext();
+        JSONSerializer jsonSerializer = JSONSerializerFactory.createSerializer();
         try {
-            JSONSerializer jsonSerializer = JSONSerializerFactory.createSerializer();
             jsonContext.setPathExpressions((List<PathExpression>) ReflectionUtils.getFieldValue(JSONSerializer.class, "pathExpressions", jsonSerializer));
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-            e.printStackTrace();
-            return false;
+        } catch (NoSuchFieldException | IllegalAccessException e1) {
+            e1.printStackTrace();
         }
 
-        // Create a schema definition for each of the database model classes
-        for (Class<? extends DatabaseModel> modelCls : reflections.getSubTypesOf(DatabaseModel.class)) {
+        // Create a schema definition for each of the serializable classes
+        Collection<Class> modelClasses = new ArrayList<>();
+        modelClasses.addAll(reflections.getTypesAnnotatedWith(Entity.class));
+        modelClasses.addAll(reflections.getTypesAnnotatedWith(Embeddable.class));
+        modelClasses.add(PaginationMetadata.class);
+        for (Class modelCls : modelClasses) {
             ClassDoc clsDoc = root.classNamed(modelCls.getName());
 
             // Root object for this model
@@ -202,15 +243,15 @@ public class BuildSwaggerDoclet extends Doclet {
                 try {
                     fieldData = getTypeInfo(property.getPropertyType(), new HashMap<Class, Class>() {{
                         put(Collection.class, Void.class);
-                        put(DatabaseModel.class, Integer.class);
+                        put(IDatabaseModel.class, Integer.class);
                     }});
                     if (fieldData == null) {
                         continue;
                     }
                 } catch (Exception e) {
                     logError(String.format(
-                        "%s for type of property %s in class %s",
-                        e.getMessage(), property.getName(), property.getReadMethod().getDeclaringClass().getName()
+                            "%s for type of property %s in class %s",
+                            e.getMessage(), property.getName(), property.getReadMethod().getDeclaringClass().getName()
                     ));
                     continue;
                 }
@@ -228,6 +269,23 @@ public class BuildSwaggerDoclet extends Doclet {
 
                 // Store the field data into the properties
                 properties.put(property.getJsonName(), fieldData);
+            }
+
+            // If this is an entity class, add the enveloped versions
+            if (modelCls.getAnnotation(Entity.class) != null) {
+                envelopeSingleDefinition = JSONUtils.toHashMap(envelopeSingleDefinition);
+                properties = subMap(envelopeSingleDefinition, "properties");
+                fieldData = subMap(properties, "data");
+                fieldData.put("$ref", "#/definitions/" + clsDoc.simpleTypeName());
+                definitions.put(clsDoc.simpleTypeName() + "Single", envelopeSingleDefinition);
+
+                envelopeCollectionDefinition = JSONUtils.toHashMap(envelopeCollectionDefinition);
+                properties = subMap(envelopeCollectionDefinition, "properties");
+                fieldData = subMap(properties, "data");
+                fieldData.put("type", "array");
+                fieldData = subMap(fieldData, "items");
+                fieldData.put("$ref", "#/definitions/" + clsDoc.simpleTypeName());
+                definitions.put(clsDoc.simpleTypeName() + "List", envelopeCollectionDefinition);
             }
         }
 
@@ -260,8 +318,8 @@ public class BuildSwaggerDoclet extends Doclet {
             }
             if (methodDoc == null) {
                 logError(String.format(
-                    "Unable to find MethodDoc for method %s in class %s",
-                    method.getName(), method.getDeclaringClass().getName()
+                        "Unable to find MethodDoc for method %s in class %s",
+                        method.getName(), method.getDeclaringClass().getName()
                 ));
                 continue;
             }
@@ -287,15 +345,15 @@ public class BuildSwaggerDoclet extends Doclet {
                     Map<String, Object> parameter;
                     try {
                         parameter = getTypeInfo(field.type(), new HashMap<Class, Class>() {{
-                            put(DatabaseModel.class, Integer.class);
+                            put(IDatabaseModel.class, Integer.class);
                         }});
                         if (parameter == null) {
                             continue;
                         }
                     } catch (Exception e) {
                         logError(String.format(
-                            "%s for type of field %s on route %s in class %s",
-                            e.getMessage(), field.name(), method.getName(), method.getDeclaringClass().getName()
+                                "%s for type of field %s on route %s in class %s",
+                                e.getMessage(), field.name(), method.getName(), method.getDeclaringClass().getName()
                         ));
                         continue;
                     }
@@ -305,6 +363,25 @@ public class BuildSwaggerDoclet extends Doclet {
                     parameter.put("required", field.required());
                     parameter.put("in", "body");
                 }
+            }
+
+            // Get the return type info
+            Map<String, Object> returnTypeInfo = null;
+            try {
+                returnTypeInfo = getTypeInfo(method.getGenericReturnType(), new HashMap<>());
+            } catch (Exception e) {
+                logError(String.format(
+                        "%s for return type of route %s in class %s",
+                        e.getMessage(), method.getName(), method.getDeclaringClass().getName()
+                ));
+            }
+
+            // Add the query parameters
+            if (returnTypeInfo != null && ((String) returnTypeInfo.getOrDefault("$ref", "")).endsWith("List")) {
+                Collection<Map<String, Object>> parameters = (Collection<Map<String, Object>>) methodMap.getOrDefault("parameters", new ArrayList<Map<String, Object>>());
+                methodMap.put("parameters", parameters);
+
+                // Get the return class, to determine the query parameters
             }
 
             // Map for the responses.
@@ -331,17 +408,9 @@ public class BuildSwaggerDoclet extends Doclet {
                     response.put("description", returnTags[0].text());
                 }
 
-                // Get the return type
-                try {
-                    Map<String, Object> typeInfo = getTypeInfo(method.getGenericReturnType(), new HashMap<>());
-                    if (typeInfo != null) {
-                        response.put("schema", typeInfo);
-                    }
-                } catch (Exception e) {
-                    logError(String.format(
-                        "%s for return type of route %s in class %s",
-                        e.getMessage(), method.getName(), method.getDeclaringClass().getName()
-                    ));
+                // Set the return type
+                if (returnTypeInfo != null) {
+                    response.put("schema", returnTypeInfo);
                 }
             }
 

@@ -154,7 +154,7 @@ public class TeamController {
     public static JSONResponse<Collection<User>> getUserHandler(RequestData requestData) throws Exception {
         Team team = EbeanEx.require(EbeanEx.find(Team.class, requestData.getParameter("id")));
         Query<User> query = Ebean.createQuery(User.class);
-        query.where().eq("teams." + Team.FIELD_ID, team);
+        query.where().eq("teams." + Team.FIELD_ID, team.getPK());
         return ResponseFactory.queryToList(requestData, User.class, query);
     }
 

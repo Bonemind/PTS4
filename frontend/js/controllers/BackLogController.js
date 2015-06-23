@@ -1,5 +1,5 @@
-PTSAppControllers.controller("BacklogController", ["$rootScope", "$scope", "Restangular", "ModalService", "$routeParams", "messageCenterService",
-		function($rootScope, $scope, Restangular, ModalService, $routeParams, messageCenterService) {
+PTSAppControllers.controller("BacklogController", ["$rootScope", "$scope", "Restangular", "ModalService", "$routeParams", "messageCenterService", "$location",
+		function($rootScope, $scope, Restangular, ModalService, $routeParams, messageCenterService, $location) {
 			$scope.selectediteration = {id: undefined, name: "None"};
 			$scope.selectedproject = {id: undefined, name: "None"};
 			$scope.update = function() {
