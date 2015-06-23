@@ -191,6 +191,9 @@ public class RallyImporter {
         String status = RallyImporter.getNodeText(storyNode, "ScheduleState");
         String description = RallyImporter.getNodeText(storyNode, "Description");
 
+        // Clean the description of <div> tags
+        description = description.replace("<div>", "\n").replace("</div>", "");
+
         // Set points to 0, if null
         if (points == null) {
             points = "0";
