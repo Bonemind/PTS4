@@ -718,13 +718,4 @@ public class VersionOneImporter {
     private int parseInt(String input){
         return Integer.valueOf(parseString(input).split(":")[1]);
     }
-
-    /***
-     * parse
-     * @param ipnut
-     * @return
-     */
-    private String parseDescription(String ipnut){
-
-    }
 }
