@@ -4,36 +4,29 @@
 	<div class="modal-content">
 		<div class="modal-header">
 			<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-			<h4 class="modal-title">Import from rally</h4>
+			<h4 class="modal-title">Import From Version One</h4>
 		</div>
 		<div class="modal-body">
 			<form class="form-horizontal">
 				<div class="form-group">
-					<label class="col-sm-2 control-label" for="nameInput">Iterations</label>
+					<label class="col-sm-2 control-label" for="nameInput">Project name</label>
 					<div class="col-sm-10">
-					    <input type="file" class="form-control" file-model="model.iterations" required>
+					        <input type"text" class="form-control" ng-model="model.project" />
 					</div>
 				</div>
 				<div class="form-group">
-					<label class="col-sm-2 control-label" for="nameInput">Stories</label>
+					<label class="col-sm-2 control-label" for="nameInput">Token</label>
 					<div class="col-sm-10">
-					    <input type="file" class="form-control" file-model="model.stories" required>
+					        <input type"text" class="form-control" ng-model="model.token" />
 					</div>
 				</div>
 				<div class="form-group">
-					<label class="col-sm-2 control-label" for="nameInput">Defects</label>
+					<label class="col-sm-2 control-label" for="nameInput">URL</label>
 					<div class="col-sm-10">
-					    <input type="file" class="form-control" file-model="model.defects" required>
-					</div>
-				</div>
-				<div class="form-group">
-					<label class="col-sm-2 control-label" for="nameInput">Tasks</label>
-					<div class="col-sm-10">
-					    <input type="file" class="form-control" file-model="model.tasks" required>
+					        <input type"text" class="form-control" ng-model="model.url" />
 					</div>
 				</div>
 			</form>
-
 		</div>
 		<div class="modal-footer">
 			<button type="button" class="btn btn-primary" ng-click="save(model)">Save</button>

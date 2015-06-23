@@ -264,6 +264,7 @@ PTSAppControllers.controller("BacklogController", ["$rootScope", "$scope", "Rest
 //CRUD controller
 PTSAppControllers.controller("CRUDController", ["$scope", "Restangular", "messageCenterService", "close", "model", "meta",
 	function($scope, Restangular, messageCenterService, close, model, meta) {
+		console.log("asdasdasd");
 		$scope.model = model;
 		$scope.meta = meta;
 		$scope.close = function(result) {
@@ -314,8 +315,8 @@ PTSAppControllers.controller("DashboardController", ["$rootScope", "$scope", "Re
 ]);
 
 //CRUD controller
-PTSAppControllers.controller("FileUploadController", ["$scope", "Restangular", "messageCenterService", "close", "model", "meta",
-	function($scope, Restangular, messageCenterService, close, model, meta) {
+PTSAppControllers.controller("FileUploadController", ["$rootScope", "$scope", "Restangular", "messageCenterService", "close", "model", "meta",
+	function($rootScope, $scope, Restangular, messageCenterService, close, model, meta) {
 		$scope.model = model;
 		$scope.meta = meta;
 		$scope.close = function(result) {
@@ -327,14 +328,16 @@ PTSAppControllers.controller("FileUploadController", ["$scope", "Restangular", "
 			_.each(result, function(val, key) {
 			    formData.append(key, val);
 			});
-			Restangular.oneUrl("x", "https://cors-anywhere.herokuapp.com/http://requestb.in/1atu8s41")
+			meta.team.one("import/" + meta.importType)
     				.withHttpConfig({transformRequest: angular.identity})
-    				.customPOST(formData, '', undefined, {"Content-Type": undefined})
+    				.customPOST(formData, '', undefined, {"Content-Type": undefined, "X-Token": $rootScope.token})
     				.then(function() {
 				    messageCenterService.add("success", "File Uploaded");
+				    $rootScope.$broadcast("project-created");
 				}, function(err) {
 					if (err.status == 409) {
 					    messageCenterService.add("danger", "That column contains the maximum number of stories", {timeout: 7000});
+					close(result, 100);
 					} else {
 					    messageCenterService.add("danger", "Something went wrong, please try again", {timeout: 7000});
 					}
@@ -439,20 +442,19 @@ PTSAppControllers.controller("LoginMenuController", ["$rootScope", "$scope", "Re
 			}
 		}]);
 
-PTSAppControllers.controller("MainNavController", ["$rootScope", "$scope", "Restangular", "$location", "$http", "ModalService",
-	function($rootScope, $scope, Restangular, $location, $http, ModalService) {
+PTSAppControllers.controller("MainNavController", ["$rootScope", "$scope", "Restangular", "$location", "$http", "ModalService", "messageCenterService",
+	function($rootScope, $scope, Restangular, $location, $http, ModalService, messageCenterService) {
 	    	$scope.currentTeam = undefined;
 	    	$scope.currentProject = undefined;
 	 	$scope.update = function() {
+	 	    console.log($rootScope.user);
 	 	    	if ($location.url().indexOf("register") >= 0) {
 			    return;
 			}
-			console.log("x");
 			Restangular.all("team").getList()
  				.then(function(teams) {
 				 	$scope.teams = teams;
 				});
-			console.log("y");
 			Restangular.all("project").getList()
     				.then(function(projects) {
 				 	$scope.projects = projects;
@@ -460,6 +462,7 @@ PTSAppControllers.controller("MainNavController", ["$rootScope", "$scope", "Rest
 		}
 		$scope.teamSelect = function(team) {
 		    $scope.currentTeam = team;
+	 	    console.log($scope.currentTeam.scrumMaster);
 		}
 		$scope.projectSelect = function(project) {
 		    $scope.currentProject = project;
@@ -489,16 +492,32 @@ PTSAppControllers.controller("MainNavController", ["$rootScope", "$scope", "Rest
 			    window.URL.revokeObjectURL(url);
 			    a.parentNode.removeChild(a);
 
-		    });
+	 	    });
 		}
 
-		$scope.uploadModal = function() {
+		$scope.uploadModal = function(importType) {
+		    var importModal = "";
+		    var controller = "";
+		    var model = {};
+		    if (importType == "rally") {
+		    	importModal = "RallyUpload.html";
+		    	controller = "FileUploadController";
+		    } else if (importType == "vone") {
+		    	importModal = "VersionOneImport.html";
+		    	controller = "CRUDController";
+			model = Restangular.restangularizeElement($scope.currentTeam, {url: "", project: "", token: ""}, "import/versionone");
+		    } else {
+		    	messageCenterService.add("danger", "Import type not found");
+		    	return;
+		    }
 		    ModalService.showModal({
-			templateUrl: "templates/RallyUpload.html",
-		    	controller: "FileUploadController",
+			templateUrl: "templates/" + importModal,
+		    	controller: controller,
 		    	inputs: {
-			    model: {},
+			    model: model,
 		    	    meta: {
+				importType: importType,
+		    		team: $scope.currentTeam
 			    }
 			}
 		    }).then(function(modal) {

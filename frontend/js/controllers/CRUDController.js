@@ -1,6 +1,7 @@
 //CRUD controller
 PTSAppControllers.controller("CRUDController", ["$scope", "Restangular", "messageCenterService", "close", "model", "meta",
 	function($scope, Restangular, messageCenterService, close, model, meta) {
+		console.log("asdasdasd");
 		$scope.model = model;
 		$scope.meta = meta;
 		$scope.close = function(result) {

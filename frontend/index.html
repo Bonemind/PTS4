@@ -84,11 +84,14 @@
 				<li>
 					<a href="#/teams/{{ currentTeam.id }}/users">Members</a>
 				</li>
-				<li>
+				<li ng-if="$root.user.id == currentTeam.scrumMaster">
 					<a ng-click="downloadExport()">Export</a>
 				</li>
-				<li>
-					<a ng-click="uploadModal()">Export</a>
+				<li ng-if="$root.user.id == currentTeam.scrumMaster">
+					<a ng-click="uploadModal('rally')">Import from Rally</a>
+				</li>
+				<li ng-if="$root.user.id == currentTeam.scrumMaster">
+					<a ng-click="uploadModal('vone')">Import from Version One</a>
 				</li>
 			</ul>
 		    </li>
@@ -146,7 +149,15 @@
 	    <div mc-messages></div>
     </div>
     <div class="container-fluid">
-	    <div ng-view></div>
+
+	    <div class="row">
+		    <div class="smallscreen-title text-center" ng-model="title">
+			    <h1>{{ title }}</h1>
+		    </div>
+	    </div>
+		    <div class="row">
+		    <div ng-view></div>
+	    </div>
     </div>
     <script type="text/javascript">
 	$.material.init();

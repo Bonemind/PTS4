@@ -1,17 +1,16 @@
-PTSAppControllers.controller("MainNavController", ["$rootScope", "$scope", "Restangular", "$location", "$http", "ModalService",
-	function($rootScope, $scope, Restangular, $location, $http, ModalService) {
+PTSAppControllers.controller("MainNavController", ["$rootScope", "$scope", "Restangular", "$location", "$http", "ModalService", "messageCenterService",
+	function($rootScope, $scope, Restangular, $location, $http, ModalService, messageCenterService) {
 	    	$scope.currentTeam = undefined;
 	    	$scope.currentProject = undefined;
 	 	$scope.update = function() {
+	 	    console.log($rootScope.user);
 	 	    	if ($location.url().indexOf("register") >= 0) {
 			    return;
 			}
-			console.log("x");
 			Restangular.all("team").getList()
  				.then(function(teams) {
 				 	$scope.teams = teams;
 				});
-			console.log("y");
 			Restangular.all("project").getList()
     				.then(function(projects) {
 				 	$scope.projects = projects;
@@ -19,6 +18,7 @@ PTSAppControllers.controller("MainNavController", ["$rootScope", "$scope", "Rest
 		}
 		$scope.teamSelect = function(team) {
 		    $scope.currentTeam = team;
+	 	    console.log($scope.currentTeam.scrumMaster);
 		}
 		$scope.projectSelect = function(project) {
 		    $scope.currentProject = project;
@@ -48,16 +48,32 @@ PTSAppControllers.controller("MainNavController", ["$rootScope", "$scope", "Rest
 			    window.URL.revokeObjectURL(url);
 			    a.parentNode.removeChild(a);
 
-		    });
+	 	    });
 		}
 
-		$scope.uploadModal = function() {
+		$scope.uploadModal = function(importType) {
+		    var importModal = "";
+		    var controller = "";
+		    var model = {};
+		    if (importType == "rally") {
+		    	importModal = "RallyUpload.html";
+		    	controller = "FileUploadController";
+		    } else if (importType == "vone") {
+		    	importModal = "VersionOneImport.html";
+		    	controller = "CRUDController";
+			model = Restangular.restangularizeElement($scope.currentTeam, {url: "", project: "", token: ""}, "import/versionone");
+		    } else {
+		    	messageCenterService.add("danger", "Import type not found");
+		    	return;
+		    }
 		    ModalService.showModal({
-			templateUrl: "templates/RallyUpload.html",
-		    	controller: "FileUploadController",
+			templateUrl: "templates/" + importModal,
+		    	controller: controller,
 		    	inputs: {
-			    model: {},
+			    model: model,
 		    	    meta: {
+				importType: importType,
+		    		team: $scope.currentTeam
 			    }
 			}
 		    }).then(function(modal) {
