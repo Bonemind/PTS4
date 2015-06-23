@@ -54,7 +54,7 @@ public class ImportExportController {
     @Field(name = "defects", required = true, description = "The defects XML file")
     @RequireAuth(role = ScopeRole.SCRUM_MASTER)
     @Route(method = HTTPMethod.POST, path = "/team/{id}/import/rally")
-    public static void importRallyHandler(RequestData requestData) throws Exception {
+    public static Project importRallyHandler(RequestData requestData) throws Exception {
         // Get the team
         Team team = EbeanEx.find(Team.class, requestData.getParameter("id"));
 
@@ -67,7 +67,7 @@ public class ImportExportController {
         inputStreams.add(payload.getFileContent("defects"));
 
         // Perform the import
-        RallyImporter.importRally(inputStreams, team);
+        return RallyImporter.importRally(inputStreams, team);
     }
 
     /**
@@ -78,7 +78,7 @@ public class ImportExportController {
     @Field(name = "project", required = true, description = "The project name")
     @RequireAuth(role = ScopeRole.SCRUM_MASTER)
     @Route(method = HTTPMethod.POST, path = "/team/{id}/import/versionone")
-    public static void importVersioOneHandler(RequestData requestData) throws Exception {
+    public static Project importVersionOneHandler(RequestData requestData) throws Exception {
         // Get the team
         Team team = EbeanEx.find(Team.class, requestData.getParameter("id"));
 
@@ -90,5 +90,7 @@ public class ImportExportController {
         Ebean.beginTransaction();
         Ebean.save(project);
         Ebean.commitTransaction();
+
+        return project;
     }
 }
