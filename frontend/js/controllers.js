@@ -1,5 +1,5 @@
-PTSAppControllers.controller("BacklogController", ["$rootScope", "$scope", "Restangular", "ModalService", "$routeParams", "messageCenterService",
-		function($rootScope, $scope, Restangular, ModalService, $routeParams, messageCenterService) {
+PTSAppControllers.controller("BacklogController", ["$rootScope", "$scope", "Restangular", "ModalService", "$routeParams", "messageCenterService", "$location",
+		function($rootScope, $scope, Restangular, ModalService, $routeParams, messageCenterService, $location) {
 			$scope.selectediteration = {id: undefined, name: "None"};
 			$scope.selectedproject = {id: undefined, name: "None"};
 			$scope.update = function() {
@@ -262,8 +262,8 @@ PTSAppControllers.controller("BacklogController", ["$rootScope", "$scope", "Rest
 
 
 //CRUD controller
-PTSAppControllers.controller("CRUDController", ["$scope", "Restangular", "messageCenterService", "close", "model", "meta",
-	function($scope, Restangular, messageCenterService, close, model, meta) {
+PTSAppControllers.controller("CRUDController", ["$rootScope", "$scope", "Restangular", "messageCenterService", "close", "model", "meta",
+	function($rootScope, $scope, Restangular, messageCenterService, close, model, meta) {
 		console.log("asdasdasd");
 		$scope.model = model;
 		$scope.meta = meta;
@@ -524,7 +524,8 @@ PTSAppControllers.controller("MainNavController", ["$rootScope", "$scope", "Rest
 			}
 		    }).then(function(modal) {
 		    	modal.element.modal();
-		    	modal.close.then( function(result) { } );
+		    	modal.close.then( function(result) { 
+		    	} );
 		    });
 		}
 

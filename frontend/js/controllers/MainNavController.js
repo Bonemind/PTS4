@@ -78,7 +78,8 @@ PTSAppControllers.controller("MainNavController", ["$rootScope", "$scope", "Rest
 			}
 		    }).then(function(modal) {
 		    	modal.element.modal();
-		    	modal.close.then( function(result) { } );
+		    	modal.close.then( function(result) { 
+		    	} );
 		    });
 		}
 
