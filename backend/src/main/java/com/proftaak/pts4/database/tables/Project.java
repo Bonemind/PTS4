@@ -1,6 +1,9 @@
 package com.proftaak.pts4.database.tables;
 
-import com.proftaak.pts4.database.DatabaseModel;
+import com.avaje.ebean.Ebean;
+import com.avaje.ebean.Expr;
+import com.avaje.ebean.Query;
+import com.proftaak.pts4.database.IDatabaseModel;
 import com.proftaak.pts4.json.ToPKTransformer;
 import flexjson.JSON;
 import org.apache.commons.lang3.StringUtils;
@@ -14,7 +17,7 @@ import java.util.List;
  */
 @Entity
 @Table(name = "projects")
-public class Project implements DatabaseModel<Integer> {
+public class Project implements IDatabaseModel<Integer> {
     public static final String FIELD_ID = "id";
     public static final String FIELD_NAME = "name";
     public static final String FIELD_DESCRIPTION = "description";
@@ -120,5 +123,17 @@ public class Project implements DatabaseModel<Integer> {
 
     public void setProductOwner(User productOwner) {
         this.productOwner = productOwner;
+    }
+
+    /**
+     * Build a query to get all projects to which a given user has access
+     */
+    public static Query<Project> queryForUser(User user) {
+        Query<Project> query = Ebean.createQuery(Project.class);
+        query.where().or(
+                Expr.eq(Project.FIELD_PRODUCT_OWNER, user.getId()),
+                Expr.in(Project.FIELD_TEAM, Team.queryForUser(user).select(Team.FIELD_ID))
+        );
+        return query;
     }
 }

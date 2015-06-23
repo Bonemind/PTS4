@@ -1,6 +1,7 @@
 package com.proftaak.pts4.controllers;
 
 import com.avaje.ebean.Ebean;
+import com.avaje.ebean.Query;
 import com.proftaak.pts4.database.EbeanEx;
 import com.proftaak.pts4.database.tables.Iteration;
 import com.proftaak.pts4.database.tables.Story;
@@ -8,6 +9,8 @@ import com.proftaak.pts4.database.tables.Team;
 import com.proftaak.pts4.database.tables.User;
 import com.proftaak.pts4.rest.*;
 import com.proftaak.pts4.rest.annotations.*;
+import com.proftaak.pts4.rest.response.JSONResponse;
+import com.proftaak.pts4.rest.response.ResponseFactory;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -77,11 +80,11 @@ public class IterationController {
     public static Iteration postHandler(RequestData requestData) throws Exception {
         // Create the new iteration
         Iteration iteration = new Iteration(
-            EbeanEx.require(EbeanEx.find(Team.class, requestData.getPayload().get("team"))),
-            LocalDate.parse(requestData.getPayload().getString("start")),
-            LocalDate.parse(requestData.getPayload().getString("end")),
-            requestData.getPayload().getString("name"),
-            requestData.getPayload().getString("description")
+                EbeanEx.require(EbeanEx.find(Team.class, requestData.getPayload().get("team"))),
+                LocalDate.parse(requestData.getPayload().getString("start")),
+                LocalDate.parse(requestData.getPayload().getString("end")),
+                requestData.getPayload().getString("name"),
+                requestData.getPayload().getString("description")
         );
         Ebean.save(iteration);
 
@@ -142,11 +145,9 @@ public class IterationController {
      */
     @RequireAuth(role = ScopeRole.TEAM_MEMBER)
     @Route(method = HTTPMethod.GET, path = "/iteration/{id}/story")
-    public static Collection<Story> getStoryHandler(RequestData requestData) throws Exception {
-        // Get the iteration
+    public static JSONResponse<Collection<Story>> getStoryHandler(RequestData requestData) throws Exception {
         Iteration iteration = EbeanEx.require(EbeanEx.find(Iteration.class, requestData.getParameter("id")));
-
-        // Return the stories
-        return iteration.getStories();
+        Query<Story> query = EbeanEx.queryBelongingTo(Story.class, Iteration.class, iteration);
+        return ResponseFactory.queryToList(requestData, Story.class, query);
     }
 }

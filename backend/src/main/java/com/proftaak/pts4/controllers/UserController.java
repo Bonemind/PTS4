@@ -12,35 +12,18 @@ import com.proftaak.pts4.rest.annotations.Controller;
 import com.proftaak.pts4.rest.annotations.Field;
 import com.proftaak.pts4.rest.annotations.RequireAuth;
 import com.proftaak.pts4.rest.annotations.Route;
+import com.proftaak.pts4.rest.response.JSONResponse;
+import com.proftaak.pts4.rest.response.ResponseFactory;
 import org.glassfish.grizzly.http.util.HttpStatus;
 
 import javax.persistence.PersistenceException;
 import java.util.Collection;
-import java.util.TreeSet;
 
 /**
  * @author Michon
  */
 @Controller
 public class UserController {
-
-    /**
-     * GET /user
-     * Returns a sorted list of usernames instead of users
-     */
-    @RequireAuth
-    @Route(method = HTTPMethod.GET)
-    public static Collection<String> getAllHandler(RequestData requestData) throws Exception {
-        Collection<String> usernames = new TreeSet<>();
-
-        // Get the username of every user
-        for (User user : Ebean.find(User.class).findList()) {
-            usernames.add(user.getName());
-        }
-
-        return usernames;
-    }
-
     /**
      * GET /user/1
      */
@@ -55,6 +38,16 @@ public class UserController {
     }
 
     /**
+     * GET /user
+     * Returns a sorted list of usernames instead of users
+     */
+    @RequireAuth
+    @Route(method = HTTPMethod.GET)
+    public static JSONResponse<Collection<String>> getAllHandler(RequestData requestData) throws Exception {
+        return ResponseFactory.queryToList(requestData, User.class, Ebean.createQuery(User.class), User::getName);
+    }
+
+    /**
      * POST /user
      */
     @Field(name = "email", required = true, description = "The email address of the new user")
@@ -64,9 +57,9 @@ public class UserController {
     public static User postHandler(RequestData requestData) throws Exception {
         // Create the new user
         User user = new User(
-            requestData.getPayload().get("email").toString(),
-            requestData.getPayload().get("name").toString(),
-            requestData.getPayload().get("password").toString()
+                requestData.getPayload().get("email").toString(),
+                requestData.getPayload().get("name").toString(),
+                requestData.getPayload().get("password").toString()
         );
         try {
             Ebean.save(user);
@@ -76,9 +69,9 @@ public class UserController {
 
         // Check if there are any pending invitations for this email address
         Collection<PendingInvitation> pendingInvitations = Ebean.find(PendingInvitation.class)
-            .where()
-            .eq(PendingInvitation.FIELD_EMAIL, requestData.getPayload().get("email").toString())
-            .findList();
+                .where()
+                .eq(PendingInvitation.FIELD_EMAIL, requestData.getPayload().get("email").toString())
+                .findList();
         for (PendingInvitation invitation : pendingInvitations) {
             user.getTeams().add(invitation.getTeam());
             Ebean.delete(invitation);

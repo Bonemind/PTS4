@@ -6,6 +6,8 @@ import flexjson.BeanProperty;
 import flexjson.JSONDeserializer;
 import flexjson.JSONSerializer;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -92,5 +94,9 @@ public class Payload extends HashMap<String, Object> {
 
     public Boolean getBoolean(String key, Boolean def) {
         return (Boolean) this.getOrDefault(key, def);
+    }
+
+    public InputStream getFileContent(String key) {
+        return new ByteArrayInputStream((byte[]) this.get(key));
     }
 }

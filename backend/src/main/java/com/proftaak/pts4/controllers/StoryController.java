@@ -1,17 +1,15 @@
 package com.proftaak.pts4.controllers;
 
 import com.avaje.ebean.Ebean;
+import com.avaje.ebean.Query;
 import com.proftaak.pts4.database.EbeanEx;
 import com.proftaak.pts4.database.tables.*;
 import com.proftaak.pts4.rest.*;
 import com.proftaak.pts4.rest.annotations.*;
-import org.apache.commons.lang3.StringUtils;
-import org.glassfish.grizzly.http.util.HttpStatus;
+import com.proftaak.pts4.rest.response.JSONResponse;
+import com.proftaak.pts4.rest.response.ResponseFactory;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.HashSet;
 
 /**
  * @author Michon
@@ -59,18 +57,8 @@ public class StoryController {
      */
     @RequireAuth
     @Route(method = HTTPMethod.GET)
-    public static Collection<Story> getAllHandler(RequestData requestData) throws Exception {
-        Collection<Story> stories = new HashSet<>();
-        User user = requestData.getUser();
-        for (Team team : user.getTeams()) {
-            for (Project project : team.getProjects()) {
-                stories.addAll(project.getStories());
-            }
-        }
-        for (Project project : user.getOwnedProjects()) {
-            stories.addAll(project.getStories());
-        }
-        return stories;
+    public static JSONResponse<Collection<Story>> getAllHandler(RequestData requestData) throws Exception {
+        return ResponseFactory.queryToList(requestData, Story.class, Story.queryForUser(requestData.getUser()));
     }
 
     /**
@@ -97,14 +85,14 @@ public class StoryController {
 
         // Create the new user story
         Story story = new Story(
-            project,
-            EbeanEx.find(Iteration.class, requestData.getPayload().get("iteration")),
-            Story.Type.valueOf(requestData.getPayload().getOrDefault("type", Story.Type.USER_STORY.toString()).toString()),
-            requestData.getPayload().getString("name"),
-            requestData.getPayload().getString("description"),
-            status,
-            0, // Priority
-            requestData.getPayload().getInt("points", 0)
+                project,
+                EbeanEx.find(Iteration.class, requestData.getPayload().get("iteration")),
+                Story.Type.valueOf(requestData.getPayload().getOrDefault("type", Story.Type.USER_STORY.toString()).toString()),
+                requestData.getPayload().getString("name"),
+                requestData.getPayload().getString("description"),
+                status,
+                0, // Priority
+                requestData.getPayload().getInt("points", 0)
         );
 
         // Check Kanban rules
@@ -191,12 +179,10 @@ public class StoryController {
      */
     @RequireAuth(role = ScopeRole.TEAM_MEMBER)
     @Route(method = HTTPMethod.GET, path = "/story/{id}/task")
-    public static Collection<Task> getTask(RequestData requestData) throws Exception {
-        // Get the story
+    public static JSONResponse<Collection<Task>> getTask(RequestData requestData) throws Exception {
         Story story = EbeanEx.require(EbeanEx.find(Story.class, requestData.getParameter("id")));
-
-        // Return the tasks
-        return story.getTasks();
+        Query<Task> query = EbeanEx.queryBelongingTo(Task.class, Story.class, story);
+        return ResponseFactory.queryToList(requestData, Task.class, query);
     }
 
     /**
@@ -204,11 +190,9 @@ public class StoryController {
      */
     @RequireAuth(role = ScopeRole.TEAM_MEMBER)
     @Route(method = HTTPMethod.GET, path = "/story/{id}/test")
-    public static Collection<Test> getTest(RequestData requestData) throws Exception {
-        // Get the story
+    public static JSONResponse<Collection<Test>> getTest(RequestData requestData) throws Exception {
         Story story = EbeanEx.require(EbeanEx.find(Story.class, requestData.getParameter("id")));
-
-        // Return the tests
-        return story.getTests();
+        Query<Test> query = EbeanEx.queryBelongingTo(Test.class, Story.class, story);
+        return ResponseFactory.queryToList(requestData, Test.class, query);
     }
 }

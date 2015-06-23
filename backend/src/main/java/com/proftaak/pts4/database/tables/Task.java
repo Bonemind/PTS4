@@ -1,6 +1,8 @@
 package com.proftaak.pts4.database.tables;
 
-import com.proftaak.pts4.database.DatabaseModel;
+import com.avaje.ebean.Query;
+import com.proftaak.pts4.database.EbeanEx;
+import com.proftaak.pts4.database.IDatabaseModel;
 import com.proftaak.pts4.json.ToPKTransformer;
 import flexjson.JSON;
 import org.apache.commons.lang3.StringUtils;
@@ -12,7 +14,7 @@ import javax.persistence.*;
  */
 @Entity
 @Table(name = "tasks")
-public class Task implements DatabaseModel<Integer> {
+public class Task implements IDatabaseModel<Integer> {
     public enum Status {
         /**
          * Task is defined
@@ -167,5 +169,12 @@ public class Task implements DatabaseModel<Integer> {
 
     public User getOwner() {
         return this.owner;
+    }
+
+    /**
+     * Build a query to get all tasks to which a given user has access
+     */
+    public static Query<Task> queryForUser(User user) throws Exception {
+        return EbeanEx.queryBelongingTo(Task.class, Story.class, Story.queryForUser(user));
     }
 }

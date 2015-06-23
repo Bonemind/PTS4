@@ -4,7 +4,6 @@ import com.sun.mail.smtp.SMTPTransport;
 
 import javax.mail.Message;
 import javax.mail.Session;
-import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import java.util.Date;
@@ -17,7 +16,7 @@ public class MailUtils {
     /**
      * Send an email
      *
-     * @param email The email address to send the email to
+     * @param email   The email address to send the email to
      * @param subject The subject line of the email
      * @param message The body of the email
      */
@@ -36,7 +35,7 @@ public class MailUtils {
         msg.setSentDate(new Date());
 
         // Send the message
-        SMTPTransport t = (SMTPTransport)session.getTransport("smtp");
+        SMTPTransport t = (SMTPTransport) session.getTransport("smtp");
         t.connect(props.getProperty("mail.host"), Integer.parseInt(props.getProperty("mail.port")), props.getProperty("mail.user"), props.getProperty("mail.pass"));
         t.sendMessage(msg, msg.getAllRecipients());
         t.close();

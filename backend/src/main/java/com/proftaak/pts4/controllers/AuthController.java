@@ -2,7 +2,6 @@ package com.proftaak.pts4.controllers;
 
 import com.avaje.ebean.Ebean;
 import com.avaje.ebean.Expr;
-import com.avaje.ebeaninternal.server.expression.SimpleExpression;
 import com.proftaak.pts4.database.EbeanEx;
 import com.proftaak.pts4.database.tables.Token;
 import com.proftaak.pts4.database.tables.User;
@@ -31,11 +30,11 @@ public class AuthController {
     public static Token loginHandler(RequestData requestData) throws Exception {
         // Check the login details
         User user = EbeanEx.require(EbeanEx.find(Ebean.find(User.class)
-            .where()
-            .or(
-                Expr.ieq(User.FIELD_EMAIL, requestData.getPayload().get("user").toString()),
-                Expr.ieq(User.FIELD_NAME, requestData.getPayload().get("user").toString())
-            ).query()));
+                .where()
+                .or(
+                        Expr.ieq(User.FIELD_EMAIL, requestData.getPayload().get("user").toString()),
+                        Expr.ieq(User.FIELD_NAME, requestData.getPayload().get("user").toString())
+                ).query()));
         if (user == null || !user.checkPassword(requestData.getPayload().getString("password"))) {
             throw new HTTPException("Invalid login details", HttpStatus.UNAUTHORIZED_401);
         }

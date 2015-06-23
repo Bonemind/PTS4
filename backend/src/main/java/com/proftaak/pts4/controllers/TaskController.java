@@ -2,13 +2,16 @@ package com.proftaak.pts4.controllers;
 
 import com.avaje.ebean.Ebean;
 import com.proftaak.pts4.database.EbeanEx;
-import com.proftaak.pts4.database.tables.*;
+import com.proftaak.pts4.database.tables.Story;
+import com.proftaak.pts4.database.tables.Task;
+import com.proftaak.pts4.database.tables.User;
 import com.proftaak.pts4.rest.*;
 import com.proftaak.pts4.rest.annotations.*;
+import com.proftaak.pts4.rest.response.JSONResponse;
+import com.proftaak.pts4.rest.response.ResponseFactory;
 import org.glassfish.grizzly.http.util.HttpStatus;
 
 import java.util.Collection;
-import java.util.HashSet;
 
 /**
  * @author Michon
@@ -49,22 +52,8 @@ public class TaskController {
      */
     @RequireAuth
     @Route(method = HTTPMethod.GET)
-    public static Collection<Task> getAllHandler(RequestData requestData) throws Exception {
-        Collection<Task> tasks = new HashSet<>();
-        User user = requestData.getUser();
-        for (Team team : user.getTeams()) {
-            for (Project project : team.getProjects()) {
-                for (Story story : project.getStories()) {
-                    tasks.addAll(story.getTasks());
-                }
-            }
-        }
-        for (Project project : user.getOwnedProjects()) {
-            for (Story story : project.getStories()) {
-                tasks.addAll(story.getTasks());
-            }
-        }
-        return tasks;
+    public static JSONResponse<Collection<Task>> getAllHandler(RequestData requestData) throws Exception {
+        return ResponseFactory.queryToList(requestData, Task.class, Task.queryForUser(requestData.getUser()));
     }
 
     /**
@@ -89,12 +78,12 @@ public class TaskController {
 
         // Create the new task
         Task task = new Task(
-            story,
-            assignedOwner,
-            requestData.getPayload().getString("name"),
-            requestData.getPayload().getString("description"),
-            requestData.getPayload().getDouble("estimate", 0.0),
-            Task.Status.valueOf(requestData.getPayload().getOrDefault("status", Task.Status.DEFINED.toString()).toString())
+                story,
+                assignedOwner,
+                requestData.getPayload().getString("name"),
+                requestData.getPayload().getString("description"),
+                requestData.getPayload().getDouble("estimate", 0.0),
+                Task.Status.valueOf(requestData.getPayload().getOrDefault("status", Task.Status.DEFINED.toString()).toString())
         );
         Ebean.save(task);
 

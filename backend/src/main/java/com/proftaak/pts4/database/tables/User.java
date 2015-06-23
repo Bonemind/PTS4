@@ -2,8 +2,8 @@ package com.proftaak.pts4.database.tables;
 
 import com.avaje.ebean.Ebean;
 import com.avaje.ebean.Expr;
-import com.proftaak.pts4.database.DatabaseModel;
 import com.proftaak.pts4.database.EbeanEx;
+import com.proftaak.pts4.database.IDatabaseModel;
 import flexjson.JSON;
 import org.mindrot.jbcrypt.BCrypt;
 
@@ -16,7 +16,7 @@ import java.util.List;
  */
 @Entity
 @Table(name = "users")
-public class User implements DatabaseModel<Integer> {
+public class User implements IDatabaseModel<Integer> {
     public static final String FIELD_ID = "id";
     public static final String FIELD_EMAIL = "email";
     public static final String FIELD_NAME = "name";
@@ -156,7 +156,6 @@ public class User implements DatabaseModel<Integer> {
         return this.ownedProjects;
     }
 
-
     /**
      * Find an user by either it's name or it's email address
      *
@@ -164,12 +163,11 @@ public class User implements DatabaseModel<Integer> {
      */
     public static User findByNameOrEmail(String identifier) {
         return EbeanEx.find(Ebean.find(User.class)
-            .where()
-            .or(
-                Expr.ieq(User.FIELD_EMAIL, identifier),
-                Expr.ieq(User.FIELD_NAME, identifier)
-            ).query()
+                        .where()
+                        .or(
+                                Expr.ieq(User.FIELD_EMAIL, identifier),
+                                Expr.ieq(User.FIELD_NAME, identifier)
+                        ).query()
         );
     }
-
 }
