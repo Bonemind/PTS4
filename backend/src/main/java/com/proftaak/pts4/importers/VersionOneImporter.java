@@ -24,7 +24,7 @@ import java.util.*;
 /**
  * Created by stijn on 16/6/2015.
  */
-public class VersionOneImporter extends Importer {
+public class VersionOneImporter {
 
     private String baseUrl;
     private static final String APPNAME = "...";

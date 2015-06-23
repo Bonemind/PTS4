@@ -5,8 +5,18 @@ import com.proftaak.pts4.rest.annotations.Fields;
 import com.proftaak.pts4.rest.annotations.PreRequest;
 import com.proftaak.pts4.rest.annotations.RequireAuth;
 import com.proftaak.pts4.rest.response.BaseResponse;
+import com.proftaak.pts4.rest.response.ErrorResponse;
 import com.proftaak.pts4.rest.response.JSONResponse;
+import flexjson.JSONDeserializer;
+import org.apache.commons.fileupload.FileItemHeaders;
+import org.apache.commons.fileupload.FileUploadBase;
+import org.apache.commons.fileupload.MultipartStream;
+import org.apache.commons.fileupload.UploadContext;
+import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.commons.fileupload.util.FileItemHeadersImpl;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HeaderElement;
+import org.apache.http.message.BasicHeaderValueParser;
 import org.glassfish.grizzly.http.server.HttpHandler;
 import org.glassfish.grizzly.http.server.Request;
 import org.glassfish.grizzly.http.server.Response;
@@ -16,6 +26,7 @@ import org.reflections.scanners.MethodAnnotationsScanner;
 import org.reflections.util.ClasspathHelper;
 
 import javax.management.openmbean.KeyAlreadyExistsException;
+import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
@@ -23,6 +34,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 /**
  * Created by Michon on 23-4-2015.
@@ -210,10 +222,62 @@ public class SwitchBoard extends HttpHandler {
         // The warnings
         Collection<String> warnings = new ArrayList<>();
 
-        Object responseData = null;
+        Object responseData;
         try {
+            // Prepare the payload
+            Payload payload = null;
+
+            // Read the post data
+            if (request.getContentType() != null && request.getContentType().startsWith(FileUploadBase.MULTIPART)) {
+                // Create a new payload
+                payload = new Payload(new HashMap<>());
+
+                // Find the boundary
+                HeaderElement contentTypeHeader = BasicHeaderValueParser.parseHeaderElement(request.getHeader("content-type"), null);
+                String boundary = contentTypeHeader.getParameterByName("boundary").getValue();
+
+                // Multipart payload
+                MultipartStream multipartStream = new MultipartStream(request.getInputStream(), boundary.getBytes());
+                ByteArrayOutputStream outputStream;
+                boolean hasNext = multipartStream.skipPreamble();
+                while (hasNext) {
+                    // Read the headers
+                    HeaderElement[] headers = BasicHeaderValueParser.parseElements(multipartStream.readHeaders(), null);
+                    String name = null;
+                    for (HeaderElement header : headers) {
+                        if (header.getName().startsWith("Content-Disposition:")) {
+                            name = header.getParameterByName("name").getValue();
+                        }
+                    }
+
+                    // Get the body
+                    outputStream = new ByteArrayOutputStream();
+                    multipartStream.readBodyData(outputStream);
+
+                    // Read the end boundary
+                    hasNext = multipartStream.readBoundary();
+
+                    // Store the data
+                    if (name != null) {
+                        payload.put(name, outputStream.toByteArray());
+                    }
+                }
+            } else {
+                // JSON payload
+                BufferedReader reader = new BufferedReader(new InputStreamReader(request.getInputStream()));
+                JSONDeserializer<Map> deserializer = new JSONDeserializer<>();
+                try {
+                    if (reader.ready()) {
+                        String data = StringUtils.join(reader.lines().iterator(), "\n");
+                        payload = new Payload((HashMap<String, Object>) deserializer.deserialize(data));
+                    }
+                } catch (Exception e) {
+                    throw new HTTPException("Malformed payload", HttpStatus.BAD_REQUEST_400);
+                }
+            }
+
             // Build the request
-            RequestData requestData = RequestData.buildRequest(request, matcher);
+            RequestData requestData = RequestData.buildRequest(request, payload, matcher);
 
             // Call the pre-request methods
             this.handlePrerequests(route.handler, requestData);
@@ -267,13 +331,7 @@ public class SwitchBoard extends HttpHandler {
             userException = HTTPException.ERROR_BAD_REQUEST;
         }
 
-        // Something went wrong, so set the appropriate status code
-        response.setStatus(userException.getStatus());
-
-        // Create a simple object containing only the error message
-        Map<String, Object> responseObject = new HashMap<>();
-        responseObject.put("error", userException.getMessage());
-        return responseObject;
+        return new ErrorResponse(userException);
     }
 
     /**

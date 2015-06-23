@@ -60,12 +60,14 @@ public class QueryData extends HashMap<String, Collection<QueryParameter>> {
         QueryData queryData = new QueryData();
 
         // For each query parameter, build a QueryParameter object
-        for (NameValuePair parameter : URLEncodedUtils.parse(queryString, Charset.defaultCharset())) {
-            QueryParameter queryParameter = QueryParameter.fromNameValuePair(parameter);
-            if (!queryData.containsKey(queryParameter.getKey())) {
-                queryData.put(queryParameter.getKey(), new ArrayList<>());
+        if (queryString != null) {
+            for (NameValuePair parameter : URLEncodedUtils.parse(queryString, Charset.defaultCharset())) {
+                QueryParameter queryParameter = QueryParameter.fromNameValuePair(parameter);
+                if (!queryData.containsKey(queryParameter.getKey())) {
+                    queryData.put(queryParameter.getKey(), new ArrayList<>());
+                }
+                queryData.get(queryParameter.getKey()).add(queryParameter);
             }
-            queryData.get(queryParameter.getKey()).add(queryParameter);
         }
 
         return queryData;

@@ -5,6 +5,7 @@ import com.proftaak.pts4.database.tables.Token;
 import com.proftaak.pts4.database.tables.User;
 import flexjson.JSONDeserializer;
 import org.glassfish.grizzly.http.server.Request;
+import org.glassfish.grizzly.http.util.ContentType;
 import org.glassfish.grizzly.http.util.HttpStatus;
 
 import java.io.BufferedReader;
@@ -92,10 +93,11 @@ public class RequestData {
      * Build a RequestData object for the current request
      *
      * @param request The request
+     * @param payload The payload
      * @param matcher The matcher for the current route
      * @return The RequestData object for this request
      */
-    protected static RequestData buildRequest(Request request, Matcher matcher) throws HTTPException {
+    protected static RequestData buildRequest(Request request, Payload payload, Matcher matcher) throws HTTPException {
         RequestData data = new RequestData();
 
         // Store the request
@@ -104,16 +106,8 @@ public class RequestData {
         // Store the matcher
         data.matcher = matcher;
 
-        // Get the payload, if any
-        BufferedReader reader = new BufferedReader(new InputStreamReader(request.getInputStream()));
-        JSONDeserializer<Map> deserializer = new JSONDeserializer<>();
-        try {
-            if (reader.ready()) {
-                data.payload = new Payload((HashMap<String, Object>) deserializer.deserialize(reader.readLine()));
-            }
-        } catch (Exception e) {
-            throw new HTTPException("Malformed payload", HttpStatus.BAD_REQUEST_400);
-        }
+        // Store the payload
+        data.payload = payload;
         if (data.payload == null) {
             data.payload = new Payload(new HashMap<>());
         }

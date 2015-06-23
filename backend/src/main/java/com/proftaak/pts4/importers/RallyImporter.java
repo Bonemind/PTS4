@@ -10,7 +10,9 @@ import org.w3c.dom.NodeList;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.File;
+import java.io.InputStream;
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -32,20 +34,20 @@ public class RallyImporter {
     /**
      * Import function for a project from rally. (rally exports individual files).
      *
-     * @param importFiles A set of files which are directly rally csv export files.
-     * @param team        The team to add the project in the import to.
+     * @param inputStreams A set of input streams which are directly rally XML export files.
+     * @param team         The team to add the project in the import to.
      * @return True if the import was successful, otherwise false.
      */
-    public synchronized static boolean importRally(Set<File> importFiles, Team team) {
+    public synchronized static boolean importRally(Collection<InputStream> inputStreams, Team team) {
         // Set the team available for all methods
         RallyImporter.team = team;
 
         // Create the iterations (and a project)
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        for (File file : importFiles) {
+        for (InputStream inputStream : inputStreams) {
             try {
                 DocumentBuilder builder = factory.newDocumentBuilder();
-                Document dom = builder.parse(file);
+                Document dom = builder.parse(inputStream);
                 Element document = dom.getDocumentElement();
 
                 RallyImporter.createIterations(document);
@@ -64,10 +66,11 @@ public class RallyImporter {
         RallyImporter.newProject.setProductOwner(team.getScrumMaster());
 
         // Create the stories and defects
-        for (File file : importFiles) {
+        for (InputStream inputStream : inputStreams) {
             try {
+                inputStream.reset();
                 DocumentBuilder builder = factory.newDocumentBuilder();
-                Document dom = builder.parse(file);
+                Document dom = builder.parse(inputStream);
                 Element document = dom.getDocumentElement();
 
                 RallyImporter.createStories(document);
@@ -77,10 +80,11 @@ public class RallyImporter {
         }
 
         // Create the tasks
-        for (File file : importFiles) {
+        for (InputStream inputStream : inputStreams) {
             try {
+                inputStream.reset();
                 DocumentBuilder builder = factory.newDocumentBuilder();
-                Document dom = builder.parse(file);
+                Document dom = builder.parse(inputStream);
                 Element document = dom.getDocumentElement();
 
                 RallyImporter.createTasks(document);
