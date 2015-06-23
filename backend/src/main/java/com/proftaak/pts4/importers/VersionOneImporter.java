@@ -476,6 +476,9 @@ public class VersionOneImporter extends Importer {
      * @param stories
      */
     private void importTests(Project project, int projectIdentifier, HashMap<Integer, Story> stories) throws ConnectionException, APIException, OidException {
+        // get all available test statuses
+        HashMap<Integer, Boolean> testStatuses = importTestStatuses();
+
         // setup Query
         IAssetType tests = services.getMeta().getAssetType("Test");
         Query query = new Query(tests);
@@ -494,7 +497,6 @@ public class VersionOneImporter extends Importer {
         query.getSelection().add(nameOfTestAtr);
         query.getSelection().add(projectVO);
         query.getSelection().add(description);
-        query.getSelection().add(estimate);
         query.getSelection().add(status);
         query.getSelection().add(identifier);
         query.getSelection().add(parent);
@@ -509,22 +511,20 @@ public class VersionOneImporter extends Importer {
             String nameOfTest = parseString(testInResult.getAttribute(nameOfTestAtr).toString());
             String descriptionOfResult = parseString(testInResult.getAttribute(description).toString());
 
-
-            // parse the estimateOfPoints
-            int estimateOfPoints = 0;
-            if (!parseString(testInResult.getAttribute(estimate).toString()).toLowerCase().equals("null")) {
-                estimateOfPoints = (int) Math.round(Double.parseDouble(parseString(testInResult.getAttribute(estimate).toString())));
-            }
-
-            // parse the identifier
-            int identifierOfResult = parseInt(testInResult.getAttribute(identifier).toString());
-
             // parse the parent
             int parentIdentifier = parseInt(testInResult.getAttribute(parent).toString());
             Story story = stories.get(parentIdentifier);
 
             // create test
             Test test = new Test(story, nameOfTest, descriptionOfResult);
+
+            // parse the status of the test
+            if (!parseString(testInResult.getAttribute(status).toString()).toLowerCase().equals("null")) {
+                System.out.println(parseInt(testInResult.getAttribute(status).toString()));
+                if (testStatuses.get(parseInt(testInResult.getAttribute(status).toString()))) {
+                    test.setAccepted(true);
+                }
+            }
 
             // set relationships
             story.getTests().add(test);
@@ -625,6 +625,50 @@ public class VersionOneImporter extends Importer {
                     break;
                 case "In Progress":
                     returnValue.put(indentifierOfResult, Task.Status.IN_PROGRESS);
+                    break;
+            }
+        }
+
+        return returnValue;
+    }
+
+    /***
+     * imports all the test statuses available and match them to the native Story enum
+     * @return
+     * @throws ConnectionException
+     * @throws APIException
+     * @throws OidException
+     */
+    private HashMap<Integer, Boolean> importTestStatuses() throws ConnectionException, APIException, OidException {
+        // create returnValue
+        HashMap<Integer, Boolean> returnValue = new HashMap<>();
+
+        // setup Query
+        IAssetType tests = services.getMeta().getAssetType("TestStatus");
+        Query query = new Query(tests);
+
+        // setup attributes that are used in query
+        IAttributeDefinition nameOfIterationAtr = tests.getAttributeDefinition("Name");
+        IAttributeDefinition identifier = tests.getAttributeDefinition("ID");
+
+        // add attributes to query
+        query.getSelection().add(nameOfIterationAtr);
+        query.getSelection().add(identifier);
+
+        // get result from query
+        QueryResult queryResult = services.retrieve(query);
+
+        for (Asset iteration : queryResult.getAssets()){
+            String name = parseString(iteration.getAttribute(nameOfIterationAtr).toString());
+            System.out.println("here:" + iteration.getAttribute(identifier).toString());
+            int indentifierOfResult = parseInt(iteration.getAttribute(identifier).toString());
+
+            switch (name){
+                case "Failed":
+                    returnValue.put(indentifierOfResult, false);
+                    break;
+                case "Passed":
+                    returnValue.put(indentifierOfResult, true);
                     break;
             }
         }
