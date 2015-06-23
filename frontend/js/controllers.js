@@ -264,6 +264,7 @@ PTSAppControllers.controller("BacklogController", ["$rootScope", "$scope", "Rest
 //CRUD controller
 PTSAppControllers.controller("CRUDController", ["$scope", "Restangular", "messageCenterService", "close", "model", "meta",
 	function($scope, Restangular, messageCenterService, close, model, meta) {
+		console.log("asdasdasd");
 		$scope.model = model;
 		$scope.meta = meta;
 		$scope.close = function(result) {
@@ -273,6 +274,7 @@ PTSAppControllers.controller("CRUDController", ["$scope", "Restangular", "messag
 			console.log(result);
 			result.save().then(function() {
 				messageCenterService.add("success", "Changes saved", {timeout: 7000});
+				    $rootScope.$broadcast("project-created");
 				close(result, 100);
 			}, function(err) {
 			    	if (err.status == 409) {
@@ -312,6 +314,38 @@ PTSAppControllers.controller("DashboardController", ["$rootScope", "$scope", "Re
 		$scope.update();
 	}
 ]);
+
+//CRUD controller
+PTSAppControllers.controller("FileUploadController", ["$rootScope", "$scope", "Restangular", "messageCenterService", "close", "model", "meta",
+	function($rootScope, $scope, Restangular, messageCenterService, close, model, meta) {
+		$scope.model = model;
+		$scope.meta = meta;
+		$scope.close = function(result) {
+			close(result, 100);
+		}
+		$scope.save = function(result) {
+			var formData = new FormData();
+			console.log(result);
+			_.each(result, function(val, key) {
+			    formData.append(key, val);
+			});
+			meta.team.one("import/" + meta.importType)
+    				.withHttpConfig({transformRequest: angular.identity})
+    				.customPOST(formData, '', undefined, {"Content-Type": undefined, "X-Token": $rootScope.token})
+    				.then(function() {
+				    messageCenterService.add("success", "File Uploaded");
+				    $rootScope.$broadcast("project-created");
+				}, function(err) {
+					if (err.status == 409) {
+					    messageCenterService.add("danger", "That column contains the maximum number of stories", {timeout: 7000});
+					close(result, 100);
+					} else {
+					    messageCenterService.add("danger", "Something went wrong, please try again", {timeout: 7000});
+					}
+					close(result, 100);
+				});
+		}
+	}]);
 
 PTSAppControllers.controller("IndexContoller", ["$rootScope", "$scope", 
 		function($rootScope, $scope) {
@@ -409,11 +443,12 @@ PTSAppControllers.controller("LoginMenuController", ["$rootScope", "$scope", "Re
 			}
 		}]);
 
-PTSAppControllers.controller("MainNavController", ["$rootScope", "$scope", "Restangular", "$location",
-	function($rootScope, $scope, Restangular, $location) {
+PTSAppControllers.controller("MainNavController", ["$rootScope", "$scope", "Restangular", "$location", "$http", "ModalService", "messageCenterService",
+	function($rootScope, $scope, Restangular, $location, $http, ModalService, messageCenterService) {
 	    	$scope.currentTeam = undefined;
 	    	$scope.currentProject = undefined;
 	 	$scope.update = function() {
+	 	    console.log($rootScope.user);
 	 	    	if ($location.url().indexOf("register") >= 0) {
 			    return;
 			}
@@ -428,10 +463,70 @@ PTSAppControllers.controller("MainNavController", ["$rootScope", "$scope", "Rest
 		}
 		$scope.teamSelect = function(team) {
 		    $scope.currentTeam = team;
+	 	    console.log($scope.currentTeam.scrumMaster);
 		}
 		$scope.projectSelect = function(project) {
 		    $scope.currentProject = project;
 		}
+
+
+		$scope.downloadExport = function() {
+		    //Retangular doesn't support file downloads, so we do it natively with $http
+		    //We need a blob, why? it's a surprise :D
+		    $http({method: 'GET', url: $scope.currentTeam.one('export').getRestangularUrl(),
+			    headers: {'X-Token': $rootScope.token}, responseType: 'application/xml'}).then(function(response) {
+
+			    //We need to base64 encode the file contents to be able to build a blob
+			    var b64encoded = btoa(response.data);
+
+			    //Build the blob and create an object url for it
+			    var url = (window.URL || window.webkitURL).createObjectURL(b64toBlob(b64encoded));
+
+			    //Because there is no way to set the file name of a blob, we create an a, append it to the body and set the name there
+			    var a = document.createElement("a");
+			    document.body.appendChild(a);
+			    a.href = url;
+			    a.download = "export.xml";
+
+			    //The a was created, now trigger a click, then revoke the objectUrl we created
+			    a.click();
+			    window.URL.revokeObjectURL(url);
+			    a.parentNode.removeChild(a);
+
+	 	    });
+		}
+
+		$scope.uploadModal = function(importType) {
+		    var importModal = "";
+		    var controller = "";
+		    var model = {};
+		    if (importType == "rally") {
+		    	importModal = "RallyUpload.html";
+		    	controller = "FileUploadController";
+		    } else if (importType == "vone") {
+		    	importModal = "VersionOneImport.html";
+		    	controller = "CRUDController";
+			model = Restangular.restangularizeElement($scope.currentTeam, {url: "", project: "", token: ""}, "import/versionone");
+		    } else {
+		    	messageCenterService.add("danger", "Import type not found");
+		    	return;
+		    }
+		    ModalService.showModal({
+			templateUrl: "templates/" + importModal,
+		    	controller: controller,
+		    	inputs: {
+			    model: model,
+		    	    meta: {
+				importType: importType,
+		    		team: $scope.currentTeam
+			    }
+			}
+		    }).then(function(modal) {
+		    	modal.element.modal();
+		    	modal.close.then( function(result) { } );
+		    });
+		}
+
 		$rootScope.$on("login", $scope.update);
 		$rootScope.$on("project-created", $scope.update);
 		$rootScope.$on("team-created", $scope.update);

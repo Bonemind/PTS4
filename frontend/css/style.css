@@ -28,15 +28,30 @@
 
 .navbar-center {
 	position: absolute;
-	width: 100%;
+	width: auto;
 	left: 0;
 	top: 0;
 	text-align: center;
-	margin: auto;
 	margin-top: 10px;
-	height:100%
+	margin-left: 80%;
+	height: 100%
 	line-height: 30px;
 	font-size: 30px;
+}
+
+@media screen and (max-width: 1280px) {
+	.navbar-center {
+		display: none;
+	}
+	.smallscreen-title {
+		display: inline;
+	}
+}
+
+@media screen and (min-width: 1280px) {
+	.smallscreen-title {
+		display: none;
+	}
 }
 
 

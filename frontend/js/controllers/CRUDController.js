@@ -1,6 +1,7 @@
 //CRUD controller
 PTSAppControllers.controller("CRUDController", ["$scope", "Restangular", "messageCenterService", "close", "model", "meta",
 	function($scope, Restangular, messageCenterService, close, model, meta) {
+		console.log("asdasdasd");
 		$scope.model = model;
 		$scope.meta = meta;
 		$scope.close = function(result) {
@@ -10,6 +11,7 @@ PTSAppControllers.controller("CRUDController", ["$scope", "Restangular", "messag
 			console.log(result);
 			result.save().then(function() {
 				messageCenterService.add("success", "Changes saved", {timeout: 7000});
+				    $rootScope.$broadcast("project-created");
 				close(result, 100);
 			}, function(err) {
 			    	if (err.status == 409) {
